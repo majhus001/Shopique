@@ -3,30 +3,9 @@ const multer = require("multer");
 const path = require("path");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
-const mongoose = require("mongoose");
-const {mobile, cloth, homeappliances} = require("./models/products")
+const {mobile, cloth, homeappliances} = require("../models/products")
 
 const router = express.Router();
-
-
-
-// Multer Storage for Mobiles
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/mobiles/"); // Folder for mobile images
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-
-
-// Serve Mobile Images
-// router.use("/uploads/mobiles/", express.static("uploads/mobiles"));
-
-
 
 
 cloudinary.config({
@@ -42,18 +21,14 @@ const upload = multer({ storage });
 router.post("/prod", upload.single("image"), async (req, res) => {
   try {
     const { name, price, brand, rating, description, stock, route, category, deliverytime } = req.body;
-    // const imagePath = req.file ? `/uploads/mobiles/${req.file.filename}` : null;
-
+   
     const file = req.file;
     const result = await cloudinary.uploader.upload_stream(
       { folder: "mobiles" },
       async (error, cloudResult) => {
         if (error) return res.status(500).json({ message: "Upload failed" });
 
-        // Save to MongoDB
-        // const newImage = new Image({ name, imageUrl: cloudResult.secure_url });
-        // await newImage.save();
-
+       
         const newProduct = new mobile({
           name,
           price,
@@ -65,7 +40,7 @@ router.post("/prod", upload.single("image"), async (req, res) => {
           route,
           category,
           deliverytime,
-    
+
         });
     
         await newProduct.save();
@@ -75,25 +50,7 @@ router.post("/prod", upload.single("image"), async (req, res) => {
 
 
 
-    
-    // const newProduct = new mobile({
-    //   name,
-    //   price,
-    //   brand,
-    //   image: imagePath , 
-    //   rating,
-    //   description,
-    //   stock,
-    //   route,
-    //   category,
-    //   deliverytime,
-
-    // });
-
-    // await newProduct.save();
-
-    // res.status(201).json({ message: "Mobile product added successfully" });
-  } catch (error) {
+     } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ error: "Failed to add mobile product" });
   }
@@ -238,6 +195,54 @@ router.get("/search/prod", async (req, res) => {
     res.json({ success: true, data: products });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+});
+
+router.post("/add/review", async (req, res) => {
+  try {
+    const { itemId, userId, review, rating } = req.body;
+    console.log(req.body)
+    if (!userId || !itemId || !review || !rating) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const product = await mobile.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+     product.reviews.push({ userId, review, rating });
+
+    // Update average rating
+    const totalRatings = product.reviews.reduce((sum, r) => sum + r.rating, 0);
+    product.rating = totalRatings / product.reviews.length;
+
+    await product.save();
+
+    res.status(201).json({ message: "Review added successfully", product });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/fetch/reviews", async (req, res) => {
+  try {
+    const { itemId } = req.query;
+console.log(req.query)
+    if (!itemId) {
+      return res.status(400).json({ message: "itemId is required" });
+    }
+
+    const product = await mobile.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ reviews: product.reviews });
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

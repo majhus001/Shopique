@@ -18,6 +18,10 @@
   }
 }
 
+.pg-navbar{
+  position: fixed ;
+  width: 100%;
+}
 
 .wishlist-icon {
   position: absolute;
@@ -85,6 +89,7 @@
   
   .productlist-container {
     width: 70%; /* Adjusted for more space */
+    margin-top: 50px;
     display: flex;
     gap: 100px;
   }
@@ -101,13 +106,18 @@
   .prod-img-btn{
     margin-left: 40px;
   }
-
+  .prod-img-btn-cont{
+    position: fixed;
+  }
   .prod-img-btn-cont button{
     margin: 10px 10px;
   }
   
 
   .prodlist-rat {
+    position: absolute;
+    left: 35%;
+    z-index: -1;
     width: 100%;
     max-width: 600px;
     margin: 20px auto; 
@@ -176,7 +186,7 @@
     font-size: 1rem;
     background-color: #2874f0;
     color: #fff;
-    border: none;
+    border: 1px solid #2874f0;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -196,9 +206,84 @@
   
   .ratings-reviews {
     margin-top: 20px;
-    font-size: 1.2rem;
-    font-weight: bold;
     color: #333;
-    text-align: center;
+ 
+  }
+  .ratings-reviews h4{
+   margin-top: 50px;
+  }
+
+  .us-wr-review{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 10px;
+    color: #333;
+  }
+  .us-wr-review input{
+    background: #f7f7f7;
+    color: #333;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 100px;
+    height: 20px;
+  }
+  .us-wr-review textarea{
+    width: 300px;
+    background: #f7f7f7;
+    color: #333;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  .us-wr-review input:focus,  .us-wr-review textarea:focus {
+    border-color: #6a11cb;
+    box-shadow: 0 0 8px rgba(106, 17, 203, 0.2);
+  } 
+
+  .us-wr-review button{
+    height: 37px;
   }
   
+  .user-reviews{
+    display: flex;
+    flex-direction: row;
+    margin: 10px;
+    color: #333;
+    border-bottom:1px solid #7b7c7e;
+  }
+
+  .us-rw-cont{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 0px;
+    color: #333;
+  }
+
+  .us-img-name-rat{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 350px;
+  }
+
+  .user-img-name{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .us-rw-cont img{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }

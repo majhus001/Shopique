@@ -21,17 +21,48 @@ const ProductList = () => {
     category,
     deliverytime,
   } = location.state || {};
+  console.log(category);
   const [isProdAdded, setProdAdded] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
+
+  const [review, setReview] = useState("");
+  const [urating, setRating] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [userImages, setUserImages] = useState({});
+
+  const handleSubmit = async () => {
+    if (!review || !rating) {
+      alert("Please enter both review and rating");
+      return;
+    }
+
+    const reviewData = {
+      userId,
+      itemId,
+      review,
+      rating: parseInt(urating),
+    };
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/${category}/add/review`,
+        reviewData
+      );
+      alert("Review submitted successfully!");
+      setReview("");
+      setRating("");
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Failed to submit review. Try again later.");
+    }
+  };
 
   useEffect(() => {
     const checkIfItemInCart = async () => {
       try {
-        console.log("f b a");
         const response = await axios.get(`${API_BASE_URL}/api/cart/check`, {
           params: { userId, itemId },
         });
-        console.log("f a a");
 
         if (response.data.exists) {
           setProdAdded(true);
@@ -42,6 +73,46 @@ const ProductList = () => {
         console.error("Error checking item in cart:", error);
       }
     };
+
+    const fetchUserDetails = async (userIds) => {
+      try {
+        console.log("User IDs:", userIds);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/auth/users/details`,
+          {
+            params: { userIds: userIds.join(",") }, // Send IDs as a query string
+          }
+        );
+
+        const userDetails = response.data; // Expected { userId1: { name, image }, userId2: { name, image } }
+        setUserImages(userDetails);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/${category}/fetch/reviews`,
+          { params: { itemId } }
+        );
+        setReviews(response.data.reviews);
+
+        // Extract unique userIds from reviews
+        const uniqueUserIds = [
+          ...new Set(response.data.reviews.map((r) => r.userId)),
+        ];
+
+        if (uniqueUserIds.length > 0) {
+          fetchUserDetails(uniqueUserIds);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
 
     checkIfItemInCart();
   }, [userId, itemId]);
@@ -115,7 +186,9 @@ const ProductList = () => {
 
   return (
     <div>
-      <Navbar userId={userId} />
+      <div className="pg-navbar">
+        <Navbar userId={userId} />
+      </div>
       {updateMessage && <div className="update-message">{updateMessage}</div>}
       <div className="productlist-page">
         <div className="productlist-container">
@@ -192,7 +265,59 @@ const ProductList = () => {
                 <button className="check-button">Check</button>
               </div>
             </div>
-            <div className="ratings-reviews">Ratings and Reviews</div>
+            <div className="ratings-reviews">
+              <h4>Ratings and Reviews</h4>
+              <div className="us-wr-review">
+                <textarea
+                  type="text"
+                  placeholder="Write a review"
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                />
+                <input
+                  type="number"
+                  placeholder="Enter the rating (1-5)"
+                  value={urating}
+                  onChange={(e) => setRating(e.target.value)}
+                  min="1"
+                  max="5"
+                />
+                <button className="check-button" onClick={handleSubmit}>
+                  Submit
+                </button>
+              </div>
+              <div className="review-list">
+                {reviews.length > 0 ? (
+                  reviews.map((r, index) => (
+                    <div key={index} className="user-reviews">
+                      <div className="us-rw-cont">
+                        <div className="us-img-name-rat">
+                          <div className="user-img-name">
+                            <img
+                              src={
+                                userImages[r.userId]?.image ||
+                                "/default-user.png"
+                              }
+                              alt="User"
+                              className="user-profile-img"
+                            />
+                            <h5>
+                              {userImages[r.userId]?.username || "Anonymous"}
+                            </h5>
+                          </div>
+                          <span>Rating: {r.rating}/5</span>
+                        </div>
+                        <div>
+                          <p>{r.review}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No reviews yet.</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

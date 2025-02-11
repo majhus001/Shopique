@@ -103,7 +103,6 @@ export default function Navbar({ userId, pageno = null }) {
               <i className="fas fa-search"></i> Search
             </button>
 
-            {/* Search Results Dropdown */}
             {(searchmobResults.length > 0 ||
               searchclothResults.length > 0 ||
               searchhomeappResults.length > 0) && (
@@ -128,7 +127,7 @@ export default function Navbar({ userId, pageno = null }) {
                         className="search-result-item"
                         onClick={() =>
                           navigate("/seprodlist", {
-                            state: { userId, product, categoryData },
+                            state: { userId, categoryData, },
                           })
                         }
                       >

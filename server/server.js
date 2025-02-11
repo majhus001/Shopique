@@ -4,11 +4,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require('dotenv').config();
 const authRoutes = require("./Authentication");
-const mobileRoutes = require("./mobileprod");
-const clothingRoutes = require("./clothprod");
-const homeappliRoutes = require("./homeappli");
-const cartRoutes = require("./cart");
-const orderRoutes = require("./order");
+const mobileRoutes = require("./Products/mobileprod");
+const clothingRoutes = require("./Products/clothprod");
+const homeappliRoutes = require("./Products/homeappli");
+const cartRoutes = require("./Carder/cart");
+const orderRoutes = require("./Carder/order");
 const adminRoutes = require("./Admin/userdatas");
 const sendVerificationotp = require("./Emailverification/emailotp");
 

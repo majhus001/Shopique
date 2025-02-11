@@ -4,24 +4,9 @@ const path = require("path");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
-const { mobile, cloth, homeappliances } = require("./models/products");
+const { mobile, cloth, homeappliances } = require("../models/products");
 
 const router = express.Router();
-
-// Multer Storage for cloths
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/homeappliances/"); // Folder for mobile images
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-
-// // Serve homeappliances Images
-// router.use("/uploads/homeappliances/", express.static("uploads/homeappliances"));
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -46,7 +31,6 @@ router.post("/prod", upload.single("image"), async (req, res) => {
       category,
       deliverytime,
     } = req.body;
-    // const imagePath = req.file ? `/uploads/homeappliances/${req.file.filename}` : null;
 
     const file = req.file;
     const result = await cloudinary.uploader
@@ -74,23 +58,6 @@ router.post("/prod", upload.single("image"), async (req, res) => {
         }
       )
       .end(file.buffer);
-
-    // const newProduct = new homeappliances({
-    //   name,
-    //   price,
-    //   brand,
-    //   image: imagePath ,
-    //   rating,
-    //   description,
-    //   stock,
-    //   route,
-    //   category,
-    //   deliverytime,
-    // });
-
-    // await newProduct.save();
-
-    // res.status(201).json({ message: "cloth product added successfully" });
   } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ error: "Failed to add cloth product" });
@@ -236,6 +203,55 @@ router.get("/search/prod", async (req, res) => {
     res.json({ success: true, data: products });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
+router.post("/add/review", async (req, res) => {
+  try {
+    const { itemId, userId, review, rating } = req.body;
+    console.log(req.body)
+    if (!userId || !itemId || !review || !rating) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const product = await homeappliances.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+     product.reviews.push({ userId, review, rating });
+
+    // Update average rating
+    const totalRatings = product.reviews.reduce((sum, r) => sum + r.rating, 0);
+    product.rating = totalRatings / product.reviews.length;
+
+    await product.save();
+
+    res.status(201).json({ message: "Review added successfully", product });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/fetch/reviews", async (req, res) => {
+  try {
+    const { itemId } = req.query;
+console.log(req.query)
+    if (!itemId) {
+      return res.status(400).json({ message: "itemId is required" });
+    }
+
+    const product = await homeappliances.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ reviews: product.reviews });
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

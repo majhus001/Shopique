@@ -7,7 +7,7 @@ import API_BASE_URL from "../../api";
 export default function Searchproducts() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, product, categoryData } = location.state || {};
+  const { userId, categoryData } = location.state || {};
 
   const [priceRange, setPriceRange] = useState([0, 100000]);
 
@@ -47,7 +47,7 @@ export default function Searchproducts() {
   return (
     <div className="search-prod-cont">
       <div className="se-nav-bar">
-        <Navbar />
+        <Navbar userId={userId}/>
       </div>
       <div className="se-pg-cont">
         <div className="se-filter-cont">

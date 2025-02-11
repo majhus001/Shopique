@@ -4,24 +4,9 @@ const path = require("path");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 const mongoose = require("mongoose");
-const { mobile, cloth, homeappliances } = require("./models/products");
+const { mobile, cloth, homeappliances } = require("../models/products");
 
 const router = express.Router();
-
-// Multer Storage for cloths
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/clothings/"); // Folder for mobile images
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-
-// // Serve cloth Images
-// router.use("/uploads/clothings/", express.static("uploads/clothings"));
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -46,7 +31,6 @@ router.post("/prod", upload.single("image"), async (req, res) => {
       category,
       deliverytime,
     } = req.body;
-    // const imagePath = req.file ? `/uploads/clothings/${req.file.filename}` : null;
 
     const file = req.file;
     const result = await cloudinary.uploader
@@ -71,27 +55,6 @@ router.post("/prod", upload.single("image"), async (req, res) => {
         res.status(201).json({ message: "cloth product added successfully" });
       })
       .end(file.buffer);
-
-
-
-
-    // const newProduct = new cloth({
-    //   name,
-    //   price,
-    //   brand,
-    //   image: cloudResult.secure_url ,
-    //   rating,
-    //   description,
-    //   stock,
-    //   route,
-    //   category,
-    //   deliverytime,
-
-    // });
-
-    // await newProduct.save();
-
-    // res.status(201).json({ message: "cloth product added successfully" });
   } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ error: "Failed to add cloth product" });
@@ -173,25 +136,21 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
       deliverytime,
     };
 
-    // If a new image is uploaded, handle it
     if (req.file) {
-      // Delete the old image from Cloudinary first (if exists)
       if (product.image) {
-        const publicId = product.image.split('/').pop().split('.')[0];  // Extract public ID from URL
-        await cloudinary.uploader.destroy(publicId);  // Delete the old image from Cloudinary
+        const publicId = product.image.split("/").pop().split(".")[0]; // Extract public ID from URL
+        await cloudinary.uploader.destroy(publicId); // Delete the old image from Cloudinary
       }
 
-      // Upload the new image to Cloudinary
       const file = req.file;
       const cloudResult = await cloudinary.uploader.upload_stream(
-        { folder: "clothings", public_id: _id.toString() },  // Use _id as public ID
+        { folder: "clothings", public_id: _id.toString() }, // Use _id as public ID
         async (error, result) => {
-          if (error) return res.status(500).json({ message: "Image upload failed" });
+          if (error)
+            return res.status(500).json({ message: "Image upload failed" });
 
-          // Add the Cloudinary URL to the update fields
           updateFields.image = result.secure_url; // Add new image URL
 
-          // Update the product with the new image and other fields
           const updatedProduct = await cloth.findByIdAndUpdate(
             _id,
             { $set: { ...updateFields, updatedAt: Date.now() } },
@@ -208,10 +167,8 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
           });
         }
       );
-      // End the stream with file buffer
       file.buffer && cloudResult.end(file.buffer);
     } else {
-      // If no image is uploaded, just update the other fields
       const updatedProduct = await cloth.findByIdAndUpdate(
         _id,
         { $set: { ...updateFields, updatedAt: Date.now() } },
@@ -233,7 +190,6 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
   }
 });
 
-
 router.get("/search/prod", async (req, res) => {
   try {
     const { query } = req.query;
@@ -247,6 +203,54 @@ router.get("/search/prod", async (req, res) => {
     res.json({ success: true, data: products });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+});
+
+router.post("/add/review", async (req, res) => {
+  try {
+    const { itemId, userId, review, rating } = req.body;
+    console.log(req.body)
+    if (!userId || !itemId || !review || !rating) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const product = await cloth.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+     product.reviews.push({ userId, review, rating });
+
+    // Update average rating
+    const totalRatings = product.reviews.reduce((sum, r) => sum + r.rating, 0);
+    product.rating = totalRatings / product.reviews.length;
+
+    await product.save();
+
+    res.status(201).json({ message: "Review added successfully", product });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/fetch/reviews", async (req, res) => {
+  try {
+    const { itemId } = req.query;
+console.log(req.query)
+    if (!itemId) {
+      return res.status(400).json({ message: "itemId is required" });
+    }
+
+    const product = await cloth.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ reviews: product.reviews });
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
