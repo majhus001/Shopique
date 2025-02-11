@@ -1,0 +1,28 @@
+.ad-or-nav{
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.ad-or-d-btn{
+    border: 1px;
+    background-color: #007bff;
+    color: #fff;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.ad-or-d-btn:hover{
+    border: 1px solid #007bff;
+    background-color: #fff;
+    color: #007bff;
+}
+.filter-btn:hover {
+    color: rgb(54, 53, 53);
+    transform: translateY(-5px); /* Moves the text 10px to the left */
+    transition: transform 0.3s ease; /* Smooth transition effect */
+}

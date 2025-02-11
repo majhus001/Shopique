@@ -1,0 +1,165 @@
+/* General Styles */
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f7f7f7;
+  color: #333;
+}
+
+.order-details-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 20px;
+  gap: 20px;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #007bff;
+}
+
+h4 {
+  font-size: 1.2rem;
+  margin: 5px 0;
+}
+
+/* Address Details Section */
+.address-details {
+  flex: 1;
+  background-color: #f7f7f7;
+  padding: 5px 20px;
+  border-radius: 5px;
+  max-width: 50%;
+  width: 620px;
+  margin-top: 0;
+}
+
+.input-group {
+  height: 70px auto ;
+  width: 600px;
+  margin-bottom: 15px;
+  background-color: #fff;
+  padding: 10px;
+}
+
+.address-details label {
+  font-size: 1rem;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.address-details input,
+.address-details textarea,
+.address-details select {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.address-details input:focus,
+.address-details textarea:focus,
+.address-details select:focus {
+  border-color: #007bff;
+}
+
+.address-details textarea {
+  resize: none;
+  height: 80px;
+}
+
+.ord-login{
+  background: #007bff;
+  color: #fff;
+  border: 0;
+  width: 70px;
+  height: 30px;
+  border-radius: 3px;
+  margin-left: 10px;
+}
+
+.ord-login:hover{
+  background: #fff;
+  color: #007bff;
+  border: 1px solid;
+}
+
+.done-button{
+  width: 80px;
+  height: 30px;
+  margin-top: 10px;
+  margin-left: 480px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+}
+
+.done-button:hover{
+  background-color: #fff;
+  color: #007bff;
+  border: 1px solid;
+}
+/* Cart Price Details Section */
+.order-price-details{
+  flex: 1;
+  background-color: #ffffff;
+  padding: 5px 20px;
+  border-radius: 5px;
+  max-width: 48%;
+  margin-top: 10px;
+}
+
+
+.order-price-details ul {
+  list-style-type: none;
+  padding: 10px;
+  margin: 0;
+}
+
+.order-price-details li {
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.order-price-details {
+  margin-top: 15px;
+  font-size: 10px;
+  color: #4b4b4b;
+}
+
+.buy-now-btn {
+  font-size: 1rem;
+  color: #ffffff;
+  background-color: #007bff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.buy-now-btn:hover {
+  background-color: #fff;
+  color: 007bff;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .order-details-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .address-details,
+  .order-price-details {
+    max-width: 100%;
+  }
+}

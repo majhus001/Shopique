@@ -1,0 +1,33 @@
+.ad-us-dthis-nav{
+    background-color: #842929;
+}
+
+.ad-us-fd-ud h4{
+    margin-left: 400px;
+}
+.ad-us-fd-orh h4{
+    margin-left: 400px;
+}
+
+.ad-user-data-container{
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.ad-us-dt-cont{
+    display: flex;
+    gap: 50px;
+}
+
+.ad-us-det-tit,.ad-us-det-dt,.ad-us-det-img{
+    padding-top: 20px;
+    padding-left: 50px;
+}
+
+.ad-us-det-img img{
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 100px;
+}

@@ -1,0 +1,167 @@
+/* SignUp.css */
+
+/* Outer container for centering */
+.outer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f9fc;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+}
+
+
+/* Signup container styling */
+.su-container {
+    width: 100%;
+    max-width: 380px; 
+    padding: 40px; 
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Heading style */
+.su-container h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 30px; 
+    font-weight: 600;
+}
+
+form{
+    margin-right: 30px;
+}
+/* Form group styling */
+.lg-input-group {
+    margin-bottom: 20px;
+    text-align: left;
+    width: 100%;
+}
+
+.label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+    display: block;
+    font-weight: 500;
+}
+
+/* Input field styling */
+.input {
+    width: 100%; /* Ensure full width for the input */
+    padding: 12px 16px; /* Increased padding for better input feel */
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input:focus {
+    border-color: #6a11cb;
+    box-shadow: 0 0 8px rgba(106, 17, 203, 0.2);
+}
+
+/* Button styling */
+.sg-button {
+    width: 385px; /* Ensure button takes up full width */
+    padding: 14px; /* Increased padding for a more prominent button */
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sg-button:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
+}
+
+/* Message styling */
+.message {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #28a745;
+}
+
+/* Login link styling */
+.login-link {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.login-link a {
+    color: #2575fc;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Spinner styles */
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3); /* Light border */
+    border-top: 3px solid #fff; /* White color for the animated part */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+  
+  .loading-text {
+    margin-left: 8px;
+    font-size: 14px;
+  }
+  
+  /* Keyframes for spinner animation */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Signup button styles */
+  .button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .su-container {
+        padding: 30px; /* Adjust padding for smaller screens */
+    }
+
+    .su-container h2 {
+        font-size: 24px;
+    }
+
+    .button {
+        font-size: 14px;
+    }
+}

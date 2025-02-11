@@ -1,0 +1,157 @@
+/* Container for the whole order history */
+
+.or-hi-nav{
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
+
+.order-history-container {
+    width: 80%;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  /* Styling for individual order cards */
+  .order-card {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .order-id {
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+  }
+  
+  .order-status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .order-status {
+    font-weight: bold;
+  }
+  
+  .order-status.pending {
+    color: orange;
+  }
+  
+  .order-status.accepted {
+    color: green;
+  }
+  
+  .order-status.rejected {
+    color: red;
+  }
+  
+  
+  .order-status.completed {
+    background-color: #4caf50;
+  }
+  
+  .order-status.cancelled {
+    background-color: #f44336;
+  }
+  
+  .order-details {
+    margin-bottom: 20px;
+  }
+  
+  .order-details p {
+    font-size: 16px;
+    margin: 5px 0;
+  }
+  
+  .order-items h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .order-item {
+    display: flex;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .item-image img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+  
+  .item-details {
+    padding-left: 20px;
+    flex: 1;
+  }
+  
+  .item-details p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  
+  .item-details p strong {
+    color: #555;
+  }
+  
+  .view-items-button{
+    height: 30px;
+    background-color: #007BFF;
+    color: #fff;
+    border: 1px solid #007BFF;
+    border-radius: 5px;
+  }
+
+  .view-items-button:hover {
+    background-color: #fff;
+    color: #007BFF;
+    border: 1px solid #007BFF;
+  }
+
+  @media (max-width: 768px) {
+    .order-history-container {
+      width: 90%;
+    }
+  
+    .order-card {
+      padding: 15px;
+    }
+  
+    .order-items .order-item {
+      flex-direction: column;
+    }
+  
+    .item-image img {
+      width: 80px;
+      height: 80px;
+    }
+  
+    .item-details {
+      padding-left: 0;
+    }
+  }
+  

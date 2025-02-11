@@ -1,0 +1,287 @@
+/* General Styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+/* Main Content */
+.main-container {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.banner-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: #fff;
+  gap: 10px;
+}
+
+.ad-banner {
+  position: relative;
+  max-width: 100vw;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ad-banner img {
+  width: 100%; /* Keeps it responsive to parent width */
+  height: 220px; /* Fixed height */
+  object-fit: cover; /* Ensures the image scales proportionally and fills the container */
+  border-radius: 10px;
+}
+
+
+.banner-content {
+  position: absolute;
+  top: 78%;
+  left: 14%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+
+.banner-content h2 {
+  font-size: 24px;
+  margin-bottom: 3px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.banner-content p {
+  font-size: 16px;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.countdown-timer {
+  text-align: center;
+  padding: 10px; /* Reduced padding for a more compact height */
+  background: linear-gradient(90deg, #0056b3, #007bff);
+  color: #fff;
+  border-radius: 8px; /* Slightly reduced radius for a cleaner look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin: 10px;
+}
+
+.countdown-timer h3 {
+  font-size: 18px;
+  margin: 5px 0 10px 0; 
+  color: #fff;
+}
+
+.timer {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Reduced gap for a tighter layout */
+}
+
+.timer div {
+  background: linear-gradient(145deg, #e0e0e0, #ffffff); /* Subtle gradient for a modern look */
+  color: #0056b3;
+  padding: 8px 12px; /* Reduced padding to decrease height */
+  border-radius: 6px; /* Slightly smaller radius */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Softer shadow for a sleek look */
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 60px; /* Compact width for the timer boxes */
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.timer div:hover {
+  transform: translateY(-3px); /* Adds a hover effect for interactivity */
+  background: linear-gradient(145deg, #ffffff, #e0e0e0); /* Slight invert effect on hover */
+}
+
+.timer div span {
+  display: block;
+  font-size: 22px; /* Slightly reduced for a balanced design */
+  font-weight: bold;
+  margin-bottom: 2px; /* Tighter spacing below the numbers */
+}
+
+
+/* Product Categories */
+.categories {
+  display: flex;
+  flex-direction: column; /* Allow categories to align in rows */
+  gap: 20px;
+  padding: 0px;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+.category {
+  flex: 1 1 calc(33.333% - 20px);
+  width: 100%;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-sizing: border-box; /* Include padding in width calculations */
+}
+
+
+.category h3 {
+  font-size: 20px;
+  color: #0056b3;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+
+.product-list::-webkit-scrollbar {
+ scrollbar-width: none;
+}
+
+
+.product-list {
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  max-width: 100%; /* Prevent spilling outside the container */
+  flex-wrap: nowrap; /* Prevent wrapping to a new line */
+}
+
+.product-card {
+  flex: 0 0 200px; /* Increased width */
+  height: 200px; /* Increased height */
+  background: #fff;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.product-card img {
+  max-width: 100%; 
+  width: 150px;
+  height: 120px; 
+  object-fit: contain; 
+  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+    box-shadow 0.3s ease-in-out;
+}
+
+
+.product-card img:hover {
+  transform: scale(1.2);}
+
+.product-card:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Smooth shadow effect */
+  transform: translateY(-0.5px); /* Slight lift effect */
+  transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+
+.product-card h5 {
+  margin: 5px 0; /* Adjust spacing */
+  font-size: 14px; /* Font size */
+  font-weight:lighter;
+  color: #333;
+  
+  /* Allow for two lines of text */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limits to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden; /* Hide the overflow text */
+  text-overflow: ellipsis; /* Add ellipsis (...) for overflow text */
+}
+
+
+
+.product-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Footer */
+.footer {
+  background: #0056b3;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  margin-top: auto;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.footer-content p {
+  margin: 0;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #fff;
+  font-size: 14px;
+  transition: color 0.3s ease-in-out;
+}
+
+.footer-links a:hover {
+  color: #ddd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ad-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .ad-banner img {
+    margin-bottom: 15px;
+  }
+
+  .categories {
+    flex-direction: column;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

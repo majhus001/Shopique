@@ -1,0 +1,69 @@
+.profile-card{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    background-color: #fff;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.profile-header{
+    display: flex;
+    margin: auto 180px;
+}
+.profile-image{
+    margin-top: 15px;
+    flex: 5;
+}
+
+.edit-btn{
+    flex: 1;
+    width: 20px;
+    height: 30px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+}
+.edit-btn:hover{
+    background-color: #fff;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+.profile-form{
+    display: flex;
+    flex-direction: column;
+    padding: 30px 130px;
+}
+.profile-form label{
+    margin: 5px 0;
+}
+.profile-form input{
+    padding: 10px 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #343434;
+}
+
+/* Corrected: Active state styling for input fields */
+.profile-form input:active,
+.profile-form input:focus {
+  border: 1px solid #007bff;
+  outline: none; 
+}
+
+.update-btn{
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+}
+
+.update-btn:hover{
+    background-color: #fff;
+    color: #007bff;
+    border: 1px solid #007bff;
+}

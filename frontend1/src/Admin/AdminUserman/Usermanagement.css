@@ -1,0 +1,239 @@
+/* General Container */
+.user-cont {
+    font-family: 'Helvetica Neue', sans-serif;
+    padding: 40px;
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    max-width: auto;
+    margin: 30px auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Heading */
+  .user-cont .heading {
+    text-align: center;
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  /* Search Input */
+.users-se-in {
+    width: 300px;
+    height: 30px;
+    border-radius: 5px;
+    padding-left: 10px;
+    border: 1px solid;
+}
+  
+  .users-se-in:focus {
+    border:1px solid #007bff;
+    outline: none;
+  }
+  
+  /* User List */
+  .user-list {
+    margin-top: 20px;
+  }
+  
+  .user-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .user-det-list-cont {
+    display: flex;
+    justify-content: space-between;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .user-det-list-cont:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* User Info */
+  .user-det-list {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .user-det-list p {
+    margin: 5px 0;
+    font-weight: 400;
+  }
+  
+  /* User Action Buttons */
+  .user-det-btns {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .user-det-btns button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .user-det-btns button:hover {
+    background-color: #0056b3;
+  }
+  
+  .user-det-btns .delete-btn {
+    background-color: #dc3545;
+  }
+  
+  .user-det-btns .delete-btn:hover {
+    background-color: #c82333;
+  }
+  
+  .user-det-btns .edit-btn {
+    background-color: #28a745;
+  }
+  
+  .user-det-btns .edit-btn:hover {
+    background-color: #218838;
+  }
+  
+
+ /* Common Styles for Popups */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Edit User Popup */
+.edit-popup {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 350px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+/* User Image */
+.edit-popup img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+/* Input Fields */
+.edit-popup input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: block;
+  font-size: 14px;
+}
+
+/* Buttons */
+.edit-popup button {
+  margin: 8px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.edit-popup button:first-of-type {
+  background: #27ae60; /* Green */
+  color: white;
+}
+
+.edit-popup button:last-of-type {
+  background: #e74c3c; /* Red */
+  color: white;
+}
+
+.edit-popup button:hover {
+  opacity: 0.8;
+}
+
+/* Delete Confirmation Popup */
+.delete-popup {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 300px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.delete-popup p {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.delete-popup button {
+  margin: 5px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.delete-popup button:first-of-type {
+  background: #e74c3c; /* Red */
+  color: white;
+}
+
+.delete-popup button:last-of-type {
+  background: #3498db; /* Blue */
+  color: white;
+}
+
+.delete-popup button:hover {
+  opacity: 0.8;
+}
+
+.ad-us-ed-sp{
+  display: flex;
+  height: 55px;
+  align-items: center;
+}
+
+.ad-us-ed-sp button{
+  font-size: 10px;
+  height: 37px;
+  justify-content: center;
+  align-items: center;
+}

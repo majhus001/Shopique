@@ -1,0 +1,132 @@
+.search-prod-cont{
+    background-color: #fff;
+}
+
+.se-nav-bar{
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+}
+.se-pg-cont{
+    display: flex;
+    flex-direction: row;
+}
+
+.se-re-cont{
+    flex: 5;
+    display: flex;
+    flex-direction: column;
+    margin-top: 100px;
+}
+
+.se-filter-cont{
+    flex: 1;
+    background-color: #fff;
+    padding-top: 70px;
+}
+
+.se-prod-item{
+    display: flex;
+    margin-bottom: 60px;
+    background-color: #fff;
+}
+
+.se-prod-item img{
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+    box-shadow 0.3s ease-in-out;
+}
+
+.se-prod-item img:hover {
+    transform: scale(1.1);
+    /* box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); */
+}
+.se-item-det{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-left: 30px;
+}
+
+.se-item-ac-btn{
+    width: 100px;
+    height: 30px;
+    background: #157ff0;
+    color: #fff;
+    border: 1px solid #157ff0;
+    margin-top: 15px;
+    border-radius: 5px;
+}
+
+.se-item-ac-btn:hover{
+    background: #fff;
+    color: #157ff0;
+    border: 1px solid #157ff0;
+}
+
+/* Container for all filter buttons */
+.se-fil-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: fixed;
+    max-width: 300px;
+    margin: 0 auto;
+    height: 500px;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Price filter bar */
+  .price-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  /* Label styling for price range */
+  .price-filter-bar label {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  /* Range input styling */
+  .price-filter-bar input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    background-color: #ddd;
+    height: 8px;
+    border-radius: 5px;
+    outline: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .price-filter-bar input[type="range"]:hover {
+    background-color: #ccc;
+  }
+  
+  /* Buttons for Brand and Delivery filters */
+  .se-fil-btns button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+  }
+  
+  .se-fil-btns button:hover {
+    background-color: #0056b3;
+  }
+  
+  .se-fil-btns button:active {
+    background-color: #004085;
+  }
+  
