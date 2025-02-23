@@ -9,6 +9,7 @@ const AdproductsList = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { userId, user } = location.state || {};
+  const [loading, setLoading] = useState(false);
 
   const [mobileprod, setMobileProducts] = useState([]);
   const [clothprod, setClothProducts] = useState([]);
@@ -17,6 +18,7 @@ const AdproductsList = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [mobileProdRes, clothProdRes, homeAppliRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/admin/fetchmobiles`),
@@ -28,6 +30,8 @@ const AdproductsList = () => {
         setHomeAppliProducts(homeAppliRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);
+      }finally {
+        setLoading(false); 
       }
     };
     fetchData();
@@ -38,7 +42,7 @@ const AdproductsList = () => {
   };
 
   return (
-    <div>
+    <div style={{ cursor: loading ? "wait" : "default" }}>
       <div>
         <Adnavbar userId={userId} user={user} />
       </div>

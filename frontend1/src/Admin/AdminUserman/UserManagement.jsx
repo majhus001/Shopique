@@ -15,6 +15,7 @@ const UserManagement = () => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Filter users based on search query
   const filteredUsers = users.filter(
@@ -25,12 +26,15 @@ const UserManagement = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(`${API_BASE_URL}/api/auth/fetch`);
         console.log(response.data.message);
         setUsers(response.data.data); // Assuming response.data is an array of users
       } catch (error) {
         console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -104,18 +108,16 @@ const UserManagement = () => {
     navigate("/adprodlist", { state: { userId, user, orders } });
   };
   const handleLogout = () => {
-     navigate("/home");
+    navigate("/home");
   };
 
   const handleUserclk = (userdata) => {
-    console.log(userdata)
-    navigate('/aduserhis',{ state: { userId, user, orders, userdata  } })
+    console.log(userdata);
+    navigate("/aduserhis", { state: { userId, user, orders, userdata } });
   };
 
-
-
   return (
-    <div>
+    <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
         <Adnavbar userId={userId} user={user} />
       </div>
@@ -172,16 +174,19 @@ const UserManagement = () => {
               </button>
             </div>
           </header>
-          
+
           <div className="user-cont">
             <h2>Registered Users</h2>
-            <input
-              className="users-se-in"
-              type="text"
-              placeholder="Search by username or email"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <div className="ad-user-search-count">
+              <input
+                className="users-se-in"
+                type="text"
+                placeholder="Search by username or email"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <h4>Total users: {users.length}</h4>
+            </div>
             <div className="user-list">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((u) => (
@@ -197,7 +202,7 @@ const UserManagement = () => {
                     <div className="user-det-btns">
                       <button
                         onClick={(e) => {
-                          e.stopPropagation(); 
+                          e.stopPropagation();
                           handleEditClick(u);
                         }}
                       >

@@ -67,6 +67,12 @@
     margin: 5px 0;
     font-weight: 400;
   }
+
+  .ad-user-search-count{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
   
   /* User Action Buttons */
   .user-det-btns {

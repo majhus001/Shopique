@@ -88,6 +88,7 @@ const SignUp = () => {
         // Complete signup after OTP verification
         await axios.post(`${API_BASE_URL}/api/auth/signup/`, formData);
         setMessage("Signup successful! Redirecting to login...");
+        const recentActivity = await axios.post(`${API_BASE_URL}/api/user/reactivity/`, {name: formData.username, email: formData.email, activity: "Signup"});
         setTimeout(() => navigate("/login"), 2000);
       } catch (error) {
         console.error("Signup Error:", error);

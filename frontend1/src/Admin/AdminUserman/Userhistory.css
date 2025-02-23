@@ -31,3 +31,12 @@
     object-fit: cover;
     border-radius: 100px;
 }
+
+.ad-userhis-filbtn {
+    transition: transform 0.3s ease, color 0.3s ease; /* Smooth transition */
+}
+
+.ad-userhis-filbtn:hover{
+    transform: translateY(-5px);
+    color: rgb(85, 83, 83);
+}

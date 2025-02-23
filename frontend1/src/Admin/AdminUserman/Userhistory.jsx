@@ -148,11 +148,11 @@ const Userhistory = () => {
 
           {/* Toggle buttons for User Data and Order History */}
           <div className="ad-or-nav">
-            <h4 className="filter-btn" onClick={() => handleToggleData("user")}>
+            <h4 className="ad-userhis-filbtn" onClick={() => handleToggleData("user")}>
               Users Data
             </h4>
             <h4
-              className="filter-btn"
+              className="ad-userhis-filbtn"
               onClick={() => handleToggleData("orders")}
             >
               Orders History

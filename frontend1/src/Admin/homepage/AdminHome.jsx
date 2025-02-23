@@ -131,23 +131,23 @@ const AdminHome = () => {
           </header>
 
           <div className="admin-dashboard">
-            <div className="card">
+            <div className="ad-det-card">
               <div onClick={handleUsemanclk}>
                 <h3>Total Users</h3>
                 <p>{userData.length}</p>
               </div>
             </div>
-            <div className="card">
+            <div className="ad-det-card" onClick={handleProdclk}>
               <h3>Total Products</h3>
               <p>
                 {mobileprod.length + clothprod.length + homeappliprod.length}
               </p>
             </div>
-            <div className="card" onClick={handleOrderclk}>
+            <div className="ad-det-card" onClick={handleOrderclk}>
               <h3>Pending Orders</h3>
               <p>{pendingOrders.length}</p>
             </div>
-            <div className="card">
+            <div className="ad-det-card">
               <h3>Reports</h3>
               <p>View Reports</p>
             </div>
