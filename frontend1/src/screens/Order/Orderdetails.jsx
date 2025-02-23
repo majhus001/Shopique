@@ -18,8 +18,14 @@ const Orderdetails = () => {
     deliveryFee = 20,
     path,
   } = location.state || {};
+  
+  cartItems.map((item) => {
+    console.log(item.itemId);
+    console.log(item.quantity);
+    console.log(item.stock);
+    console.log(item.category);
+})
 
-  // State to manage form inputs
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -57,15 +63,6 @@ const Orderdetails = () => {
       return;
     }
 
-    const orderData = {
-      userId,
-      cartItems,
-      totalPrice: totalPrice + platformFee + deliveryFee - discount,
-      mobileNumber,
-      deliveryAddress,
-      paymentMethod,
-    };
-
     try {
       const response = await axios.post(`${API_BASE_URL}/api/orders/add`, {
         userId,
@@ -75,13 +72,27 @@ const Orderdetails = () => {
         deliveryAddress,
         paymentMethod,
       });
-
+      
       if (response.data) {
         const result = response.data;
         alert(result.message); 
         if(path == "cart"){
           await clearCart();
         }
+        try {
+          if (cartItems.length > 0) {
+            const StockUpdate = await axios.put(
+              `${API_BASE_URL}/api/orders/stockupdate/`,
+              { cartItems }
+            );
+          } else {
+            console.error("Cart is empty");
+          }
+        } catch (error) {
+          console.error("Error updating stock:", error);
+          alert("An error occurred. Please try again.");
+        }
+        
         navigate("/home", { state: { userId: userId } }); 
       } else {
         const error = await response.json();

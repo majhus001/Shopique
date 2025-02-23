@@ -20,6 +20,7 @@ const Buynow = () => {
     category,
     deliverytime,
     rating,
+    stock,
   } = location.state || {};
 
   // Initializing cartItems state
@@ -36,10 +37,11 @@ const Buynow = () => {
       category,
       deliverytime,
       rating,
+      stock,
     },
   ]);
-  
-  // Calculate the total price of the cart
+  console.log(stock)
+
   const calculateTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };

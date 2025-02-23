@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/orderschema");
+const {mobile, cloth, homeappliances} = require("../models/products")
 
 
 router.post("/add", async (req, res) => {
-  console.log("hi")
+
   const {
     userId,
     cartItems, 
@@ -13,7 +14,10 @@ router.post("/add", async (req, res) => {
     deliveryAddress,
     paymentMethod,
   } = req.body;
-
+  console.log(cartItems[0].itemId);
+  console.log(cartItems[0].quantity);
+  console.log(cartItems[0].stock);
+  console.log(cartItems[0].category);
   if (
     !userId ||
     !cartItems ||
@@ -68,6 +72,64 @@ router.get("/fetch/:userId", async (req, res) => {
     
   } catch (error) {
     console.error("Error fetching orders:", error); 
+  }
+});
+
+
+
+router.put("/stockupdate", async (req, res) => {
+  try {
+    console.log("Stock update request received");
+
+    const { cartItems } = req.body;
+
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ message: "Invalid cart items" });
+    }
+
+    // Process each item in cartItems
+    for (let item of cartItems) {
+      const { itemId, quantity, category } = item;
+
+      if (!itemId || !quantity || !category) {
+        return res.status(400).json({ message: "Invalid item data" });
+      }
+
+      // Select the correct collection dynamically
+      let Collection;
+      switch (category) {
+        case "mobiles":
+          Collection = mobile;
+          break;
+        case "clothings":
+          Collection = cloth;
+          break;
+        case "hoappliances":
+          Collection = homeappliances;
+          break;
+        default:
+          return res.status(400).json({ message: `Invalid category: ${category}` });
+      }
+
+      const product = await Collection.findById(itemId);
+      if (!product) {
+        return res.status(404).json({ message: `Product ${itemId} not found` });
+      }
+
+      if (product.stock < quantity) {
+        return res.status(400).json({ message: `Not enough stock for ${itemId}` });
+      }
+
+      product.stock -= quantity;
+      await product.save();
+    }
+
+    console.log("Stock updated successfully");
+    res.json({ message: "Stock updated successfully" });
+
+  } catch (error) {
+    console.error("Stock update error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

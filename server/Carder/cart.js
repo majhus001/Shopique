@@ -91,7 +91,9 @@ router.get("/fetch", async (req, res) => {
         message: "No items found in the cart for this user.",
       });
     }
-
+    {cartItems.map((item) => (
+      console.log(item.itemId)
+    ))}
     res.status(200).json({
       success: true,
       cartItems,

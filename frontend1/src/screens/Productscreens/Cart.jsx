@@ -8,7 +8,7 @@ import "./Cart.css";
 export default function Cart() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId } = location.state || {};
+  const { userId, stock } = location.state || {};
   const [cartItems, setCartItems] = useState([]);
   const [updateMessage, setUpdateMessage] = useState("");
 
@@ -24,6 +24,7 @@ export default function Cart() {
               ...item,
               quantity: item.quantity || 1,
             }));
+            
             setCartItems(itemsWithQuantity);
           } else {
             alert(response.data.message || "Failed to fetch cart data.");
@@ -114,6 +115,7 @@ export default function Cart() {
         discount,
         platformFee,
         deliveryFee,
+        stock,
         path: "cart"
       },
     });
@@ -177,9 +179,7 @@ export default function Cart() {
                       </div>
                     </div>
                   ))}
-                  {/* <button id="cart-prodlist-buy" onClick={handleBuyNow}>
-                    Check Out
-                  </button> */}
+                 
                 </div>
 
                 {/* Price Details Section */}

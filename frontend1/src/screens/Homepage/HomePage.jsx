@@ -167,7 +167,6 @@ const HomePage = () => {
                           rating: item.rating,
                           description: item.description,
                           stock: item.stock,
-                          route: item.route,
                           category: item.category,
                           deliverytime: item.deliverytime,
                         }}
@@ -206,7 +205,6 @@ const HomePage = () => {
                           rating: item.rating,
                           description: item.description,
                           stock: item.stock,
-                          route: item.route,
                           category: item.category,
                           deliverytime: item.deliverytime,
                         }}
@@ -245,7 +243,6 @@ const HomePage = () => {
                           rating: item.rating,
                           description: item.description,
                           stock: item.stock,
-                          route: item.route,
                           category: item.category,
                           deliverytime: item.deliverytime,
                         }}

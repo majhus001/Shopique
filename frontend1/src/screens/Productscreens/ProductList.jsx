@@ -14,14 +14,14 @@ const ProductList = () => {
     name,
     price,
     brand,
-    stock,
-    description,
     image,
     rating,
+    description,
+    stock,
     category,
     deliverytime,
   } = location.state || {};
-  console.log(category);
+  
   const [isProdAdded, setProdAdded] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
 
@@ -180,6 +180,7 @@ const ProductList = () => {
         category,
         deliverytime,
         rating,
+        stock,
       },
     });
   };
@@ -207,7 +208,7 @@ const ProductList = () => {
                   if (stock <= 0) {
                     alert("Sorry, Out of Stock");
                   } else if (isProdAdded) {
-                    navigate("/cart", { state: { userId: userId } });
+                    navigate("/cart", { state: { userId: userId, stock } });
                   } else {
                     handleAddToCart();
                   }
