@@ -2,19 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Adnavbar.css"; // Assuming you have a separate CSS for this navbar
 
-const Adnavbar = ({ userId, user }) => {
+const Adnavbar = ({ user }) => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    
-    if (userId) {
+    if (user) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-  }, [userId]);
-
+  }, [user]);
 
   return (
     <nav className="hm-navbar">
@@ -25,16 +23,13 @@ const Adnavbar = ({ userId, user }) => {
       <h2 onClick={() => navigate("/home")}>Admin Panel</h2>
 
       {isLoggedIn ? (
-        <button
-          className="nav-btns"
-          aria-label="Go to profile page"
-        >
+        <button className="nav-btns" aria-label="Go to profile page">
           {user.username}
         </button>
       ) : (
         <button
           className="nav-btns"
-          onClick={() => navigate("/login", { state: { userId } })}
+          onClick={() => navigate("/login")}
           aria-label="Go to profile page"
         >
           Login

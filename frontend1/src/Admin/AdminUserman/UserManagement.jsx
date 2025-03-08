@@ -8,7 +8,12 @@ import "./Usermanagement.css";
 const UserManagement = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, user, orders } = location.state || {};
+  const stateUser = location.state?.user || null;
+  const stateOrders = location.state?.orders || null;
+  
+  // State for user and orders
+  const [user, setUser] = useState(stateUser);
+  const [orders, setOrders] = useState(stateOrders);
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [editUser, setEditUser] = useState(null);
@@ -16,6 +21,52 @@ const UserManagement = () => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  const fetchUserData = async () => {
+    try {
+      console.log("Checking user validity...");
+      const response = await axios.get(`${API_BASE_URL}/api/auth/checkvaliduser`, {
+        withCredentials: true,
+      });
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(`${API_BASE_URL}/api/auth/fetch/${userId}`);
+      setUser(userRes.data.data);
+      console.log("User fetched from backend:", userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    }
+  };
+
+  // Function to fetch order data from backend if not available in state
+  const fetchOrderData = async () => {
+    try {
+      const OrdersRes = await axios.get(`${API_BASE_URL}/api/admin/pendingorders`);
+      setOrders(OrdersRes.data);
+      setUsersPendingOrder(OrdersRes.data.filter((order) => order.OrderStatus === "Pending"));
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!orders) {
+      fetchOrderData();
+    }
+  }, [orders]);
+
 
   // Filter users based on search query
   const filteredUsers = users.filter(
@@ -57,7 +108,6 @@ const UserManagement = () => {
 
   const handleEditSave = async () => {
     try {
-      console.log(editUser._id);
       await axios.put(
         `${API_BASE_URL}/api/auth/update/${editUser._id}`, // Use _id for MongoDB
         editUser
@@ -92,34 +142,47 @@ const UserManagement = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+      console.log(response.data.message);
+      navigate("/home");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   const handleDashclk = () => {
-    navigate("/adhome", { state: { userId, user, orders } });
+    navigate("/adhome", { state: { user, orders } });
   };
   const handleprofileclk = () => {
-    navigate("/adprof", { state: { userId, user, orders } });
+    navigate("/adprof", { state: { user, orders } });
   };
   const handleUsemanclk = () => {
-    navigate("/userman", { state: { userId, user, orders } });
+    navigate("/userman", { state: { user, orders } });
   };
+
   const handleOrderclk = () => {
-    navigate("/adorders", { state: { userId, user, orders } });
+    navigate("/adorders", { state: { user, orders } });
   };
+
   const handleProdclk = () => {
-    navigate("/adprodlist", { state: { userId, user, orders } });
-  };
-  const handleLogout = () => {
-    navigate("/home");
+    navigate("/adprodlist", { state: { user, orders }});
   };
 
   const handleUserclk = (userdata) => {
     console.log(userdata);
-    navigate("/aduserhis", { state: { userId, user, orders, userdata } });
+    navigate("/aduserhis", { state: { user, orders, userdata } });
   };
 
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
-        <Adnavbar userId={userId} user={user} />
+        <Adnavbar user={user} />
       </div>
       <div className="admin-container">
         <div className="admin-sidebar">

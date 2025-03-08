@@ -8,13 +8,67 @@ import API_BASE_URL from "../../api";
 const AdproductsList = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, user } = location.state || {};
-  const [loading, setLoading] = useState(false);
-
+  
+  const stateUser = location.state?.user || null;
+  const stateOrders = location.state?.orders || null;
+  
+  // State for user and orders
+  const [user, setUser] = useState(stateUser);
+  const [orders, setOrders] = useState(stateOrders);
+  const [userData, setUserData] = useState([]);
+  const [pendingOrders, setUsersPendingOrder] = useState([]);
   const [mobileprod, setMobileProducts] = useState([]);
   const [clothprod, setClothProducts] = useState([]);
   const [homeappliprod, setHomeAppliProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("mobiles"); // Initial category
+
+  const fetchUserData = async () => {
+    try {
+      console.log("Checking user validity...");
+      const response = await axios.get(`${API_BASE_URL}/api/auth/checkvaliduser`, {
+        withCredentials: true,
+      });
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(`${API_BASE_URL}/api/auth/fetch/${userId}`);
+      setUser(userRes.data.data);
+      console.log("User fetched from backend:", userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    }
+  };
+
+  // Function to fetch order data from backend if not available in state
+  const fetchOrderData = async () => {
+    try {
+      const OrdersRes = await axios.get(`${API_BASE_URL}/api/admin/pendingorders`);
+      setOrders(OrdersRes.data);
+      setUsersPendingOrder(OrdersRes.data.filter((order) => order.OrderStatus === "Pending"));
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!orders) {
+      fetchOrderData();
+    }
+  }, [orders]);
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,8 +84,8 @@ const AdproductsList = () => {
         setHomeAppliProducts(homeAppliRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);
-      }finally {
-        setLoading(false); 
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -44,11 +98,13 @@ const AdproductsList = () => {
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       <div>
-        <Adnavbar userId={userId} user={user} />
+        <Adnavbar user={user} />
       </div>
       <div className="ad-prod-tit">
         <div className="ad-se-group">
-          <label><strong>Category :</strong></label>
+          <label>
+            <strong>Category :</strong>
+          </label>
           <select
             name="category"
             required
@@ -60,7 +116,13 @@ const AdproductsList = () => {
             <option value="hoappliances">Home Appliances</option>
           </select>
         </div>
-        <button onClick={()=>{navigate("/adprod")}}>Add Products</button>
+        <button
+          onClick={() => {
+            navigate("/adprod");
+          }}
+        >
+          Add Products
+        </button>
       </div>
 
       <div className="ad-prod-dis">

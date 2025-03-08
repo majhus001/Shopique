@@ -4,8 +4,34 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 const User = require("./models/userschema");
+const jwt = require("jsonwebtoken");
+const AdminEmail = require("./Admin/AdminEmail")
 
 const router = express.Router();
+
+SECRET_KEY = process.env.JWT_SECRET;
+
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token; 
+
+  if (!token) {
+    console.log("false");
+    return res.status(401).json({ success: false, message: "Access denied. No token provided." });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ success: false, message: "Invalid token." });
+  }
+};
+
+router.get("/checkvaliduser", verifyToken, (req, res) => {
+  console.log("user in...");
+  res.json({ success:true, message: "User is valid", user: req.user });
+});
 
 router.post("/signup", async (req, res) => {
   const { username, email, password, mobile, address, image } = req.body;
@@ -20,12 +46,10 @@ router.post("/signup", async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("email already exists");
-      return res
-        .status(400)
-        .json({
-          success: "false",
-          message: "Email already registered... please login",
-        });
+      return res.status(400).json({
+        success: "false",
+        message: "Email already registered... please login",
+      });
     }
 
     const newUser = new User({
@@ -42,12 +66,10 @@ router.post("/signup", async (req, res) => {
     res.status(201).json({ success: true, message: "Signup successful!" });
   } catch (error) {
     console.error("Error during signup:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred. Please try again.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });
   }
 });
 
@@ -84,7 +106,7 @@ router.get("/signup/check", async (req, res) => {
 // Login Route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
+  
   if (!email || !password) {
     return res
       .status(400)
@@ -99,40 +121,45 @@ router.post("/login", async (req, res) => {
         .json({ success: false, message: "Invalid email or password" });
     }
 
+    const token = jwt.sign(
+      { userId: user._id, username: user.username, image: user.image },
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
     console.log("Login success");
-    if (user.email == "majidsmart7@gmail.com") {
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Login successful!",
-          user: user,
-          role: "Admin",
-        });
-    } else {
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Login successful!",
-          user: user,
-          role: "User",
-        });
-    }
+    const role = user.email === AdminEmail ? "Admin" : "User";
+
+    res.cookie("token", token, {
+      httpOnly: true, 
+      secure: true, 
+      sameSite: "Strict", 
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful!",
+      user,
+      role,
+    });
   } catch (error) {
     console.error("Error during login:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred. Please try again.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });
   }
+});
+
+router.post("/logout", (req, res) => {
+  console.log("logingg out")
+  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
+  res.json({ success: true, message: "Logged out successfully!" });
 });
 
 // fetch User details with user Id
 router.get("/fetch/:userId", async (req, res) => {
   try {
+    console.log("fet u id")
     const { userId } = req.params;
     const user = await User.findOne({ _id: userId });
 

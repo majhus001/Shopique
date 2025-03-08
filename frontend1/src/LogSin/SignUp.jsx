@@ -80,8 +80,8 @@ const SignUp = () => {
     setIsLoading(true);
     setMessage("Verifying OTP...");
 
-    console.log("Generated OTP:", generatedOtp); // Debugging
-    console.log("User Entered OTP:", otp); // Debugging
+    console.log("Generated OTP:", generatedOtp); 
+    console.log("User Entered OTP:", otp); 
 
     if (otp.trim() === String(generatedOtp).trim()) {
       try {

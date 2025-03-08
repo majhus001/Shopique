@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api";
-
-import "./Login.css"; 
+import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,15 +24,18 @@ const Login = () => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/auth/login/`,
-        formData
+        formData,
+        { withCredentials: true }
       );
       if (response.data.success) {
         const user = response.data.user;
         const userId = response.data.user._id;
+
         setMessage("Login successful!");
         setTimeout(() => {
           if (response.data.role === "Admin") {
-            navigate("/adhome", { state: { userId, user } });
+            const adminData = user;
+            navigate("/adhome", { state: { user } });
           } else {
             navigate("/home", { state: { userId } });
           }
@@ -47,7 +49,9 @@ const Login = () => {
     } catch (error) {
       console.error("Error logging in:", error);
       if (error.response && error.response.data) {
-        setMessage(error.response.data.message || "An error occurred. Please try again.");
+        setMessage(
+          error.response.data.message || "An error occurred. Please try again."
+        );
       } else {
         setMessage("Network error. Please try again.");
       }
@@ -99,10 +103,7 @@ const Login = () => {
         </form>
         {message && <p className="message">{message}</p>}
         <p className="login-link">
-          Don't have an account?{" "}
-          <Link to="/signup">
-            Signup here
-          </Link>
+          Don't have an account? <Link to="/signup">Signup here</Link>
         </p>
       </div>
     </div>

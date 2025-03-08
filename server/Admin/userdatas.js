@@ -11,7 +11,6 @@ const router = express.Router();
 router.get("/userdata", async (req, res) => {
   try {
     const users = await User.find();
-    console.log("Total users : ",users.length)
     res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -22,8 +21,6 @@ router.get("/userdata", async (req, res) => {
 router.get("/pendingorders", async (req, res) => {
   try {
     const orders = await Order.find();
-    console.log("Total orders : ",orders.length)
-    console.log(orders)
     res.status(200).json(orders);
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -33,7 +30,6 @@ router.get("/pendingorders", async (req, res) => {
 
 router.get("/fetchmobiles", async (req, res) => {
   try {
-    console.log("mobile")
     const products = await mobile.find().limit(10); // Fetch all products
     res.status(200).json(products);
     
@@ -45,7 +41,6 @@ router.get("/fetchmobiles", async (req, res) => {
 
 router.get("/fetchcloths", async (req, res) => {
   try {
-    console.log("cloth")
     const products = await cloth.find().limit(10); // Fetch all products
     res.status(200).json(products);
     

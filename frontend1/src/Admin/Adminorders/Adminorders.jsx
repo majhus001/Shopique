@@ -1,16 +1,82 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios"; // Importing axios for API requests
 import "./Adminorders.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
-import API_BASE_URL from "../../api"
+import API_BASE_URL from "../../api";
 
 const Adminorders = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, user, orders } = location.state || {};
+
+  const stateUser = location.state?.user || null;
+  const stateOrders = location.state?.orders || null;
+
+  // State for user and orders
+  const [user, setUser] = useState(stateUser);
+  const [orders, setOrders] = useState(stateOrders);
   const [visibleItems, setVisibleItems] = useState({});
-  const [filteredOrders, setFilteredOrders] = useState(orders); 
+  const [filteredOrders, setFilteredOrders] = useState(orders);
+
+  const fetchUserData = async () => {
+    try {
+      console.log("Checking user validity...");
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
+      setUser(userRes.data.data);
+      console.log("User fetched from backend:", userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    }
+  };
+
+  // Function to fetch order data from backend if not available in state
+  const fetchOrderData = async () => {
+    try {
+      const OrdersRes = await axios.get(
+        `${API_BASE_URL}/api/admin/pendingorders`
+      );
+      setOrders(OrdersRes.data);
+      setUsersPendingOrder(
+        OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
+      );
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!orders) {
+      fetchOrderData();
+    }
+  }, [orders]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/adhome", { state: { user, orders }});
+    }
+  });
 
   const toggleItemsVisibility = (orderId) => {
     setVisibleItems((prevState) => ({
@@ -51,29 +117,36 @@ const Adminorders = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+      console.log(response.data.message);
+      navigate("/home");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   const handleDashclk = () => {
-    navigate("/adhome", { state: { userId, user } });
+    navigate("/adhome", { state: { user, orders } });
   };
-
   const handleprofileclk = () => {
-    navigate("/adprof", { state: { userId, user, orders } });
+    navigate("/adprof", { state: { user, orders } });
   };
-
   const handleUsemanclk = () => {
-    navigate("/userman", { state: { userId, user, orders  } });
+    navigate("/userman", { state: { user, orders } });
   };
 
   const handleOrderclk = () => {
-    navigate("/adorders", { state: { userId, user, orders } });
+    navigate("/adorders", { state: { user, orders } });
   };
 
-  
-  const handleProdclk = () =>{
-    navigate("/adprodlist", { state: { userId, user, orders } });
-  }
-
-  const handleLogout = () => {
-    navigate("/home");
+  const handleProdclk = () => {
+    navigate("/adprodlist", { state: { user, orders }});
   };
 
   const handleFilterOrders = (status) => {
@@ -83,24 +156,20 @@ const Adminorders = () => {
       const filtered = orders.filter(
         (order) => order.OrderStatus.toLowerCase() === status.toLowerCase()
       );
-      setFilteredOrders(filtered); 
+      setFilteredOrders(filtered);
     }
   };
 
   return (
     <div>
       <div className="ad-nav">
-        <Adnavbar userId={userId} user={user} />
+        <Adnavbar user={user} />
       </div>
       <div className="admin-container">
         <div className="admin-sidebar">
           <div className="ad-sb-img-cont">
             {user?.image ? (
-              <img
-                src={user.image}
-                alt="admin"
-                className="ad-sb-img"
-              />
+              <img src={user.image} alt="admin" className="ad-sb-img" />
             ) : (
               <div className="placeholder-img">No Image</div>
             )}
@@ -108,7 +177,7 @@ const Adminorders = () => {
           </div>
           <div className="ad-sb-list-cont">
             <ul className="ad-sb-list-items">
-            <li>
+              <li>
                 <button className="ad-sb-btns" onClick={handleDashclk}>
                   Dashboard
                 </button>
@@ -128,9 +197,9 @@ const Adminorders = () => {
                   Orders
                 </button>
               </li>
-              
+
               <li>
-                <button className="ad-sb-btns"  onClick={handleProdclk}>
+                <button className="ad-sb-btns" onClick={handleProdclk}>
                   Products
                 </button>
               </li>
@@ -231,10 +300,7 @@ const Adminorders = () => {
                         {order.OrderedItems.map((item, index) => (
                           <div key={index} className="order-item">
                             <div className="item-image">
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                              />
+                              <img src={item.image} alt={item.name} />
                             </div>
                             <div className="item-details">
                               <p>

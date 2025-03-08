@@ -8,7 +8,7 @@ import "./Userhistory.css";
 const Userhistory = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, user, orders, userdata } = location.state || {};
+  const { user, orders, userdata } = location.state || {};
 
   const [fetchedUserData, setFetchedUserData] = useState(null);
   const [orderHistory, setOrderHistory] = useState(null);
@@ -90,7 +90,7 @@ const Userhistory = () => {
   return (
     <div>
       <div className="ad-nav">
-        <Adnavbar userId={userId} user={user} />
+        <Adnavbar user={user} />
       </div>
       <div className="admin-container">
         <div className="admin-sidebar">

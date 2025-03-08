@@ -52,8 +52,6 @@ const HomePage = () => {
           ]
         );
 
-        console.log("home ");
-
         if (!mobilesRes.ok || !clothingsRes.ok || !homeAppliancesRes.ok) {
           throw new Error("Error fetching data from one or more endpoints.");
         }
@@ -65,7 +63,6 @@ const HomePage = () => {
         setMobiles(mobilesData);
         setClothings(clothingsData);
         setHomeAppliances(homeAppliancesData);
-        console.log(mobilesData);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load data. Please try again later.");

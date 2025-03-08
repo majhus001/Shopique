@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require('dotenv').config();
 const authRoutes = require("./Authentication");
 const mobileRoutes = require("./Products/mobileprod");
@@ -14,9 +15,21 @@ const sendVerificationotp = require("./Emailverification/emailotp");
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173", // Local development
+  "https://shopique-iota.vercel.app/" // Deployed frontend
+];
+
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
@@ -34,8 +47,6 @@ app.use("/api/auth/send-verify-otp", sendVerificationotp);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected..."))
   .catch((err) => console.log("Error connecting to MongoDB: ", err));
-
-
 
 
 // Start the server

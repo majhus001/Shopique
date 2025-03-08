@@ -8,7 +8,67 @@ import API_BASE_URL from "../../api";
 const Adminprofile = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, user, orders } = location.state || {};
+
+  const stateUser = location.state?.user || null;
+  const stateOrders = location.state?.orders || null;
+
+  // State for user and orders
+  const [user, setUser] = useState(stateUser);
+  const [orders, setOrders] = useState(stateOrders);
+
+  const fetchUserData = async () => {
+    try {
+      console.log("Checking user validity...");
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
+      setUser(userRes.data.data);
+      console.log("User fetched from backend:", userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    }
+  };
+
+  // Function to fetch order data from backend if not available in state
+  const fetchOrderData = async () => {
+    try {
+      const OrdersRes = await axios.get(
+        `${API_BASE_URL}/api/admin/pendingorders`
+      );
+      setOrders(OrdersRes.data);
+      setUsersPendingOrder(
+        OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
+      );
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!orders) {
+      fetchOrderData();
+    }
+  }, [orders]);
 
   const [adminData, setAdminData] = useState({
     username: user?.username || "",
@@ -52,7 +112,7 @@ const Adminprofile = () => {
 
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/api/auth/update/${userId}`,
+        `${API_BASE_URL}/api/auth/update/${user._id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -66,41 +126,52 @@ const Adminprofile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+      console.log(response.data.message);
+      navigate("/home");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   const handleDashclk = () => {
-    navigate("/adhome", { state: { userId, user } });
+    navigate("/adhome", { state: { user, orders } });
   };
-
   const handleprofileclk = () => {
-    navigate("/adprof", { state: { userId, user } });
+    navigate("/adprof", { state: { user, orders } });
   };
-
   const handleUsemanclk = () => {
-    navigate("/userman", { state: { userId, user, orders  } });
+    navigate("/userman", { state: { user, orders } });
   };
 
   const handleOrderclk = () => {
-    navigate("/adorders", { state: { userId, user, orders } });
+    navigate("/adorders", { state: { user, orders } });
   };
 
   const handleProdclk = () => {
-    navigate("/adprodlist", { state: { userId, user, orders } });
-  };
-
-  const handleLogout = () => {
-    navigate("/home");
+    navigate("/adprodlist", { state: { user, orders } });
   };
 
   return (
     <div>
       <div className="ad-nav">
-        <Adnavbar userId={userId} user={user} />
+        <Adnavbar user={user} />
       </div>
       <div className="admin-container">
         <div className="admin-sidebar">
           <div className="ad-sb-img-cont">
             {user?.image ? (
-              <img src={previewImage || adminData.image}  alt="admin" className="ad-sb-img" />
-      
+              <img
+                src={previewImage || user.image}
+                alt="admin"
+                className="ad-sb-img"
+              />
             ) : (
               <div className="placeholder-img">No Image</div>
             )}
@@ -119,8 +190,8 @@ const Adminprofile = () => {
                 </button>
               </li>
               <li>
-                <button className="ad-sb-btns" onClick={handleUsemanclk}
-                >User Management
+                <button className="ad-sb-btns" onClick={handleUsemanclk}>
+                  User Management
                 </button>
               </li>
               <li>
@@ -178,7 +249,7 @@ const Adminprofile = () => {
                   <input
                     type="text"
                     name="username"
-                    value={adminData.username}
+                    value={user?.username || " "}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -186,7 +257,7 @@ const Adminprofile = () => {
                   <input
                     type="email"
                     name="email"
-                    value={adminData.email}
+                    value={user?.email || " "}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -194,7 +265,7 @@ const Adminprofile = () => {
                   <input
                     type="password"
                     name="password"
-                    value={adminData.password}
+                    value={user?.password || " "}
                     onChange={handleChange}
                     placeholder="Enter new password"
                     disabled={!isEditing}
@@ -203,7 +274,7 @@ const Adminprofile = () => {
                   <input
                     type="text"
                     name="mobile"
-                    value={adminData.mobile}
+                    value={user?.mobile || " "}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -211,7 +282,7 @@ const Adminprofile = () => {
                   <input
                     type="text"
                     name="address"
-                    value={adminData.address}
+                    value={user?.address || " "}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
