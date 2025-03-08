@@ -16,18 +16,26 @@ const sendVerificationotp = require("./Emailverification/emailotp");
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173", // Local development
-  "https://shopique-iota.vercel.app/" // Deployed frontend
+  "http://localhost:5000", // Local frontend
+  "https://shopique-iota.vercel.app", // Deployed frontend
 ];
 
 // Middleware
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
 );
+
 
 app.use(cookieParser());
 app.use(express.json());

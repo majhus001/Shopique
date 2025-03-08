@@ -106,7 +106,7 @@ router.get("/signup/check", async (req, res) => {
 // Login Route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  
+  console.log("hiiiii")
   if (!email || !password) {
     return res
       .status(400)
