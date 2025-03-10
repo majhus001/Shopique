@@ -82,7 +82,7 @@ const HomePage = () => {
   }, [bannerImages.length]);
 
   useEffect(() => {
-    const targetDate = new Date("2025-02-30T00:00:00");
+    const targetDate = new Date("2025-03-30T00:00:00");
     const interval = setInterval(() => {
       const now = new Date();
       const diff = targetDate - now;
