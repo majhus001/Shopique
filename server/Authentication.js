@@ -193,19 +193,6 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/users/"); // Folder for mobile images
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-
-// router.use("/uploads/users/", express.static("uploads/users"));
-
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,

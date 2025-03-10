@@ -10,6 +10,7 @@ import ProductAddPage from './Admin/AdminProducts/Productadd';
 import UserManagement from './Admin/AdminUserman/UserManagement';
 import Userhistory from './Admin/AdminUserman/Userhistory';
 import AdproductsList from './Admin/AdminProducts/AdproductsList';
+import RecentActivity from './Admin/homepage/RecentActivity/RecentActivity';
 
 import SignUp from './LogSin/SignUp';
 import Login from './LogSin/Login';
@@ -33,6 +34,8 @@ const App = () => {
         <Route path="/home" element={<HomePage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/buynow" element={<Buynow />} />
+
         <Route path="/adprod" element={<ProductAddPage />} />
         <Route path="/orderdet" element={<Orderdetails />} />
         <Route path="/myorders" element={<Orderhistory />} />
@@ -45,7 +48,7 @@ const App = () => {
         <Route path="/seprodlist" element={<Searchproducts />} />
         <Route path="/userman" element={<UserManagement />} />
         <Route path="/aduserhis" element={<Userhistory />} />
-        <Route path="/buynow" element={<Buynow />} />
+        <Route path="/recentactivity" element={<RecentActivity />} />
 
       </Routes>
     </Router>

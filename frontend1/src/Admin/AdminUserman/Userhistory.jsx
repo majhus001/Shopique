@@ -60,19 +60,19 @@ const Userhistory = () => {
 
   // Handle navigation
   const handleDashclk = () => {
-    navigate("/adhome", { state: { userId, user, orders } });
+    navigate("/adhome", { state: {user, orders } });
   };
   const handleprofileclk = () => {
-    navigate("/adprof", { state: { userId, user, orders } });
+    navigate("/adprof", { state: {  user, orders } });
   };
   const handleUsemanclk = () => {
-    navigate("/userman", { state: { userId, user, orders } });
+    navigate("/userman", { state: {  user, orders } });
   };
   const handleOrderclk = () => {
-    navigate("/adorders", { state: { userId, user, orders } });
+    navigate("/adorders", { state: { user, orders } });
   };
   const handleProdclk = () => {
-    navigate("/adprodlist", { state: { userId, user, orders } });
+    navigate("/adprodlist", { state: { user, orders } });
   };
   const handleLogout = () => {
     navigate("/home");

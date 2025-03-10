@@ -29,7 +29,6 @@ const Login = () => {
       );
       if (response.data.success) {
         const user = response.data.user;
-        const userId = response.data.user._id;
 
         setMessage("Login successful!");
         setTimeout(() => {

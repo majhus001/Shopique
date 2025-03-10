@@ -37,9 +37,7 @@ router.post("/", async (req, res) => {
   
 
   try {
-    console.log("b s")
     await sgMail.send(msg);
-    console.log("a s")
     verificationCodes[email] = { code: verificationCode, expiresAt: Date.now() + 10 * 60 * 1000 };
 
     console.log(`✅ OTP sent to ${email}: ${verificationCode}`);

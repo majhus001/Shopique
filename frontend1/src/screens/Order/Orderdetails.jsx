@@ -18,13 +18,12 @@ const Orderdetails = () => {
     deliveryFee = 20,
     path,
   } = location.state || {};
-  
+
   cartItems.map((item) => {
     console.log(item.itemId);
     console.log(item.quantity);
-    console.log(item.stock);
     console.log(item.category);
-})
+  });
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileNumber, setMobileNumber] = useState(user.mobile || "");
@@ -32,12 +31,12 @@ const Orderdetails = () => {
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [isMobileDone, setIsMobileDone] = useState(false);
   const [isAddressDone, setIsAddressDone] = useState(false);
-  
-  useEffect(()=>{
-    if(user){
+
+  useEffect(() => {
+    if (user) {
       setIsLoggedIn(true);
     }
-  })
+  });
 
   const handlePlaceOrder = async () => {
     if (!mobileNumber || !deliveryAddress) {
@@ -54,11 +53,11 @@ const Orderdetails = () => {
         deliveryAddress,
         paymentMethod,
       });
-      
+
       if (response.data) {
         const result = response.data;
-        alert(result.message); 
-        if(path == "cart"){
+        alert(result.message);
+        if (path == "cart") {
           await clearCart();
         }
         try {
@@ -74,8 +73,18 @@ const Orderdetails = () => {
           console.error("Error updating stock:", error);
           alert("An error occurred. Please try again.");
         }
-        
-        navigate("/home", { state: { user: user } }); 
+
+        try {
+          const recActivity = await axios.post(
+            `${API_BASE_URL}/api/user/reactivity/add`,
+            { name: user.username, activity: "has Placed an order" }
+          );
+          console.log("placed an order");
+        } catch (error) {
+          console.error("Error updating Recent Activity:", error);
+        }
+
+        navigate("/home", { state: { user: user } });
       } else {
         const error = await response.json();
         alert(error.message || "Failed to place order.");
@@ -88,7 +97,9 @@ const Orderdetails = () => {
 
   const clearCart = async () => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/api/cart/clear/${user._id}`);
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/cart/clear/${user._id}`
+      );
       if (response.data.success) {
         console.log("Cart cleared successfully!");
       } else {
@@ -98,11 +109,10 @@ const Orderdetails = () => {
       console.error("Error clearing cart:", error);
     }
   };
-  
 
   return (
     <div>
-      <Navbar user = {user} pageno="123" />
+      <Navbar user={user} pageno="123" />
       <div className="order-details-container">
         {/* Address Details Section */}
         <div className="address-details">
