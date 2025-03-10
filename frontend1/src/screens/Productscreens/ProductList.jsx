@@ -9,7 +9,7 @@ const ProductList = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const {
-    userId,
+    user,
     itemId,
     name,
     price,
@@ -21,7 +21,8 @@ const ProductList = () => {
     category,
     deliverytime,
   } = location.state || {};
-  
+
+  const userId = user?._id;
   const [isProdAdded, setProdAdded] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
 
@@ -162,14 +163,14 @@ const ProductList = () => {
   };
 
   const handleBuyNow = () => {
-    if (!userId) {
+    if (!user) {
       alert("Please log in to Add products to Cart.");
       return;
     }
     // handleAddToCart();
     navigate("/buynow", {
       state: {
-        userId,
+        user,
         itemId,
         name,
         price,
@@ -188,7 +189,7 @@ const ProductList = () => {
   return (
     <div>
       <div className="pg-navbar">
-        <Navbar userId={userId} />
+        <Navbar user={user} />
       </div>
       {updateMessage && <div className="update-message">{updateMessage}</div>}
       <div className="productlist-page">
@@ -208,7 +209,7 @@ const ProductList = () => {
                   if (stock <= 0) {
                     alert("Sorry, Out of Stock");
                   } else if (isProdAdded) {
-                    navigate("/cart", { state: { userId: userId, stock } });
+                    navigate("/cart", { state: { user: user, stock } });
                   } else {
                     handleAddToCart();
                   }

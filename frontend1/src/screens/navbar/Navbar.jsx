@@ -4,7 +4,7 @@ import axios from "axios";
 import "./Navbar.css";
 import API_BASE_URL from "../../api";
 
-export default function Navbar({ userId, pageno = null }) {
+export default function Navbar({ user, pageno = null }) {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrderPage, setIsOrderPage] = useState(false);
@@ -16,28 +16,15 @@ export default function Navbar({ userId, pageno = null }) {
 
   const debounceTimeout = useRef(null); // To store the timeout ID
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/auth/fetch/${userId}`
-        );
-        const user = response.data.data;
-        setUsername(user.username);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    if (userId) {
-      fetchUserData();
+   useEffect(() => {
+    if (user) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
 
     setIsOrderPage(pageno === "123");
-  }, [userId, pageno]);
+  }, [user, pageno]);
 
   // Handle search input change with debounce
   const handleSearchChange = (e) => {
@@ -86,7 +73,7 @@ export default function Navbar({ userId, pageno = null }) {
   return (
     <nav className="hm-navbar">
       <div className="nav-logo">
-        <h2 onClick={() => navigate("/home",{state:{userId}})}>SHOPIQUE</h2>
+        <h2 onClick={() => navigate("/home",{state:{user}})}>SHOPIQUE</h2>
       </div>
 
       {!isOrderPage ? (
@@ -127,7 +114,7 @@ export default function Navbar({ userId, pageno = null }) {
                         className="search-result-item"
                         onClick={() =>
                           navigate("/seprodlist", {
-                            state: { userId, categoryData, },
+                            state: { user, categoryData, },
                           })
                         }
                       >
@@ -149,7 +136,7 @@ export default function Navbar({ userId, pageno = null }) {
           <div className="nav-actions">
             <button
               className="nav-btns"
-              onClick={() => navigate("/cart", { state: { userId } })}
+              onClick={() => navigate("/cart", { state: { user } })}
             >
               <i className="fas fa-shopping-cart"></i> Cart
             </button>
@@ -157,9 +144,9 @@ export default function Navbar({ userId, pageno = null }) {
             {isLoggedIn ? (
               <button
                 className="nav-btns my-prof-btn"
-                onClick={() => navigate("/profilepage", { state: { userId } })}
+                onClick={() => navigate("/profilepage", { state: { user } })}
               >
-                <i className="fas fa-user"></i> {username}
+                <i className="fas fa-user"></i> {user.username}
               </button>
             ) : (
               <button className="nav-btns" onClick={() => navigate("/login")}>
@@ -173,9 +160,9 @@ export default function Navbar({ userId, pageno = null }) {
           {isLoggedIn ? (
             <button
               className="nav-btns"
-              onClick={() => navigate("/profilepage", { state: { userId } })}
+              onClick={() => navigate("/profilepage", { state: { user } })}
             >
-              <i className="fas fa-user"></i> {username}
+              <i className="fas fa-user"></i> {user.username}
             </button>
           ) : (
             <button className="nav-btns" onClick={() => navigate("/login")}>

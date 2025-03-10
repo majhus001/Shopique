@@ -12,7 +12,6 @@ const AdminHome = () => {
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
 
-  // State for user and orders
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [userData, setUserData] = useState([]);

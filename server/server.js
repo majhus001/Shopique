@@ -16,8 +16,8 @@ const sendVerificationotp = require("./Emailverification/emailotp");
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173", // Local frontend
-  "https://shopique-iota.vercel.app", // Deployed frontend
+  "http://localhost:5173", 
+  "https://shopique-iota.vercel.app", 
 ];
 
 // Middleware

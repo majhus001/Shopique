@@ -37,7 +37,7 @@ const Login = () => {
             const adminData = user;
             navigate("/adhome", { state: { user } });
           } else {
-            navigate("/home", { state: { userId } });
+            navigate("/home", { state: { user } });
           }
         }, 1000);
       } else {

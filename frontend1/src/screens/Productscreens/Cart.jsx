@@ -8,16 +8,19 @@ import "./Cart.css";
 export default function Cart() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, stock } = location.state || {};
+  
+  const user = location.state?.user || null;
+  const stock = location.state?.stock || null;
+
   const [cartItems, setCartItems] = useState([]);
   const [updateMessage, setUpdateMessage] = useState("");
 
   useEffect(() => {
-    if (userId) {
+    if (user) {
       const fetchCartData = async () => {
         try {
           const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
-            params: { userId },
+            params: { userId: user._id },
           });
           if (response.data.success) {
             const itemsWithQuantity = response.data.cartItems.map((item) => ({
@@ -36,7 +39,7 @@ export default function Cart() {
 
       fetchCartData();
     }
-  }, [userId]);
+  }, [user]);
 
   const handleQuantityChange = async (itemId, change) => {
     const updatedCartItems = cartItems.map((item) =>
@@ -50,7 +53,7 @@ export default function Cart() {
       const response = await axios.put(
         `${API_BASE_URL}/api/cart/update-quantity`,
         {
-          userId: userId,
+          userId: user._id,
           itemId: updatedItem.itemId,
           quantity: updatedItem.quantity,
         }
@@ -97,7 +100,7 @@ export default function Cart() {
   };
 
   const HandleShopNow = () => {
-    navigate("/home", { state: { userId } });
+    navigate("/home", { state: { user } });
   };
 
   const handleBuyNow = () => {
@@ -107,10 +110,12 @@ export default function Cart() {
     const platformFee = 50;
     const deliveryFee = 20;
 
-    navigate("/orderdet", {
+    console.log(stock);
+
+    navigate("/orderdet", { 
       state: {
         cartItems,
-        userId,
+        user,
         totalPrice,
         discount,
         platformFee,
@@ -123,12 +128,12 @@ export default function Cart() {
 
   return (
     <div>
-      <Navbar userId={userId} />
+      <Navbar user={user} />
       <div className="cart-container">
         <h1 className="cart-title">Your Cart</h1>
         {updateMessage && <div className="update-message">{updateMessage}</div>}
         <div className="cart-prod">
-          {userId ? (
+          {user ? (
             cartItems.length > 0 ? (
               <>
                 <div className="cart-items">

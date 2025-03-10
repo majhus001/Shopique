@@ -7,17 +7,17 @@ import Navbar from "../navbar/Navbar";
 
 const Orderhistory = () => {
   const location = useLocation();
-  const { userId } = location.state || {}; 
+  const { user } = location.state || {}; 
 
   const [orders, setOrders] = useState([]);
-  const [visibleItems, setVisibleItems] = useState({}); // To track visibility of items for each order
-  console.log(userId);
+  const [visibleItems, setVisibleItems] = useState({}); 
+
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/api/orders/fetch/${userId}`
+          `${API_BASE_URL}/api/orders/fetch/${user._id}`
         );
         const result = response.data.data;
         if (result) {
@@ -30,10 +30,10 @@ const Orderhistory = () => {
       }
     };
 
-    if (userId) {
+    if (user) {
       fetchOrders();
     }
-  }, [userId]);
+  }, [user]);
 
   // Function to toggle visibility of ordered items for a specific order
   const toggleItemsVisibility = (orderId) => {
@@ -46,7 +46,7 @@ const Orderhistory = () => {
   return (
     <div>
       <div className="or-hi-nav">
-        <Navbar userId={userId} />
+        <Navbar user={user} />
       </div>
 
       <div className="order-history-container">

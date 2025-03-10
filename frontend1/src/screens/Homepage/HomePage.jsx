@@ -10,7 +10,7 @@ import API_BASE_URL from "../../api";
 const HomePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId } = location.state || {};
+  const { user } = location.state || {};
   const [mobiles, setMobiles] = useState([]);
   const [clothings, setClothings] = useState([]);
   const [homeAppliances, setHomeAppliances] = useState([]);
@@ -28,12 +28,12 @@ const HomePage = () => {
   });
 
   useEffect(() => {
-    if (userId) {
+    if (user) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-  }, [userId]);
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,8 +105,8 @@ const HomePage = () => {
 
   return (
     <div className="app">
-      {/* Navbar */}
-      <Navbar userId={userId} />
+      
+      <Navbar user={user} />
 
       <div className="main-container">
         <div className="content">
@@ -155,7 +155,7 @@ const HomePage = () => {
                       <Link
                         to={`/${item.route}`}
                         state={{
-                          userId: userId,
+                          user: user,
                           itemId: item._id,
                           name: item.name,
                           price: item.price,
@@ -193,7 +193,7 @@ const HomePage = () => {
                       <Link
                         to={`/${item.route}`}
                         state={{
-                          userId: userId,
+                          user: user,
                           itemId: item._id,
                           name: item.name,
                           price: item.price,
@@ -231,7 +231,7 @@ const HomePage = () => {
                       <Link
                         to={`/${item.route}`}
                         state={{
-                          userId: userId,
+                          user: user,
                           itemId: item._id,
                           name: item.name,
                           price: item.price,

@@ -7,46 +7,45 @@ import API_BASE_URL from "../../api";
 
 const ProfilePage = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // Get the navigate function
-  const { userId } = location.state || {}; // Fallback if userId is undefined
-  console.log(userId);
+  const navigate = useNavigate(); 
+  const { user } = location.state || {}; 
 
   const [userDetails, setUserDetails] = useState({
-    image: "",
-    username: "John Doe",
-    email: "john.doe@example.com",
-    password: "password123",
-    mobile: "+1234567890",
-    address: "123 Main St, City, Country",
+    image: user.image,
+    username: user.username,
+    email: user.email,
+    password: user.password,
+    mobile: user.mobile,
+    address: user.address,
   });
 
   const [isEditing, setIsEditing] = useState(false);
 
   // Fetch user data using userId
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/auth/fetch/${userId}`
-        );
-        const fetchedData = response.data.data;
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `${API_BASE_URL}/api/auth/fetch/${userId}`
+  //       );
+  //       const fetchedData = response.data.data;
 
-        // Fix the image path by replacing backslashes with forward slashes
-        const fixedImagePath = fetchedData.image.replace(/\\/g, "/");
+  //       // Fix the image path by replacing backslashes with forward slashes
+  //       const fixedImagePath = fetchedData.image.replace(/\\/g, "/");
 
-        setUserDetails({
-          ...fetchedData,
-          image: fixedImagePath, // Set the fixed image path
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+  //       setUserDetails({
+  //         ...fetchedData,
+  //         image: fixedImagePath, // Set the fixed image path
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching user data:", error);
+  //     }
+  //   };
 
-    if (userId) {
-      fetchUserData();
-    }
-  }, [userId]);
+  //   if (userId) {
+  //     fetchUserData();
+  //   }
+  // }, [userId]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -90,7 +89,7 @@ const ProfilePage = () => {
 
       // Send the form data to the server using Axios PUT request
       const response = await axios.put(
-        `${API_BASE_URL}/api/auth/update/${userId}`,
+        `${API_BASE_URL}/api/auth/update/${user._id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -107,19 +106,19 @@ const ProfilePage = () => {
 
   // Function to handle button click and navigate to My Orders
   const handleBtnClick = () => {
-    navigate("/myorders", { state: { userId } });
+    navigate("/myorders", { state: { user } });
   };
   const handleOnClickprofile = () => {
-    navigate("/profilepage", { state: { userId } });
+    navigate("/profilepage", { state: { user } });
   };
   const handleOnClickwhishlist = () => {
-    navigate("/profilepage", { state: { userId } });
+    navigate("/profilepage", { state: { user } });
   };
   const handleOnClickorders = () => {
-    navigate("/myorders", { state: { userId } });
+    navigate("/myorders", { state: { user } });
   };
   const handleOnClicksettings = () => {
-    navigate("/myorders", { state: { userId } });
+    navigate("/myorders", { state: { user } });
   };
   const handleOnClicklogout = () => {
     navigate("/home");
@@ -128,7 +127,7 @@ const ProfilePage = () => {
   return (
     <div>
       <div className="prof-nav">
-        <Navbar userId={userId} />
+        <Navbar user ={user} />
       </div>
       {/* Sidebar */}
       <div className="prof-cont">

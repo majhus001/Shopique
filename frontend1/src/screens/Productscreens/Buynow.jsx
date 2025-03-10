@@ -9,7 +9,7 @@ const Buynow = () => {
   
   // Extract data from location state
   const {
-    userId,
+    user,
     itemId,
     name,
     price,
@@ -23,6 +23,7 @@ const Buynow = () => {
     stock,
   } = location.state || {};
 
+  const userId = user?._id;
   // Initializing cartItems state
   const [cartItems, setCartItems] = useState([
     {
@@ -48,7 +49,7 @@ const Buynow = () => {
 
   // Handle Buy Now
   const handleBuyNow = () => {
-    if (userId && cartItems.length > 0) {
+    if (user && cartItems.length > 0) {
       
       const totalPrice = calculateTotalPrice();
       const discount = 0; 
@@ -58,7 +59,7 @@ const Buynow = () => {
       navigate("/orderdet", {
         state: {
           cartItems,
-          userId,
+          user,
           totalPrice,
           discount,
           platformFee,
@@ -93,11 +94,11 @@ const Buynow = () => {
 
   return (
     <div>
-      <Navbar userId={userId} />
+      <Navbar user={user} />
       <div className="cart-container">
         <h1 className="cart-title">Check Out</h1>
         <div className="cart-prod">
-          {userId ? (
+          {user ? (
             cartItems.length > 0 ? (
               <>
                 <div className="cart-items">

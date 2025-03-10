@@ -11,7 +11,7 @@ const Orderdetails = () => {
 
   const {
     cartItems = [],
-    userId,
+    user,
     totalPrice = 0,
     discount = 0,
     platformFee = 50,
@@ -27,35 +27,17 @@ const Orderdetails = () => {
 })
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [mobileNumber, setMobileNumber] = useState(user.mobile || "");
+  const [deliveryAddress, setDeliveryAddress] = useState(user.address || "");
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
-  const [userData, setUserDatas] = useState("");
-
-  // State to manage step completion
   const [isMobileDone, setIsMobileDone] = useState(false);
   const [isAddressDone, setIsAddressDone] = useState(false);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (userId) {
-        setIsLoggedIn(true);
-        try {
-          const userDataRes = await axios.get(`${API_BASE_URL}/api/auth/fetch/${userId}`);
-          if (userDataRes.data.data) {
-            setUserDatas(userDataRes.data.data);
-            setMobileNumber(userDataRes.data.data.mobile || ""); // Set fetched mobile or keep it empty
-            setDeliveryAddress(userDataRes.data.data.address || ""); // Set fetched address or keep it empty
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      }
-    };
   
-    fetchUserData();
-  }, [userId]);
-  
+  useEffect(()=>{
+    if(user){
+      setIsLoggedIn(true);
+    }
+  })
 
   const handlePlaceOrder = async () => {
     if (!mobileNumber || !deliveryAddress) {
@@ -65,7 +47,7 @@ const Orderdetails = () => {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/api/orders/add`, {
-        userId,
+        userId: user._id,
         cartItems,
         totalPrice: totalPrice + platformFee + deliveryFee - discount,
         mobileNumber,
@@ -93,7 +75,7 @@ const Orderdetails = () => {
           alert("An error occurred. Please try again.");
         }
         
-        navigate("/home", { state: { userId: userId } }); 
+        navigate("/home", { state: { user: user } }); 
       } else {
         const error = await response.json();
         alert(error.message || "Failed to place order.");
@@ -106,7 +88,7 @@ const Orderdetails = () => {
 
   const clearCart = async () => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/api/cart/clear/${userId}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/cart/clear/${user._id}`);
       if (response.data.success) {
         console.log("Cart cleared successfully!");
       } else {
@@ -120,7 +102,7 @@ const Orderdetails = () => {
 
   return (
     <div>
-      <Navbar userId={userId} pageno="123" />
+      <Navbar user = {user} pageno="123" />
       <div className="order-details-container">
         {/* Address Details Section */}
         <div className="address-details">
