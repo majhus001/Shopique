@@ -237,7 +237,7 @@ const Orderdetails = () => {
             <button
               className="buy-now-btn"
               onClick={handlePlaceOrder}
-              disabled={!isAddressDone} // Disable button until all steps are done
+              disabled={!isAddressDone} 
             >
               Place Order
             </button>

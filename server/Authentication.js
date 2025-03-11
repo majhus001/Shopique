@@ -291,13 +291,6 @@ router.get("/users/details", async (req, res) => {
       return res.status(404).json({ error: "No users found" });
     }
 
-    // Log all user details correctly
-    users.forEach((user) => {
-      console.log(
-        `User ID: ${user._id}, Name: ${user.username}, Image: ${user.image}`
-      );
-    });
-
     const userDetails = users.reduce((acc, user) => {
       acc[user._id] = { username: user.username, image: user.image };
       return acc;

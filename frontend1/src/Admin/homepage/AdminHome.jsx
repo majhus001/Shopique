@@ -225,7 +225,7 @@ const AdminHome = () => {
             <ul>
               {recactivity.slice(0, 5).map((item, index) => (
                 <li key={index}>
-                  User {item.username} {item.activity} on{" "}
+                  User <strong>{item.username}</strong> {item.activity} on{" "}
                   {new Date(item.createdAt).toLocaleString()}
                 </li>
               ))}
