@@ -29,7 +29,6 @@ const verifyToken = (req, res, next) => {
 };
 
 router.get("/checkvaliduser", verifyToken, (req, res) => {
-  console.log("user in...");
   res.json({ success:true, message: "User is valid", user: req.user });
 });
 
@@ -106,7 +105,6 @@ router.get("/signup/check", async (req, res) => {
 // Login Route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("hiiiii")
   if (!email || !password) {
     return res
       .status(400)
