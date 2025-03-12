@@ -4,19 +4,18 @@ import axios from "axios";
 import "./AdproductsList.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
+import Sidebar from "../sidebar/Sidebar";
 
 const AdproductsList = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
-  
+
   // State for user and orders
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
-  const [userData, setUserData] = useState([]);
-  const [pendingOrders, setUsersPendingOrder] = useState([]);
   const [mobileprod, setMobileProducts] = useState([]);
   const [clothprod, setClothProducts] = useState([]);
   const [homeappliprod, setHomeAppliProducts] = useState([]);
@@ -25,10 +24,14 @@ const AdproductsList = () => {
 
   const fetchUserData = async () => {
     try {
+      setLoading(true);
       console.log("Checking user validity...");
-      const response = await axios.get(`${API_BASE_URL}/api/auth/checkvaliduser`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (!response.data.user) {
         navigate("/login");
@@ -36,21 +39,26 @@ const AdproductsList = () => {
       }
 
       const userId = response.data.user.userId;
-      const userRes = await axios.get(`${API_BASE_URL}/api/auth/fetch/${userId}`);
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
       setUser(userRes.data.data);
       console.log("User fetched from backend:", userRes.data.data);
     } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Function to fetch order data from backend if not available in state
   const fetchOrderData = async () => {
     try {
-      const OrdersRes = await axios.get(`${API_BASE_URL}/api/admin/pendingorders`);
+      const OrdersRes = await axios.get(
+        `${API_BASE_URL}/api/admin/pendingorders`
+      );
       setOrders(OrdersRes.data);
-      setUsersPendingOrder(OrdersRes.data.filter((order) => order.OrderStatus === "Pending"));
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -67,8 +75,6 @@ const AdproductsList = () => {
       fetchOrderData();
     }
   }, [orders]);
-
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,9 +103,11 @@ const AdproductsList = () => {
 
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
-      <div>
+      <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
+      <div className="admin-container">
+      <Sidebar user={user} orders={orders}/>
       <div className="ad-prod-tit">
         <div className="ad-se-group">
           <label>
@@ -259,6 +267,7 @@ const AdproductsList = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

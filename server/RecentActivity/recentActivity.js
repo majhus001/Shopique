@@ -9,7 +9,9 @@ router.post("/add", async (req, res) => {
     const { name, activity } = req.body;
 
     if (!name || !activity) {
-      return res.status(400).json({ message: "Name and Activity are required." });
+      return res
+        .status(400)
+        .json({ message: "Name and Activity are required." });
     }
 
     const newActivity = new RecentActivity({
@@ -19,19 +21,19 @@ router.post("/add", async (req, res) => {
 
     await newActivity.save();
 
-    res.status(201).json({ message: "Activity saved successfully.", data: newActivity });
+    res
+      .status(201)
+      .json({ message: "Activity saved successfully.", data: newActivity });
   } catch (error) {
     console.error("Error saving activity:", error);
     res.status(500).json({ message: "Server error." });
   }
 });
 
-
 // ✅ GET route to fetch recent activities
 router.get("/fetch", async (req, res) => {
   try {
-    const activities = await RecentActivity.find().sort({ createdAt: -1 }); // Latest first
-    console.log(activities);
+    const activities = await RecentActivity.find().sort({ createdAt: -1 });
     res.status(200).json(activities);
   } catch (error) {
     console.error("Error fetching activities:", error);

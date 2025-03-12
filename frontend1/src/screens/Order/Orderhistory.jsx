@@ -12,7 +12,6 @@ const Orderhistory = () => {
   const [orders, setOrders] = useState([]);
   const [visibleItems, setVisibleItems] = useState({}); 
 
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -43,6 +42,25 @@ const Orderhistory = () => {
     }));
   };
 
+  // Function to cancel an order
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/api/orders/cancelorder/${orderId}`);
+      if (response.data.success) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === orderId ? { ...order, OrderStatus: "Cancelled" } : order
+          )
+        );
+      } else {
+        alert("Failed to cancel the order.");
+      }
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      alert("An error occurred while canceling the order.");
+    }
+  };
+
   return (
     <div>
       <div className="or-hi-nav">
@@ -65,7 +83,7 @@ const Orderhistory = () => {
                   }`}
                 >
                   {order.OrderStatus === "Accepted"
-                    ? "Order completed"
+                    ? "Order Accepted"
                     : order.OrderStatus}
                 </span>
               </div>
@@ -83,6 +101,17 @@ const Orderhistory = () => {
                   <strong>Total Price:</strong> ₹{order.totalPrice}
                 </p>
               </div>
+
+              {/* Display cancel button if OrderStatus is "Pending" */}
+              {order.OrderStatus === "Pending" && (
+                <button
+                  className="cancel-order-button"
+                  onClick={() => handleCancelOrder(order._id)}
+                >
+                  Cancel Order
+                </button>
+              )}
+
               <div className="order-items">
                 <button
                   className="view-items-button"

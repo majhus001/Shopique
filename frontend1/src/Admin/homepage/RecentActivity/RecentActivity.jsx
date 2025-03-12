@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./RecentActivity.css"; // You can create and style this CSS file
+import Adnavbar from "../../Adnavbar/Adnavbar";
+import Sidebar from "../../sidebar/Sidebar";
 
 const RecentActivity = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const user = location.state?.user || null;
+  const orders = location.state?.orders || null;
   const recactivity = location.state?.recactivity || [];
-
+  const [loading, setLoading] = useState(false);
+    
   if (!user) {
     navigate("/adhome");
     return null;
@@ -19,6 +23,13 @@ const RecentActivity = () => {
   };
 
   return (
+    <div style={{ cursor: loading ? "wait" : "default" }}>
+      <div className="ad-nav">
+        <Adnavbar user={user} />
+      </div>
+      <div className="admin-container">
+        <Sidebar user={user} orders={orders} />
+
     <div className="recent-activity-container">
       <header className="recent-activity-header">
         <h1>Recent User Activities</h1>
@@ -43,6 +54,8 @@ const RecentActivity = () => {
           </ul>
         )}
       </div>
+    </div>
+    </div>
     </div>
   );
 };

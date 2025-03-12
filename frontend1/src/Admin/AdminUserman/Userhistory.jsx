@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
 import "./Userhistory.css";
+import Sidebar from "../sidebar/Sidebar";
 
 const Userhistory = () => {
   const location = useLocation();
@@ -15,22 +16,27 @@ const Userhistory = () => {
   const [isUserDataVisible, setIsUserDataVisible] = useState(true);
   const [visibleItems, setVisibleItems] = useState({});
   const [ordersCount, setOrdersCount] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Fetch user data and order history
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        setLoading(true);
         const UserdataRes = await axios.get(
           `${API_BASE_URL}/api/auth/fetch/${userdata._id}`
         );
         setFetchedUserData(UserdataRes.data.data); // Store the fetched user data
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     const fetchOrderHistory = async () => {
       try {
+        setLoading(true);
         const UserorderhisRes = await axios.get(
           `${API_BASE_URL}/api/orders/fetch/${userdata._id}`
         );
@@ -42,6 +48,8 @@ const Userhistory = () => {
         }
       } catch (error) {
         console.error("Error fetching order history:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -58,24 +66,19 @@ const Userhistory = () => {
     }));
   };
 
-  // Handle navigation
-  const handleDashclk = () => {
-    navigate("/adhome", { state: {user, orders } });
-  };
-  const handleprofileclk = () => {
-    navigate("/adprof", { state: {  user, orders } });
-  };
-  const handleUsemanclk = () => {
-    navigate("/userman", { state: {  user, orders } });
-  };
-  const handleOrderclk = () => {
-    navigate("/adorders", { state: { user, orders } });
-  };
-  const handleProdclk = () => {
-    navigate("/adprodlist", { state: { user, orders } });
-  };
-  const handleLogout = () => {
-    navigate("/home");
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+      console.log(response.data.message);
+      navigate("/home");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   // Toggle visibility of user data and order history
@@ -88,53 +91,13 @@ const Userhistory = () => {
   };
 
   return (
-    <div>
+    <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
       <div className="admin-container">
-        <div className="admin-sidebar">
-          <div className="ad-sb-img-cont">
-            {user?.image ? (
-              <img src={user.image} alt="admin" className="ad-sb-img" />
-            ) : (
-              <div className="placeholder-img">No Image</div>
-            )}
-            <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>
-          </div>
-          <div className="ad-sb-list-cont">
-            <ul className="ad-sb-list-items">
-              <li>
-                <button className="ad-sb-btns" onClick={handleDashclk}>
-                  Dashboard
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleprofileclk}>
-                  Profile
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleUsemanclk}>
-                  User Management
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOrderclk}>
-                  Orders
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleProdclk}>
-                  Products
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns">Settings</button>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <Sidebar user={user} orders={orders} />
+
         <div className="main-content">
           <header className="admin-header">
             <h1>{userdata?.username}</h1>
@@ -148,11 +111,11 @@ const Userhistory = () => {
 
           {/* Toggle buttons for User Data and Order History */}
           <div className="ad-or-nav">
-            <h4 className="ad-userhis-filbtn" onClick={() => handleToggleData("user")}>
+            <h4 className="filter-btn" onClick={() => handleToggleData("user")}>
               Users Data
             </h4>
             <h4
-              className="ad-userhis-filbtn"
+              className="filter-btn"
               onClick={() => handleToggleData("orders")}
             >
               Orders History
@@ -199,7 +162,7 @@ const Userhistory = () => {
                       <p>: {ordersCount}</p>
                     </div>
                     <div className="ad-us-det-img">
-                        <img src={fetchedUserData.image} alt="no image"/>
+                      <img src={fetchedUserData.image} alt="no image" />
                     </div>
                   </div>
                 </div>
@@ -227,7 +190,7 @@ const Userhistory = () => {
                             }`}
                           >
                             {order.OrderStatus === "Accepted"
-                              ? "Order completed"
+                              ? "Order Accepted"
                               : order.OrderStatus}
                           </span>
                         </div>

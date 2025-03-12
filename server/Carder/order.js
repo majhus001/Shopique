@@ -55,8 +55,6 @@ router.post("/add", async (req, res) => {
 
 router.get("/fetch/:userId", async (req, res) => {
   const userId = req.params.userId;
-  console.log("orders fetching...")
-  console.log(userId)
 
   try {
     const MyOrders = await Order.find({ userId });
@@ -74,6 +72,35 @@ router.get("/fetch/:userId", async (req, res) => {
     console.error("Error fetching orders:", error); 
   }
 });
+
+router.put("/cancelorder/:orderId", async (req, res) => {
+  const orderId = req.params.orderId;
+
+  try {
+    const myOrder = await Order.findOne({ _id: orderId });
+
+    if (myOrder) {
+      myOrder.OrderStatus = "Cancelled";
+      await myOrder.save(); 
+      return res.status(200).json({
+        success: true,
+        message: "Order updated successfully!",
+        data: myOrder,
+      });
+    } else {
+      return res.status(404).json({
+        message: "No order found with the given ID.",
+      });
+    }
+  } catch (error) {
+    console.error("Error updating order:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
 
 
 

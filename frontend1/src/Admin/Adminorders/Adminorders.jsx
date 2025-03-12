@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios"; // Importing axios for API requests
 import "./Adminorders.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
+import Sidebar from "../sidebar/Sidebar";
 import API_BASE_URL from "../../api";
 
 const Adminorders = () => {
@@ -17,6 +18,18 @@ const Adminorders = () => {
   const [orders, setOrders] = useState(stateOrders);
   const [visibleItems, setVisibleItems] = useState({});
   const [filteredOrders, setFilteredOrders] = useState(orders);
+  const [loadingOrderId, setLoadingOrderId] = useState(null);
+  const [searchOrderId, setSearchOrderId] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
+
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   const fetchUserData = async () => {
     try {
@@ -74,7 +87,7 @@ const Adminorders = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/adhome", { state: { user, orders }});
+      navigate("/adhome", { state: { user, orders } });
     }
   });
 
@@ -85,24 +98,26 @@ const Adminorders = () => {
     }));
   };
 
-  // Function to handle accepting the order
   const handleOrderAccept = async (orderId) => {
-    console.log(`Order with ID: ${orderId} accepted`);
-
     try {
-      // Update the order status to "Accepted"
+      setLoadingOrderId(orderId);
       const response = await axios.put(
         `${API_BASE_URL}/api/admin/update-orders`,
         {
           orderId,
-          status: "Accepted", // You can customize the status as per your needs
+          status: "Accepted",
         }
       );
 
       if (response.status === 200) {
-        console.log(`Order with ID: ${orderId} has been successfully accepted`);
-
-        // Directly modify the filteredOrders state without need for useEffect
+        // Update both orders and filteredOrders
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === orderId
+              ? { ...order, OrderStatus: "Accepted" }
+              : order
+          )
+        );
         setFilteredOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
@@ -113,7 +128,52 @@ const Adminorders = () => {
       }
     } catch (error) {
       console.error("Error accepting the order:", error);
-      alert("There was an error accepting the order. Please try again.");
+    } finally {
+      setLoadingOrderId(null);
+    }
+  };
+
+  // Complete Order Function
+  const handleCompleteOrd = async (orderId) => {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/api/admin/update-orders`,
+        {
+          orderId,
+          status: "Completed",
+        }
+      );
+
+      if (response.status === 200) {
+        // Update both orders and filteredOrders
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === orderId
+              ? { ...order, OrderStatus: "Completed" }
+              : order
+          )
+        );
+        setFilteredOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === orderId
+              ? { ...order, OrderStatus: "Completed" }
+              : order
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error completing the order:", error);
+    }
+  };
+
+  const handleSearchOrder = () => {
+    if (searchOrderId.trim() === "") {
+      setFilteredOrders(orders); // If empty, show all orders
+    } else {
+      const searchedOrders = orders.filter((order) =>
+        order._id.toLowerCase().startsWith(searchOrderId.trim().toLowerCase())
+      );
+      setFilteredOrders(searchedOrders);
     }
   };
 
@@ -129,24 +189,6 @@ const Adminorders = () => {
     } catch (error) {
       console.error("Error during logout:", error);
     }
-  };
-
-  const handleDashclk = () => {
-    navigate("/adhome", { state: { user, orders } });
-  };
-  const handleprofileclk = () => {
-    navigate("/adprof", { state: { user, orders } });
-  };
-  const handleUsemanclk = () => {
-    navigate("/userman", { state: { user, orders } });
-  };
-
-  const handleOrderclk = () => {
-    navigate("/adorders", { state: { user, orders } });
-  };
-
-  const handleProdclk = () => {
-    navigate("/adprodlist", { state: { user, orders }});
   };
 
   const handleFilterOrders = (status) => {
@@ -166,49 +208,7 @@ const Adminorders = () => {
         <Adnavbar user={user} />
       </div>
       <div className="admin-container">
-        <div className="admin-sidebar">
-          <div className="ad-sb-img-cont">
-            {user?.image ? (
-              <img src={user.image} alt="admin" className="ad-sb-img" />
-            ) : (
-              <div className="placeholder-img">No Image</div>
-            )}
-            <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>
-          </div>
-          <div className="ad-sb-list-cont">
-            <ul className="ad-sb-list-items">
-              <li>
-                <button className="ad-sb-btns" onClick={handleDashclk}>
-                  Dashboard
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleprofileclk}>
-                  Profile
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleUsemanclk}>
-                  User Management
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOrderclk}>
-                  Orders
-                </button>
-              </li>
-
-              <li>
-                <button className="ad-sb-btns" onClick={handleProdclk}>
-                  Products
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns">Settings</button>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <Sidebar user={user} orders={orders} />
 
         <div className="main-content">
           <header className="admin-header">
@@ -220,6 +220,18 @@ const Adminorders = () => {
             </div>
           </header>
 
+          <div>
+            <input
+              type="text"
+              placeholder="Search by Order ID"
+              value={searchOrderId}
+              onChange={(e) => {
+                setSearchOrderId(e.target.value);
+                handleSearchOrder();
+              }}
+              className="ad-ord-search-input"
+            />
+          </div>
           <div className="ad-or-nav">
             <h4
               className="filter-btn"
@@ -254,8 +266,8 @@ const Adminorders = () => {
           </div>
 
           <div>
-            {filteredOrders && filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
+            {currentOrders && currentOrders.length > 0 ? (
+              currentOrders.map((order) => (
                 <div key={order._id} className="order-card">
                   <div className="order-header">
                     <span className="order-id">Order ID: {order._id}</span>
@@ -270,6 +282,14 @@ const Adminorders = () => {
                         ? "Order Accepted"
                         : order.OrderStatus}
                     </span>
+                    {order.OrderStatus === "Accepted" && (
+                      <button
+                        className="ad-or-d-btn"
+                        onClick={() => handleCompleteOrd(order._id)}
+                      >
+                        Complete order
+                      </button>
+                    )}
                   </div>
                   <div className="order-details">
                     <p>
@@ -337,6 +357,7 @@ const Adminorders = () => {
                   {order.OrderStatus === "Pending" && (
                     <button
                       className="ad-or-d-btn"
+                      disabled={loadingOrderId === order._id}
                       onClick={() => handleOrderAccept(order._id)}
                     >
                       Accept Order
@@ -347,6 +368,29 @@ const Adminorders = () => {
             ) : (
               <p>No orders found.</p>
             )}
+          </div>
+          <div className="pagination-buttons">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="ad-or-d-btn"
+            >
+              Previous
+            </button>
+
+            <span style={{ padding: "0 10px" }}>
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="ad-or-d-btn"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>

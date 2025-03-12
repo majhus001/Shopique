@@ -11,6 +11,7 @@ import UserManagement from './Admin/AdminUserman/UserManagement';
 import Userhistory from './Admin/AdminUserman/Userhistory';
 import AdproductsList from './Admin/AdminProducts/AdproductsList';
 import RecentActivity from './Admin/homepage/RecentActivity/RecentActivity';
+import Sidebar from './Admin/sidebar/Sidebar';
 
 import SignUp from './LogSin/SignUp';
 import Login from './LogSin/Login';
@@ -49,6 +50,7 @@ const App = () => {
         <Route path="/userman" element={<UserManagement />} />
         <Route path="/aduserhis" element={<Userhistory />} />
         <Route path="/recentactivity" element={<RecentActivity />} />
+        <Route path="/sidebar" element={<Sidebar />} />
 
       </Routes>
     </Router>

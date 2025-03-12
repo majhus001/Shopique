@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./AdminHome.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
+import Sidebar from "../sidebar/Sidebar";
 
 const AdminHome = () => {
   const location = useLocation();
@@ -20,9 +21,11 @@ const AdminHome = () => {
   const [mobileprod, setMobileProducts] = useState([]);
   const [clothprod, setClothProducts] = useState([]);
   const [homeappliprod, setHomeAppliProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchUserData = async () => {
     try {
+      setLoading(true);
       console.log("Checking user validity...");
       const response = await axios.get(
         `${API_BASE_URL}/api/auth/checkvaliduser`,
@@ -45,12 +48,15 @@ const AdminHome = () => {
     } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Function to fetch order data from backend if not available in state
   const fetchOrderData = async () => {
     try {
+      setLoading(true);
       const OrdersRes = await axios.get(
         `${API_BASE_URL}/api/admin/pendingorders`
       );
@@ -60,6 +66,8 @@ const AdminHome = () => {
       );
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +87,7 @@ const AdminHome = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [
           userDataRes,
           userRecActRes,
@@ -100,6 +109,8 @@ const AdminHome = () => {
         setHomeAppliProducts(homeAppliRes.data);
       } catch (err) {
         console.error("Error fetching additional data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -122,9 +133,6 @@ const AdminHome = () => {
     }
   };
 
-  const handleDashclk = () => navigate("/adhome", { state: { user, orders } });
-  const handleprofileclk = () =>
-    navigate("/adprof", { state: { user, orders } });
   const handleUsemanclk = () =>
     navigate("/userman", { state: { user, orders } });
   const handleOrderclk = () =>
@@ -133,57 +141,19 @@ const AdminHome = () => {
     navigate("/adprodlist", { state: { user, orders } });
 
   const handleRecentActivityClick = () => {
-    navigate("/recentactivity", { state: { user, recactivity } });
+    navigate("/recentactivity", { state: { user, orders, recactivity } });
+  };
+  const handlesbclk = () => {
+    navigate("/sidebar", { state: { user, orders } });
   };
 
   return (
-    <div>
+    <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
       <div className="admin-container">
-        <div className="admin-sidebar">
-          <div className="ad-sb-img-cont">
-            {user?.image ? (
-              <img src={user.image} alt="admin" className="ad-sb-img" />
-            ) : (
-              <div className="placeholder-img">No Image</div>
-            )}
-            <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>
-          </div>
-          <div className="ad-sb-list-cont">
-            <ul className="ad-sb-list-items">
-              <li>
-                <button className="ad-sb-btns" onClick={handleDashclk}>
-                  Dashboard
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleprofileclk}>
-                  Profile
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleUsemanclk}>
-                  User Management
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOrderclk}>
-                  Orders
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleProdclk}>
-                  Products
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns">Settings</button>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <Sidebar user={user} orders={orders} />
 
         <div className="main-content">
           <header className="admin-header">

@@ -4,30 +4,49 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
 import "./Usermanagement.css";
+import Sidebar from "../sidebar/Sidebar";
 
 const UserManagement = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
-  
+
   // State for user and orders
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [filteredUsers, setfilteredUsers] = useState(users);
   const [editUser, setEditUser] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
+
+  // const filteredUsers = users.filter(
+  //   (user) =>
+  //     user.username.toLowerCase().startsWith(searchQuery.toLowerCase()) ||
+  //     user.email.toLowerCase().startsWith(searchQuery.toLowerCase())
+  // );
+
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(filteredUsers.length / ordersPerPage);
+
   const fetchUserData = async () => {
     try {
       console.log("Checking user validity...");
-      const response = await axios.get(`${API_BASE_URL}/api/auth/checkvaliduser`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (!response.data.user) {
         navigate("/login");
@@ -35,7 +54,9 @@ const UserManagement = () => {
       }
 
       const userId = response.data.user.userId;
-      const userRes = await axios.get(`${API_BASE_URL}/api/auth/fetch/${userId}`);
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
       setUser(userRes.data.data);
       console.log("User fetched from backend:", userRes.data.data);
     } catch (error) {
@@ -47,9 +68,13 @@ const UserManagement = () => {
   // Function to fetch order data from backend if not available in state
   const fetchOrderData = async () => {
     try {
-      const OrdersRes = await axios.get(`${API_BASE_URL}/api/admin/pendingorders`);
+      const OrdersRes = await axios.get(
+        `${API_BASE_URL}/api/admin/pendingorders`
+      );
       setOrders(OrdersRes.data);
-      setUsersPendingOrder(OrdersRes.data.filter((order) => order.OrderStatus === "Pending"));
+      setUsersPendingOrder(
+        OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
+      );
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -67,13 +92,7 @@ const UserManagement = () => {
     }
   }, [orders]);
 
-
   // Filter users based on search query
-  const filteredUsers = users.filter(
-    (user) =>
-      user.username.toLowerCase().startsWith(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().startsWith(searchQuery.toLowerCase())
-  );
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -81,7 +100,8 @@ const UserManagement = () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/auth/fetch`);
         console.log(response.data.message);
-        setUsers(response.data.data); // Assuming response.data is an array of users
+        setUsers(response.data.data);
+        setfilteredUsers(response.data.data);
       } catch (error) {
         console.error("Error fetching users:", error);
       } finally {
@@ -142,6 +162,23 @@ const UserManagement = () => {
     }
   };
 
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setfilteredUsers(users); // Show all if empty
+    } else {
+      const searchUsers = users.filter(
+        (user) =>
+          user._id.toLowerCase().startsWith(searchQuery.trim().toLowerCase()) ||
+          user.username
+            ?.toLowerCase()
+            .startsWith(searchQuery.trim().toLowerCase()) ||
+          user.email?.toLowerCase().startsWith(searchQuery.trim().toLowerCase())
+      );
+      setfilteredUsers(searchUsers);
+      setCurrentPage(1); // Reset to first page on new search
+    }
+  }, [searchQuery, users]);
+
   const handleLogout = async () => {
     try {
       const response = await axios.post(
@@ -156,24 +193,6 @@ const UserManagement = () => {
     }
   };
 
-  const handleDashclk = () => {
-    navigate("/adhome", { state: { user, orders } });
-  };
-  const handleprofileclk = () => {
-    navigate("/adprof", { state: { user, orders } });
-  };
-  const handleUsemanclk = () => {
-    navigate("/userman", { state: { user, orders } });
-  };
-
-  const handleOrderclk = () => {
-    navigate("/adorders", { state: { user, orders } });
-  };
-
-  const handleProdclk = () => {
-    navigate("/adprodlist", { state: { user, orders }});
-  };
-
   const handleUserclk = (userdata) => {
     console.log(userdata);
     navigate("/aduserhis", { state: { user, orders, userdata } });
@@ -185,48 +204,7 @@ const UserManagement = () => {
         <Adnavbar user={user} />
       </div>
       <div className="admin-container">
-        <div className="admin-sidebar">
-          <div className="ad-sb-img-cont">
-            {user?.image ? (
-              <img src={user.image} alt="admin" className="ad-sb-img" />
-            ) : (
-              <div className="placeholder-img">No Image</div>
-            )}
-            <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>
-          </div>
-          <div className="ad-sb-list-cont">
-            <ul className="ad-sb-list-items">
-              <li>
-                <button className="ad-sb-btns" onClick={handleDashclk}>
-                  Dashboard
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleprofileclk}>
-                  Profile
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleUsemanclk}>
-                  User Management
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOrderclk}>
-                  Orders
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleProdclk}>
-                  Products
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns">Settings</button>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <Sidebar user={user} orders={orders} />
 
         <div className="main-content">
           <header className="admin-header">
@@ -251,8 +229,8 @@ const UserManagement = () => {
               <h4>Total users: {users.length}</h4>
             </div>
             <div className="user-list">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((u) => (
+              {currentUsers.length > 0 ? (
+                currentUsers.map((u) => (
                   <div
                     key={u._id}
                     className="user-det-list-cont"
@@ -277,6 +255,29 @@ const UserManagement = () => {
               ) : (
                 <p>No users found</p>
               )}
+            </div>
+            <div className="pagination-buttons">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="ad-or-d-btn"
+              >
+                Previous
+              </button>
+
+              <span style={{ padding: "0 10px" }}>
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="ad-or-d-btn"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>

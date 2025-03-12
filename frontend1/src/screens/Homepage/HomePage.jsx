@@ -16,7 +16,6 @@ const HomePage = () => {
   const [homeAppliances, setHomeAppliances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const bannerImages = [bannerImage, bannerImage1, bannerImage2];
   const [currentImage, setCurrentImage] = useState(0);
@@ -28,16 +27,9 @@ const HomePage = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true)
         const [mobilesRes, clothingsRes, homeAppliancesRes] = await Promise.all(
           [
             fetch(
@@ -104,7 +96,7 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="app">
+    <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
       
       <Navbar user={user} />
 
