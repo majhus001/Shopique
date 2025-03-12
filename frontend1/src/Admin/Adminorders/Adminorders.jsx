@@ -17,8 +17,8 @@ const Adminorders = () => {
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [visibleItems, setVisibleItems] = useState({});
-  const [filteredOrders, setFilteredOrders] = useState(orders);
   const [loadingOrderId, setLoadingOrderId] = useState(null);
+  const [filteredOrders, setFilteredOrders] = useState(orders);
   const [searchOrderId, setSearchOrderId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
@@ -59,37 +59,24 @@ const Adminorders = () => {
   };
 
   // Function to fetch order data from backend if not available in state
-  const fetchOrderData = async () => {
-    try {
-      const OrdersRes = await axios.get(
-        `${API_BASE_URL}/api/admin/pendingorders`
-      );
-      setOrders(OrdersRes.data);
-      setUsersPendingOrder(
-        OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
-      );
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    }
-  };
+    const fetchOrderData = async () => {
+      try {
+        const OrdersRes = await axios.get(
+          `${API_BASE_URL}/api/admin/pendingorders`
+        );
+        setOrders(OrdersRes.data);
+        setUsersPendingOrder(
+          OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
+        );
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
 
-  useEffect(() => {
-    if (!user) {
-      fetchUserData();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!orders) {
-      fetchOrderData();
-    }
-  }, [orders]);
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/adhome", { state: { user, orders } });
-    }
-  });
+    useEffect(() => {
+        fetchUserData();
+        fetchOrderData();
+    }, []);
 
   const toggleItemsVisibility = (orderId) => {
     setVisibleItems((prevState) => ({
@@ -166,7 +153,7 @@ const Adminorders = () => {
     }
   };
 
-  const handleSearchOrder = () => {
+  useEffect(() => {
     if (searchOrderId.trim() === "") {
       setFilteredOrders(orders); // If empty, show all orders
     } else {
@@ -175,7 +162,8 @@ const Adminorders = () => {
       );
       setFilteredOrders(searchedOrders);
     }
-  };
+    setCurrentPage(1); // Reset to first page on search
+  }, [searchOrderId, orders]);
 
   const handleLogout = async () => {
     try {
@@ -200,6 +188,7 @@ const Adminorders = () => {
       );
       setFilteredOrders(filtered);
     }
+    setCurrentPage(1); // Reset to first page on filter
   };
 
   return (
@@ -225,10 +214,7 @@ const Adminorders = () => {
               type="text"
               placeholder="Search by Order ID"
               value={searchOrderId}
-              onChange={(e) => {
-                setSearchOrderId(e.target.value);
-                handleSearchOrder();
-              }}
+              onChange={(e) => setSearchOrderId(e.target.value)} // Only update value
               className="ad-ord-search-input"
             />
           </div>
