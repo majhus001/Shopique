@@ -181,28 +181,56 @@
     border-bottom-color: #2874f0; /* Blue border on focus */
   }
   
-  .check-button {
-    padding: 8px 15px;
-    font-size: 1rem;
+  .check-button{
+    border: 1px solid #fff;
     background-color: #2874f0;
     color: #fff;
-    border: 1px solid #2874f0;
+    padding: 8px;
     border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .check-button:hover {
+    transition: all 0.3s ease;
+}
+
+.check-button:hover {
+  border: 1px solid #2874f0;
     background-color: #fff;
-    color: #185bb5;
-    border: 1px solid;
+    color: #007bff;
+    transform: scale(1.05);
+}
+
+.loader {
+  width: 10px;
+  height: 10px;
+  border: 3px solid white;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+  
+  .delivery-display {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px; 
   }
   
-  .estimated-delivery-date {
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: #888;
+  .expected-delivery {
+    display: block; /* Each line separate */
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #333; /* Dark text for good readability */
+    font-weight: 500;
   }
+  
+  .expected-delivery:last-child {
+    margin-bottom: 0; /* Remove margin for last item */
+  }  
   
   .ratings-reviews {
     margin-top: 20px;
