@@ -1,0 +1,104 @@
+/* Container Styles */
+.report-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    text-align: center;
+  }
+  
+  /* Title */
+  .report-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  /* User details */
+  .user-details {
+    text-align: left;
+    margin-bottom: 25px;
+    padding: 10px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .user-details p {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  /* Buttons */
+  .download-btn,
+  .back-btn {
+    display: inline-block;
+    margin: 10px 5px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  .back-btn {
+    background: #6c757d;
+  }
+  
+  .download-btn:hover,
+  .back-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  .download-btn:disabled {
+    background: #a0a0a0;
+    cursor: not-allowed;
+  }
+  
+  /* No Data Text */
+  .no-data-text {
+    color: #cc0000;
+    font-weight: bold;
+    margin: 20px 0;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .report-container {
+      padding: 15px;
+    }
+  
+    .report-title {
+      font-size: 1.5rem;
+    }
+  
+    .download-btn,
+    .back-btn {
+      width: 100%;
+      margin: 8px 0;
+    }
+  
+    .user-details p {
+      font-size: 0.95rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .report-title {
+      font-size: 1.3rem;
+    }
+  
+    .download-btn,
+    .back-btn {
+      padding: 10px;
+    }
+  }
+  

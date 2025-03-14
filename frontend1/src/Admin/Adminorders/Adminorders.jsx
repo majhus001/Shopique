@@ -13,7 +13,6 @@ const Adminorders = () => {
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
 
-  // State for user and orders
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [visibleItems, setVisibleItems] = useState({});
@@ -59,24 +58,21 @@ const Adminorders = () => {
   };
 
   // Function to fetch order data from backend if not available in state
-    const fetchOrderData = async () => {
-      try {
-        const OrdersRes = await axios.get(
-          `${API_BASE_URL}/api/admin/pendingorders`
-        );
-        setOrders(OrdersRes.data);
-        setUsersPendingOrder(
-          OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
-        );
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
+  const fetchOrderData = async () => {
+    try {
+      const OrdersRes = await axios.get(
+        `${API_BASE_URL}/api/admin/pendingorders`
+      );
+      setOrders(OrdersRes.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
 
-    useEffect(() => {
-        fetchUserData();
-        fetchOrderData();
-    }, []);
+  useEffect(() => {
+    fetchUserData();
+    fetchOrderData();
+  }, []);
 
   const toggleItemsVisibility = (orderId) => {
     setVisibleItems((prevState) => ({
@@ -97,7 +93,7 @@ const Adminorders = () => {
       );
 
       if (response.status === 200) {
-        // Update both orders and filteredOrders
+        GenerateUserReport(response.data.user, orderId);
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
@@ -105,6 +101,7 @@ const Adminorders = () => {
               : order
           )
         );
+
         setFilteredOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
@@ -191,6 +188,12 @@ const Adminorders = () => {
     setCurrentPage(1); // Reset to first page on filter
   };
 
+  const GenerateUserReport = (orduser, orderId) => {
+    navigate("/generateuserreport", {
+      state: { ordereduser: orduser, orderId, user, orders },
+    });
+  };
+
   return (
     <div>
       <div className="ad-nav">
@@ -209,7 +212,7 @@ const Adminorders = () => {
             </div>
           </header>
 
-          <div>
+          <div className="ad-ord-search-rep">
             <input
               type="text"
               placeholder="Search by Order ID"
@@ -217,6 +220,9 @@ const Adminorders = () => {
               onChange={(e) => setSearchOrderId(e.target.value)} // Only update value
               className="ad-ord-search-input"
             />
+            <button className="ad-or-d-btn" onClick={handleLogout} >
+                Order Reports
+              </button>
           </div>
           <div className="ad-or-nav">
             <h4
@@ -339,7 +345,6 @@ const Adminorders = () => {
                     )}
                   </div>
 
-                  {/* Accept Order Button for Pending Orders */}
                   {order.OrderStatus === "Pending" && (
                     <button
                       className="ad-or-d-btn"

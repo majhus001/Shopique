@@ -23,6 +23,7 @@ import Orderdetails from './screens/Order/Orderdetails';
 import ProfilePage from './screens/profiledetails/ProfilePage';
 import Orderhistory from './screens/Order/Orderhistory';
 import Buynow from './screens/Productscreens/Buynow';
+import GenerateUserReport from './Admin/GenUserReport/GenerateUserReport';
 
 const App = () => {
   return (
@@ -51,6 +52,7 @@ const App = () => {
         <Route path="/aduserhis" element={<Userhistory />} />
         <Route path="/recentactivity" element={<RecentActivity />} />
         <Route path="/sidebar" element={<Sidebar />} />
+        <Route path="/generateuserreport" element={<GenerateUserReport />} />
 
       </Routes>
     </Router>

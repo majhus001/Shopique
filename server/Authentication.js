@@ -157,7 +157,6 @@ router.post("/logout", (req, res) => {
 // fetch User details with user Id
 router.get("/fetch/:userId", async (req, res) => {
   try {
-    console.log("fet u id")
     const { userId } = req.params;
     const user = await User.findOne({ _id: userId });
 

@@ -101,9 +101,6 @@ router.put("/cancelorder/:orderId", async (req, res) => {
   }
 });
 
-
-
-
 router.put("/stockupdate", async (req, res) => {
   try {
     console.log("Stock update request received");

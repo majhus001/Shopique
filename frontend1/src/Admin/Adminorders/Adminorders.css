@@ -54,4 +54,14 @@
     outline: none;
   }
   
-  
+  .ad-ord-search-rep{
+    display: flex;
+    gap: 30px;
+    align-items: center;
+  }
+
+  .ad-ord-rep{
+    width: 100px;
+    height: 40px;
+    color: #000;
+  }

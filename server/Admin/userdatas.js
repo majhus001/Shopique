@@ -2,7 +2,6 @@ const express = require("express");
 const User = require("../models/userschema");
 const Order = require("../models/orderschema");
 const { mobile, cloth, homeappliances } = require("../models/products");
-
 const router = express.Router();
 
 
@@ -77,10 +76,12 @@ router.put('/update-orders', async (req, res) => {
       }
 
       order.OrderStatus = status;
+      const userId = order.userId
 
+      const user = await User.findById(userId);
+      console.log(user)
       await order.save();
-
-      res.status(200).json({ message: 'Order status updated successfully', order });
+      res.status(200).json({ message: 'Order status updated successfully', order, user });
   } catch (error) {
       console.error('Error updating order:', error);
       res.status(500).json({ message: 'Server error, please try again later' });
