@@ -84,11 +84,12 @@ const Adminorders = () => {
   const handleOrderAccept = async (orderId) => {
     try {
       setLoadingOrderId(orderId);
-      const response = await axios.put(`${API_BASE_URL}/api/admin/orduser`, {
+      console.log("hiii")
+      const response = await axios.put(`${API_BASE_URL}/api/admin/update-orders`, {
         orderId,
         status: "Accepted",
       });
-
+console.log("cooo")
       if (response.status === 200) {
         GenerateUserReport(response.data.user, orderId);
         setOrders((prevOrders) =>

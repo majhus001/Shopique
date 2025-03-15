@@ -44,10 +44,10 @@ const ProductList = () => {
       alert("Please enter both review and rating");
       return;
     }
-
+console.log(itemId)
     const reviewData = {
-      userId,
       itemId,
+      userId,
       review,
       rating: parseInt(urating),
     };
@@ -175,7 +175,7 @@ const ProductList = () => {
       alert("Please log in to Add products to Cart.");
       return;
     }
-    // handleAddToCart();
+    
     navigate("/buynow", {
       state: {
         user,

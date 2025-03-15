@@ -186,7 +186,7 @@ const AdminHome = () => {
           >
             <h2>Recent Activity</h2>
             <ul>
-              {recactivity.slice(0, 5).map((item, index) => (
+              {recactivity.slice(0, 3).map((item, index) => (
                 <li key={index}>
                   User <strong>{item.username}</strong> {item.activity} on{" "}
                   {new Date(item.createdAt).toLocaleString()}

@@ -24,7 +24,6 @@ const Buynow = () => {
   } = location.state || {};
 
   const userId = user?._id;
-  // Initializing cartItems state
   const [cartItems, setCartItems] = useState([
     {
       userId,

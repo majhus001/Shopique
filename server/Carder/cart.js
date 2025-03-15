@@ -56,6 +56,8 @@ router.post("/add", async (req, res) => {
 
 router.get("/fetch", async (req, res) => {
   const { userId } = req.query;
+
+  // Validation: Check if userId is provided
   if (!userId) {
     return res.status(400).json({
       success: false,
@@ -64,7 +66,6 @@ router.get("/fetch", async (req, res) => {
   }
 
   try {
-    // Fetch cart items for the user from the database
     const cartItems = await Cart.find({ userId });
 
     if (!cartItems || cartItems.length === 0) {
@@ -73,18 +74,17 @@ router.get("/fetch", async (req, res) => {
         message: "No items found in the cart for this user.",
       });
     }
-    {cartItems.map((item) => (
-      console.log(item.itemId)
-    ))}
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       cartItems,
     });
   } catch (error) {
-    console.error("Error fetching cart data:", error);
-    res.status(500).json({
+    console.error("Error fetching cart data:", error.message);
+    return res.status(500).json({
       success: false,
       message: "An error occurred while fetching the cart data.",
+      error: error.message,
     });
   }
 });
@@ -109,7 +109,7 @@ router.get("/check", async (req, res) => {
 router.put("/update-quantity", async (req, res) => {
   const { userId, itemId, quantity } = req.body; // Extract data from request body
 
-  console.log("b b a")
+  console.log("b b a");
   // Validate request
   if (!userId || !itemId || !quantity || quantity < 1) {
     return res.status(400).json({
@@ -117,7 +117,7 @@ router.put("/update-quantity", async (req, res) => {
         "Invalid input. Please provide userId, itemId, and quantity >= 1.",
     });
   }
-  console.log("b b a 2")
+  console.log("b b a 2");
 
   try {
     // Find the document by userId and itemId, then update the quantity
@@ -127,7 +127,7 @@ router.put("/update-quantity", async (req, res) => {
       { new: true } // Return the updated document
     );
 
-    console.log(updatedCart)
+    console.log(updatedCart);
 
     if (!updatedCart) {
       return res.status(404).json({
@@ -168,11 +168,10 @@ router.delete("/delete/:itemId", async (req, res) => {
   }
 });
 
-
 router.delete("/clear/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     await Cart.deleteMany({ userId });
 
     res.json({ success: true, message: "Cart cleared successfully!" });
@@ -181,6 +180,5 @@ router.delete("/clear/:userId", async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to clear cart." });
   }
 });
-
 
 module.exports = router;

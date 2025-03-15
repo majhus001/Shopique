@@ -16,7 +16,7 @@ const Reports = () => {
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [reports, setReports] = useState([]);
-  const [searchOrderId, setSearchOrderId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loadingOrder, setLoadingOrder] = useState({});
   const [loadingReport, setLoadingReport] = useState(false);
 
@@ -126,11 +126,11 @@ const Reports = () => {
 
   // Filter reports by Order ID
   const filteredReports = reports.filter((report) =>
-    report.orderId
-      ?.toString()
-      .toLowerCase()
-      .startsWith(searchOrderId.toLowerCase())
+    report.orderId?.toString().toLowerCase().startsWith(searchQuery.toLowerCase()) ||
+    report.username?.toLowerCase().startsWith(searchQuery.toLowerCase()) ||
+    report.email?.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
+  
 
   // Pagination calculations
   const indexOfLastReport = currentPage * reportsPerPage;
@@ -169,11 +169,11 @@ const Reports = () => {
           <div className="ad-ord-search-rep">
             <input
               type="text"
-              placeholder="Search by Order ID"
-              value={searchOrderId}
+              placeholder="Search by Order ID, Username, Email"
+              value={searchQuery}
               onChange={(e) => {
-                setSearchOrderId(e.target.value);
-                setCurrentPage(1); // Reset to first page when searching
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); 
               }}
               className="ad-ord-search-input"
             />

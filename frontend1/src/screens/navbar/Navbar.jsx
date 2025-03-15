@@ -8,15 +8,15 @@ export default function Navbar({ user, pageno = null }) {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrderPage, setIsOrderPage] = useState(false);
-  const [username, setUsername] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchmobResults, setSearchmobileResults] = useState([]);
   const [searchclothResults, setSearchclothResults] = useState([]);
   const [searchhomeappResults, setSearchhomeappResults] = useState([]);
+  const [cartlength, setCartLength] = useState("");
 
   const debounceTimeout = useRef(null); // To store the timeout ID
 
-   useEffect(() => {
+  useEffect(() => {
     if (user) {
       setIsLoggedIn(true);
     } else {
@@ -25,6 +25,27 @@ export default function Navbar({ user, pageno = null }) {
 
     setIsOrderPage(pageno === "123");
   }, [user, pageno]);
+
+  useEffect(() => {
+    const fetchCartData = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
+          params: { userId: user._id },
+        });
+        if (!response.data.success) {
+          console.log(response.data.message);
+        } else {
+          setCartLength(response.data.cartItems.length);
+        }
+      } catch (error) {
+        console.error("Error fetching cart data:", error);
+      }
+    };
+
+    if (user) {
+      fetchCartData();
+    }
+  }, []);
 
   // Handle search input change with debounce
   const handleSearchChange = (e) => {
@@ -44,19 +65,15 @@ export default function Navbar({ user, pageno = null }) {
         setSearchclothResults([]);
         setSearchhomeappResults([]);
       }
-    }, 500); 
+    }, 500);
   };
 
   // Fetch search results from different collections
   const fetchSearchResults = async (query) => {
     try {
       const [mobileRes, clothRes, homeappliRes] = await Promise.all([
-        axios.get(
-          `${API_BASE_URL}/api/mobiles/search/prod?query=${query}`
-        ),
-        axios.get(
-          `${API_BASE_URL}/api/clothings/search/prod?query=${query}`
-        ),
+        axios.get(`${API_BASE_URL}/api/mobiles/search/prod?query=${query}`),
+        axios.get(`${API_BASE_URL}/api/clothings/search/prod?query=${query}`),
         axios.get(
           `${API_BASE_URL}/api/hoappliances/search/prod?query=${query}`
         ),
@@ -73,7 +90,7 @@ export default function Navbar({ user, pageno = null }) {
   return (
     <nav className="hm-navbar">
       <div className="nav-logo">
-        <h2 onClick={() => navigate("/home",{state:{user}})}>SHOPIQUE</h2>
+        <h2 onClick={() => navigate("/home", { state: { user } })}>SHOPIQUE</h2>
       </div>
 
       {!isOrderPage ? (
@@ -94,12 +111,15 @@ export default function Navbar({ user, pageno = null }) {
               searchclothResults.length > 0 ||
               searchhomeappResults.length > 0) && (
               <div className="search-results-dropdown">
-                {[...searchmobResults, ...searchclothResults, ...searchhomeappResults]
+                {[
+                  ...searchmobResults,
+                  ...searchclothResults,
+                  ...searchhomeappResults,
+                ]
                   .slice(0, 5)
                   .map((product) => {
                     let categoryData = [];
 
-                    // Identify which category the selected product belongs to
                     if (searchmobResults.includes(product)) {
                       categoryData = searchmobResults;
                     } else if (searchclothResults.includes(product)) {
@@ -114,14 +134,11 @@ export default function Navbar({ user, pageno = null }) {
                         className="search-result-item"
                         onClick={() =>
                           navigate("/seprodlist", {
-                            state: { user, categoryData, },
+                            state: { user, categoryData, clickedProduct: product },
                           })
                         }
                       >
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                        />
+                        <img src={product.image} alt={product.name} />
                         <div>
                           <p>{product.name}</p>
                           <span>${product.price}</span>
@@ -139,6 +156,9 @@ export default function Navbar({ user, pageno = null }) {
               onClick={() => navigate("/cart", { state: { user } })}
             >
               <i className="fas fa-shopping-cart"></i> Cart
+              {cartlength > 0 && (
+                <span className="cart-pro-num">{cartlength}</span>
+              )}
             </button>
 
             {isLoggedIn ? (

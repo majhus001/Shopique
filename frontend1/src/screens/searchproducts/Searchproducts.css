@@ -53,6 +53,9 @@
 .se-item-ac-btn{
     width: 100px;
     height: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
     background: #157ff0;
     color: #fff;
     border: 1px solid #157ff0;
@@ -64,6 +67,10 @@
     background: #fff;
     color: #157ff0;
     border: 1px solid #157ff0;
+}
+.se-item-btn-cont{
+    display: flex;
+    gap: 20px;
 }
 
 /* Container for all filter buttons */
