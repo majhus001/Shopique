@@ -72,16 +72,9 @@ const AdminHome = () => {
   };
 
   useEffect(() => {
-    if (!user) {
-      fetchUserData();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!orders) {
-      fetchOrderData();
-    }
-  }, [orders]);
+    fetchUserData();
+    fetchOrderData();
+  }, []);
 
   // Fetch other required data
   useEffect(() => {

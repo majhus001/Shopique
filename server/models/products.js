@@ -26,12 +26,7 @@ const mobileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Mobile", mobileSchema);
-
-
 const mobile = mongoose.model("mobileproduct", mobileSchema);
-
-
 
 
 const clothSchema = new mongoose.Schema({

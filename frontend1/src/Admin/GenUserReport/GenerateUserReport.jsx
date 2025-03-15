@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -6,7 +6,8 @@ import "./GenerateUserReport.css"; // External CSS
 import Adnavbar from "../Adnavbar/Adnavbar";
 import Sidebar from "../sidebar/Sidebar";
 import axios from "axios";
-import { API_BASE_URL } from "../../api"; // Assuming you have config
+import API_BASE_URL from "../../api"; // Assuming you have config
+import { generateReportHTML } from "./ReportTemplate";
 
 const GenerateUserReport = () => {
   const location = useLocation();
@@ -17,11 +18,54 @@ const GenerateUserReport = () => {
   const orderedUser = location.state?.ordereduser || null;
   const orderId = location.state?.orderId || null;
 
-  const [user] = useState(stateUser);
-  const [orders] = useState(stateOrders);
+  const [user, setUser] = useState(stateUser);
+  const [orders, setOrders] = useState(stateOrders);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generatePDF = () => {
+  const fetchUserData = async () => {
+    try {
+      console.log("Checking user validity...");
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
+      setUser(userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    }
+  };
+
+  // Function to fetch order data from backend if not available in state
+  const fetchOrderData = async () => {
+    try {
+      const OrdersRes = await axios.get(
+        `${API_BASE_URL}/api/admin/pendingorders`
+      );
+      setOrders(OrdersRes.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchOrderData();
+  }, []);
+
+  const generatePDF = async () => {
     if (!orderedUser) {
       alert("No user data available to generate report.");
       return;
@@ -29,19 +73,13 @@ const GenerateUserReport = () => {
 
     setIsGenerating(true);
 
+    // ✅ Generate PDF now
     const reportContainer = document.createElement("div");
     reportContainer.style.padding = "30px";
     reportContainer.style.backgroundColor = "#fff";
     reportContainer.style.width = "700px";
     reportContainer.style.fontFamily = "Arial, sans-serif";
-    reportContainer.innerHTML = `
-      <h1 style="text-align:center; color:#333; margin-bottom:20px;">User Report</h1>
-      <p><strong>Order ID:</strong> ${orderId}</p>
-      <p><strong>Name:</strong> ${orderedUser.username}</p>
-      <p><strong>Email:</strong> ${orderedUser.email}</p>
-      <p><strong>Phone:</strong> ${orderedUser.mobile}</p>
-      <p><strong>Address:</strong> ${orderedUser.address}</p>
-    `;
+    reportContainer.innerHTML = generateReportHTML(orderedUser, orderId);
 
     document.body.appendChild(reportContainer);
 
@@ -59,6 +97,7 @@ const GenerateUserReport = () => {
     });
   };
 
+  // ✅ Handle Logout
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -73,9 +112,7 @@ const GenerateUserReport = () => {
   };
 
   const handleBack = () => {
-    if (window.confirm("Are you sure you want to go back?")) {
-      navigate(-1);
-    }
+    navigate(-1);
   };
 
   return (
@@ -114,7 +151,9 @@ const GenerateUserReport = () => {
                   <strong>Address:</strong> {orderedUser.address}
                 </p>
                 <button
-                  className={`download-btn ${isGenerating ? "disabled-btn" : ""}`}
+                  className={`download-btn ${
+                    isGenerating ? "disabled-btn" : ""
+                  }`}
                   onClick={generatePDF}
                   disabled={isGenerating}
                 >
@@ -122,7 +161,9 @@ const GenerateUserReport = () => {
                 </button>
               </div>
             ) : (
-              <p className="no-data-text">No user data available to generate report.</p>
+              <p className="no-data-text">
+                No user data available to generate report.
+              </p>
             )}
 
             <button className="back-btn" onClick={handleBack}>

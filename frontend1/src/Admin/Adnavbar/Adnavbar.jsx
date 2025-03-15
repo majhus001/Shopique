@@ -23,7 +23,7 @@ const Adnavbar = ({ user }) => {
       <h2 onClick={() => navigate("/home")}>Admin Panel</h2>
 
       {isLoggedIn ? (
-        <button className="nav-btns" aria-label="Go to profile page">
+        <button className="nav-btns" aria-label="Go to profile page" onClick={()=>navigate("/adhome")}>
           {user.username}
         </button>
       ) : (

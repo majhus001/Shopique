@@ -79,7 +79,6 @@ router.put('/update-orders', async (req, res) => {
       const userId = order.userId
 
       const user = await User.findById(userId);
-      console.log(user)
       await order.save();
       res.status(200).json({ message: 'Order status updated successfully', order, user });
   } catch (error) {
@@ -88,6 +87,26 @@ router.put('/update-orders', async (req, res) => {
   }
 });
 
+router.get("/orduser", async (req, res) => {
+
+  const { orderId } = req.query;
+
+  try {
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const userId = order.userId
+
+    const user = await User.findById(userId);
+    res.status(200).json({ user });
+} catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).json({ message: 'Server error, please try again later' });
+}
+});
 
 router.get("/get-orders", async (req, res) => {
   try {

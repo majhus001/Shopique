@@ -11,6 +11,7 @@ const homeappliRoutes = require("./Products/homeappli");
 const cartRoutes = require("./Carder/cart");
 const orderRoutes = require("./Carder/order");
 const adminRoutes = require("./Admin/userdatas");
+const reportgen = require("./Admin/Report");
 const sendVerificationotp = require("./Emailverification/emailotp");
 const recentActivityRoute = require("./RecentActivity/recentActivity");
 
@@ -48,6 +49,7 @@ app.use("/api/hoappliances", homeappliRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/reports", reportgen);
 app.use("/api/auth/send-verify-otp", sendVerificationotp);
 app.use("/api/user/reactivity", recentActivityRoute);
 

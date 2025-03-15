@@ -84,13 +84,10 @@ const Adminorders = () => {
   const handleOrderAccept = async (orderId) => {
     try {
       setLoadingOrderId(orderId);
-      const response = await axios.put(
-        `${API_BASE_URL}/api/admin/update-orders`,
-        {
-          orderId,
-          status: "Accepted",
-        }
-      );
+      const response = await axios.put(`${API_BASE_URL}/api/admin/orduser`, {
+        orderId,
+        status: "Accepted",
+      });
 
       if (response.status === 200) {
         GenerateUserReport(response.data.user, orderId);
@@ -188,10 +185,32 @@ const Adminorders = () => {
     setCurrentPage(1); // Reset to first page on filter
   };
 
-  const GenerateUserReport = (orduser, orderId) => {
-    navigate("/generateuserreport", {
-      state: { ordereduser: orduser, orderId, user, orders },
-    });
+  const GenerateUserReport = async (orduser, orderId) => {
+    const reportData = {
+      orderId: orderId,
+      username: orduser.username,
+      email: orduser.email,
+      mobile: orduser.mobile,
+      address: orduser.address,
+      generatedAt: new Date().toISOString(), // Timestamp
+    };
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/admin/reports/generate`,
+        reportData
+      );
+
+      navigate("/generateuserreport", {
+        state: { ordereduser: orduser, orderId, user, orders },
+      });
+    } catch (error) {
+      console.error("Error storing report:", error);
+    }
+  };
+
+  const handlereports = () => {
+    navigate("/reports", { state: { user, orders } });
   };
 
   return (
@@ -220,9 +239,35 @@ const Adminorders = () => {
               onChange={(e) => setSearchOrderId(e.target.value)} // Only update value
               className="ad-ord-search-input"
             />
-            <button className="ad-or-d-btn" onClick={handleLogout} >
-                Order Reports
-              </button>
+            <button className="ad-or-d-btn" onClick={handlereports}>
+              Order Reports
+            </button>
+            <span className="ad-ord-tot-info">
+              <strong>Total orders </strong>
+              <span>{orders.length}</span>
+            </span>
+            <span className="ad-ord-tot-info">
+              <strong>Pending orders </strong>
+              <span>
+                {
+                  orders.filter(
+                    (filorder) =>
+                      filorder.OrderStatus.toLowerCase() === "pending"
+                  ).length
+                }
+              </span>
+            </span>
+            <span className="ad-ord-tot-info">
+              <strong>Ongoing orders </strong>
+              <span>
+                {
+                  orders.filter(
+                    (filorder) =>
+                      filorder.OrderStatus.toLowerCase() === "accepted"
+                  ).length
+                }
+              </span>
+            </span>
           </div>
           <div className="ad-or-nav">
             <h4

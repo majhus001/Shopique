@@ -90,6 +90,10 @@ const Userhistory = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
@@ -103,6 +107,9 @@ const Userhistory = () => {
             <h1>{userdata?.username}</h1>
             <h3>{userdata?.email}</h3>
             <div className="admin-info">
+              <button className="ad-or-d-btn" onClick={handleBack}>
+                Back
+              </button>
               <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>

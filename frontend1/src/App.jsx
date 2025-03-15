@@ -24,6 +24,7 @@ import ProfilePage from './screens/profiledetails/ProfilePage';
 import Orderhistory from './screens/Order/Orderhistory';
 import Buynow from './screens/Productscreens/Buynow';
 import GenerateUserReport from './Admin/GenUserReport/GenerateUserReport';
+import Reports from './Admin/GenUserReport/Reports';
 
 const App = () => {
   return (
@@ -53,6 +54,7 @@ const App = () => {
         <Route path="/recentactivity" element={<RecentActivity />} />
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/generateuserreport" element={<GenerateUserReport />} />
+        <Route path="/reports" element={<Reports />} />
 
       </Routes>
     </Router>
