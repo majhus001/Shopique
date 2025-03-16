@@ -1,5 +1,5 @@
 const express = require('express');
-const Report = require('../models/reportSchema'); // Import Report model
+const Report = require('../models/ReportSchema'); // Import Report model
 
 const router = express.Router();
 
