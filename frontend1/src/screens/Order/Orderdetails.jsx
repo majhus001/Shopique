@@ -47,7 +47,6 @@ const Orderdetails = () => {
           withCredentials: true,
         }
       );
-
       if (!response.data.user) {
         navigate("/login");
         return;
