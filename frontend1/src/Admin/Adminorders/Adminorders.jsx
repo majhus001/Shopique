@@ -50,7 +50,7 @@ const Adminorders = () => {
         `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
       setUser(userRes.data.data);
-       } catch (error) {
+    } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
     }
@@ -97,19 +97,19 @@ const Adminorders = () => {
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
-        ? { ...order, OrderStatus: "Accepted" }
-        : order
-      )
-    );
-    
+              ? { ...order, OrderStatus: "Accepted" }
+              : order
+          )
+        );
+
         setFilteredOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
               ? { ...order, OrderStatus: "Accepted" }
               : order
-            )
-          );
-        }
+          )
+        );
+      }
     } catch (error) {
       console.error("Error accepting the order:", error);
     } finally {
@@ -185,7 +185,7 @@ const Adminorders = () => {
       );
       setFilteredOrders(filtered);
     }
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const GenerateUserReport = async (orduser, order) => {
@@ -200,7 +200,7 @@ const Adminorders = () => {
     };
 
     try {
-      console.log("hiiii")
+      console.log("hiiii");
       const response = await axios.post(
         `${API_BASE_URL}/api/admin/reports/generate`,
         reportData
@@ -217,6 +217,14 @@ const Adminorders = () => {
   const handlereports = () => {
     navigate("/reports", { state: { user, orders } });
   };
+
+  const statusMapping = {
+    Accepted: "Order Confirmed",
+    Completed: "✅Delivered",
+    Pending: "Pending",
+    Cancelled: "Cancelled"
+  };
+
 
   return (
     <div>
@@ -314,15 +322,9 @@ const Adminorders = () => {
                   <div className="order-header">
                     <span className="order-id">Order ID: {order._id}</span>
                     <span
-                      className={`order-status ${
-                        order.OrderStatus === "Accepted"
-                          ? "accepted"
-                          : order.OrderStatus.toLowerCase()
-                      }`}
+                      className={`order-status ${order.OrderStatus.toLowerCase()}`}
                     >
-                      {order.OrderStatus === "Accepted"
-                        ? "Order Accepted"
-                        : order.OrderStatus}
+                      {statusMapping[order.OrderStatus] || order.OrderStatus}
                     </span>
                     {order.OrderStatus === "Accepted" && (
                       <button

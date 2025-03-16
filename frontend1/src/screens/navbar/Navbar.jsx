@@ -103,10 +103,7 @@ export default function Navbar({ user, pageno = null }) {
               value={searchQuery}
               onChange={handleSearchChange}
             />
-            <button className="nav-btns">
-              <i className="fas fa-search"></i> Search
-            </button>
-
+              
             {(searchmobResults.length > 0 ||
               searchclothResults.length > 0 ||
               searchhomeappResults.length > 0) && (

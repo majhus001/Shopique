@@ -65,6 +65,13 @@ const Orderhistory = () => {
     }
   };
 
+  const statusMapping = {
+    Accepted: "Order Confirmed",
+    Completed: "✅Delivered",
+    Pending: "Pending",
+    Cancelled: "Cancelled",
+  };
+
   return (
     <div>
       <div className="or-hi-nav">
