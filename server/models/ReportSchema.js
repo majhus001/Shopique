@@ -15,11 +15,15 @@ const reportSchema = new mongoose.Schema(
       required: true,
     },
     mobile: {
-      type: String,
+      type: Number,
       required: true,
     },
     address: {
       type: String,
+      required: true,
+    },
+    pincode: {
+      type: Number,
       required: true,
     },
     generatedAt: {

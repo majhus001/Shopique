@@ -164,7 +164,7 @@ router.get("/fetch/:userId", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "User fetched successfully", data: user });
+    res.status(200).json({ success:true, message: "User fetched successfully", data: user });
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Server error", error });
@@ -202,8 +202,7 @@ const upload = multer({ storage });
 router.put("/update/:userId", upload.single("image"), async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { name, email, password, mobile, address } = req.body;
-    console.log(req.body);
+    const { name, email, password, mobile, address, pincode } = req.body;
 
     const user = await User.findById(userId);
 
@@ -216,6 +215,7 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
     if (password) user.password = password;
     if (mobile) user.mobile = mobile;
     if (address) user.address = address;
+    if (pincode) user.pincode = pincode;
 
     if (req.file) {
       const file = req.file;
@@ -239,6 +239,7 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
       // If no image is provided, save without changing the image
       const updatedUser = await user.save();
       res.status(200).json({
+        success: true,
         message: "User details updated successfully",
         user: updatedUser,
       });

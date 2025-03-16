@@ -5,6 +5,7 @@ import "./Adminprofile.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
 import Sidebar from "../sidebar/Sidebar";
+import getCoordinates from "../../utils/Geolocation";
 
 const Adminprofile = () => {
   const location = useLocation();
@@ -20,7 +21,7 @@ const Adminprofile = () => {
 
   const fetchUserData = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       console.log("Checking user validity...");
       const response = await axios.get(
         `${API_BASE_URL}/api/auth/checkvaliduser`,
@@ -39,19 +40,18 @@ const Adminprofile = () => {
         `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
       setUser(userRes.data.data);
-      console.log("User fetched from backend:", userRes.data.data);
-    } catch (error) {
+     } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
   // Function to fetch order data from backend if not available in state
   const fetchOrderData = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const OrdersRes = await axios.get(
         `${API_BASE_URL}/api/admin/pendingorders`
       );
@@ -61,8 +61,8 @@ const Adminprofile = () => {
       );
     } catch (error) {
       console.error("Error fetching orders:", error);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,6 +84,7 @@ const Adminprofile = () => {
     password: "",
     mobile: user?.mobile || "",
     address: user?.address || "",
+    pincode: user?.pincode || "",
     image: user?.image || null,
   });
 
@@ -92,7 +93,35 @@ const Adminprofile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setAdminData({ ...adminData, [name]: value });
+
+    if (name === "mobile") {
+      const digitsOnly = value.replace(/\D/g, ""); // Only digits
+      if (digitsOnly.length <= 10) {
+        setAdminData((prev) => ({ ...prev, [name]: digitsOnly }));
+      }
+    } else if (name === "pincode") {
+      const digitsOnly = value.replace(/\D/g, ""); // Only digits
+      if (digitsOnly.length <= 6) {
+        setAdminData((prev) => {
+          const updatedData = { ...prev, [name]: digitsOnly };
+
+          if (digitsOnly.length === 6) {
+            getCoordinates(digitsOnly).then((coordinates) => {
+              if (coordinates) {
+                setAdminData((prev) => ({
+                  ...prev,
+                  address: coordinates.address,
+                }));
+              }
+            });
+          }
+
+          return updatedData;
+        });
+      }
+    } else {
+      setAdminData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -114,12 +143,13 @@ const Adminprofile = () => {
     if (adminData.password) formData.append("password", adminData.password);
     formData.append("mobile", adminData.mobile);
     formData.append("address", adminData.address);
+    formData.append("pincode", adminData.pincode);
     if (adminData.image instanceof File) {
       formData.append("image", adminData.image);
     }
 
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await axios.put(
         `${API_BASE_URL}/api/auth/update/${user._id}`,
         formData,
@@ -132,8 +162,8 @@ const Adminprofile = () => {
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,7 +180,7 @@ const Adminprofile = () => {
       console.error("Error during logout:", error);
     }
   };
-  
+
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
@@ -197,7 +227,7 @@ const Adminprofile = () => {
                   <input
                     type="text"
                     name="username"
-                    value={user?.username || " "}
+                    value={adminData.username}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -205,7 +235,7 @@ const Adminprofile = () => {
                   <input
                     type="email"
                     name="email"
-                    value={user?.email || " "}
+                    value={adminData.email}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />
@@ -213,7 +243,7 @@ const Adminprofile = () => {
                   <input
                     type="password"
                     name="password"
-                    value={user?.password || " "}
+                    value={adminData.password}
                     onChange={handleChange}
                     placeholder="Enter new password"
                     disabled={!isEditing}
@@ -222,15 +252,32 @@ const Adminprofile = () => {
                   <input
                     type="text"
                     name="mobile"
-                    value={user?.mobile || " "}
+                    value={adminData.mobile}
                     onChange={handleChange}
                     disabled={!isEditing}
+                    maxLength={10}
+                    pattern="\d*"
+                    inputMode="numeric"
+                    placeholder="Enter 10-digit number"
                   />
-                  <label>Address:</label>
+
+                  <label>Pincode:</label>
                   <input
                     type="text"
+                    name="pincode"
+                    value={adminData.pincode}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    maxLength={6}
+                    pattern="\d*"
+                    inputMode="numeric"
+                    placeholder="Enter 6-digit Pincode"
+                  />
+                  <label>Address:</label>
+                  <textarea
+                    type="text"
                     name="address"
-                    value={user?.address || " "}
+                    value={adminData.address}
                     onChange={handleChange}
                     disabled={!isEditing}
                   />

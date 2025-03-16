@@ -15,8 +15,8 @@ const GenerateUserReport = () => {
 
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
-  const orderedUser = location.state?.ordereduser || null;
-  const orderId = location.state?.orderId || null;
+  const orderedUser = location.state?.orduser || null;
+  const order = location.state?.order || null;
 
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
@@ -79,7 +79,7 @@ const GenerateUserReport = () => {
     reportContainer.style.backgroundColor = "#fff";
     reportContainer.style.width = "700px";
     reportContainer.style.fontFamily = "Arial, sans-serif";
-    reportContainer.innerHTML = generateReportHTML(orderedUser, orderId);
+    reportContainer.innerHTML = generateReportHTML(orderedUser, order);
 
     document.body.appendChild(reportContainer);
 
@@ -136,7 +136,7 @@ const GenerateUserReport = () => {
             {orderedUser ? (
               <div className="user-card">
                 <p>
-                  <strong>Order ID:</strong> {orderId}
+                  <strong>Order ID:</strong> {order._id}
                 </p>
                 <p>
                   <strong>Name:</strong> {orderedUser.username}
@@ -150,6 +150,10 @@ const GenerateUserReport = () => {
                 <p>
                   <strong>Address:</strong> {orderedUser.address}
                 </p>
+                <p>
+                  <strong>Pincode:</strong> {order.pincode}
+                </p>
+                
                 <button
                   className={`download-btn ${
                     isGenerating ? "disabled-btn" : ""
@@ -159,7 +163,7 @@ const GenerateUserReport = () => {
                 >
                   {isGenerating ? "Generating..." : "Download PDF Report"}
                 </button>
-              </div>
+                </div>
             ) : (
               <p className="no-data-text">
                 No user data available to generate report.

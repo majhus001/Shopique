@@ -7,10 +7,10 @@ import Navbar from "../navbar/Navbar";
 
 const Orderhistory = () => {
   const location = useLocation();
-  const { user } = location.state || {}; 
+  const { user } = location.state || {};
 
   const [orders, setOrders] = useState([]);
-  const [visibleItems, setVisibleItems] = useState({}); 
+  const [visibleItems, setVisibleItems] = useState({});
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -45,11 +45,15 @@ const Orderhistory = () => {
   // Function to cancel an order
   const handleCancelOrder = async (orderId) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/orders/cancelorder/${orderId}`);
+      const response = await axios.put(
+        `${API_BASE_URL}/api/orders/cancelorder/${orderId}`
+      );
       if (response.data.success) {
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
-            order._id === orderId ? { ...order, OrderStatus: "Cancelled" } : order
+            order._id === orderId
+              ? { ...order, OrderStatus: "Cancelled" }
+              : order
           )
         );
       } else {
@@ -74,22 +78,20 @@ const Orderhistory = () => {
             <div key={order._id} className="order-card">
               <div className="order-header">
                 <span className="order-id">Order ID: {order._id}</span>
-                {/* Updated order status display logic */}
+
                 <span
-                  className={`order-status ${
-                    order.OrderStatus === "Accepted"
-                      ? "accepted"
-                      : order.OrderStatus.toLowerCase()
-                  }`}
+                  className={`order-status ${order.OrderStatus.toLowerCase()}`}
                 >
-                  {order.OrderStatus === "Accepted"
-                    ? "Order Accepted"
-                    : order.OrderStatus}
+                  {statusMapping[order.OrderStatus] || order.OrderStatus}
                 </span>
               </div>
+
               <div className="order-details">
                 <p>
                   <strong>Delivery Address:</strong> {order.deliveryAddress}
+                </p>
+                <p>
+                  <strong>Pincode:</strong> {order.pincode}
                 </p>
                 <p>
                   <strong>Mobile Number:</strong> {order.mobileNumber}
@@ -127,10 +129,7 @@ const Orderhistory = () => {
                     {order.OrderedItems.map((item, index) => (
                       <div key={index} className="order-item">
                         <div className="item-image">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                          />
+                          <img src={item.image} alt={item.name} />
                         </div>
                         <div className="item-details">
                           <p>

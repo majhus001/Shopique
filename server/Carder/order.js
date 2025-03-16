@@ -11,18 +11,17 @@ router.post("/add", async (req, res) => {
     cartItems, 
     totalPrice,
     mobileNumber,
+    pincode,
     deliveryAddress,
     paymentMethod,
   } = req.body;
-  console.log(cartItems[0].itemId);
-  console.log(cartItems[0].quantity);
-  console.log(cartItems[0].stock);
-  console.log(cartItems[0].category);
+  
   if (
     !userId ||
     !cartItems ||
     !totalPrice ||
     !mobileNumber ||
+    !pincode ||
     !deliveryAddress ||
     !paymentMethod
   ) {
@@ -36,6 +35,7 @@ router.post("/add", async (req, res) => {
       OrderedItems: cartItems, // Properly mapping cartItems to OrderedItems
       totalPrice,
       mobileNumber,
+      pincode,
       deliveryAddress,
       paymentMethod,
     });

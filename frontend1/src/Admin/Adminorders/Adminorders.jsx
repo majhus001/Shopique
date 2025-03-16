@@ -50,8 +50,7 @@ const Adminorders = () => {
         `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
       setUser(userRes.data.data);
-      console.log("User fetched from backend:", userRes.data.data);
-    } catch (error) {
+       } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
     }
@@ -84,30 +83,33 @@ const Adminorders = () => {
   const handleOrderAccept = async (orderId) => {
     try {
       setLoadingOrderId(orderId);
-      console.log("hiii")
-      const response = await axios.put(`${API_BASE_URL}/api/admin/update-orders`, {
-        orderId,
-        status: "Accepted",
-      });
-console.log("cooo")
+      const response = await axios.put(
+        `${API_BASE_URL}/api/admin/update-orders`,
+        {
+          orderId,
+          status: "Accepted",
+        }
+      );
       if (response.status === 200) {
-        GenerateUserReport(response.data.user, orderId);
+        const order = response.data.order;
+        const orduser = response.data.user;
+        GenerateUserReport(orduser, order);
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
-              ? { ...order, OrderStatus: "Accepted" }
-              : order
-          )
-        );
-
+        ? { ...order, OrderStatus: "Accepted" }
+        : order
+      )
+    );
+    
         setFilteredOrders((prevOrders) =>
           prevOrders.map((order) =>
             order._id === orderId
               ? { ...order, OrderStatus: "Accepted" }
               : order
-          )
-        );
-      }
+            )
+          );
+        }
     } catch (error) {
       console.error("Error accepting the order:", error);
     } finally {
@@ -183,27 +185,29 @@ console.log("cooo")
       );
       setFilteredOrders(filtered);
     }
-    setCurrentPage(1); // Reset to first page on filter
+    setCurrentPage(1); 
   };
 
-  const GenerateUserReport = async (orduser, orderId) => {
+  const GenerateUserReport = async (orduser, order) => {
     const reportData = {
-      orderId: orderId,
+      orderId: order._id,
       username: orduser.username,
       email: orduser.email,
       mobile: orduser.mobile,
       address: orduser.address,
+      pincode: order.pincode || orduser.address,
       generatedAt: new Date().toISOString(), // Timestamp
     };
 
     try {
+      console.log("hiiii")
       const response = await axios.post(
         `${API_BASE_URL}/api/admin/reports/generate`,
         reportData
       );
 
       navigate("/generateuserreport", {
-        state: { ordereduser: orduser, orderId, user, orders },
+        state: { orduser, order, user, orders },
       });
     } catch (error) {
       console.error("Error storing report:", error);
@@ -332,6 +336,9 @@ console.log("cooo")
                   <div className="order-details">
                     <p>
                       <strong>Delivery Address:</strong> {order.deliveryAddress}
+                    </p>
+                    <p>
+                      <strong>Pincode:</strong> {order.pincode}
                     </p>
                     <p>
                       <strong>Mobile Number:</strong> {order.mobileNumber}

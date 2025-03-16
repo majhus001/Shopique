@@ -5,9 +5,8 @@ const router = express.Router();
 
 router.post('/generate', async (req, res) => {
   try {
-    console.log("API hit for generating report");
 
-    const { orderId, username, email, mobile, address, generatedAt } = req.body;
+    const { orderId, username, email, mobile, address, pincode, generatedAt } = req.body;
 
     if (!orderId || !username || !email || !mobile || !address) {
       return res.status(400).json({ message: 'All fields are required.' });
@@ -19,6 +18,7 @@ router.post('/generate', async (req, res) => {
       email,
       mobile,
       address,
+      pincode,
       generatedAt,
     });
 

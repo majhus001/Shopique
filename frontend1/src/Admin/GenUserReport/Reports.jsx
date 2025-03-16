@@ -108,14 +108,15 @@ const Reports = () => {
   const handleGenRep = async (orderId) => {
     try {
       setLoadingOrder((prev) => ({ ...prev, [orderId]: true }));
+ 
       const response = await axios.get(`${API_BASE_URL}/api/admin/orduser`, {
         params: { orderId },
       });
-      
       const orduser = response.data.user;
+      const order = response.data.order;
 
       navigate("/generateuserreport", {
-        state: { ordereduser: orduser, orderId, user, orders },
+        state: { orduser, order, user, orders },
       });
     } catch (error) {
       console.error("Error generating report:", error);

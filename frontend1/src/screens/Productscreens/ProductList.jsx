@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./ProductList.css";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
+import getCoordinates from "../../utils/Geolocation";
 
 const ProductList = () => {
   const location = useLocation();
@@ -194,35 +195,12 @@ console.log(itemId)
     });
   };
 
-  const getCoordinates = async (pincode) => {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        `https://nominatim.openstreetmap.org/search?postalcode=${pincode}&country=IN&format=json`
-      );
-      if (response.data.length > 0) {
-        const { lat, lon, display_name } = response.data[0];
-        return {
-          lat: parseFloat(lat),
-          lon: parseFloat(lon),
-          address: display_name,
-        };
-      } else {
-        throw new Error("Invalid Pincode");
-      }
-    } catch (error) {
-      console.error("Error fetching coordinates:", error);
-      return null;
-    }finally{
-      setLoading(false)
-    }
-  };
 
   // ✅ 2. Function to calculate distance using Haversine Formula
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
 
-    const R = 6371; // Radius of Earth in KM
+    const R = 6371; 
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
 
@@ -245,8 +223,8 @@ console.log(itemId)
       return;
     }
 
-    const warehouseCoords = await getCoordinates(warehousePincode);
-    const userCoords = await getCoordinates(pincode);
+    const warehouseCoords = await getCoordinates(warehousePincode, setLoading);
+    const userCoords = await getCoordinates(pincode, setLoading);
 
     if (warehouseCoords && userCoords) {
       const distanceKm = calculateDistance(
@@ -258,7 +236,6 @@ console.log(itemId)
 
       let deliveryDays = 0;
 
-      // Distance-based delivery estimation
       if (distanceKm > 500) {
         deliveryDays = 6;
       } else if (distanceKm > 400 && distanceKm <= 500) {

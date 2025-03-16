@@ -1,4 +1,4 @@
-export const generateReportHTML = (orderedUser, orderId) => `
+export const generateReportHTML = (orderedUser, order) => `
   <div style="width: 100%; font-family: Arial, sans-serif; color: #000; padding: 10px; border: 2px dashed #000; box-sizing: border-box;">
     <h2 style="text-align: center; margin-bottom: 10px;">Delivery Label</h2>
 
@@ -6,7 +6,7 @@ export const generateReportHTML = (orderedUser, orderId) => `
       <tbody>
         <tr>
           <td style="padding: 8px; border: 1px solid #000;"><strong>Order ID</strong></td>
-          <td style="padding: 8px; border: 1px solid #000;">${orderId}</td>
+          <td style="padding: 8px; border: 1px solid #000;">${order._id}</td>
         </tr>
         <tr>
           <td style="padding: 8px; border: 1px solid #000;"><strong>Customer Name</strong></td>
@@ -23,6 +23,10 @@ export const generateReportHTML = (orderedUser, orderId) => `
         <tr>
           <td style="padding: 8px; border: 1px solid #000;"><strong>Address</strong></td>
           <td style="padding: 8px; border: 1px solid #000;">${orderedUser.address}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #000;"><strong>Pincode</strong></td>
+          <td style="padding: 8px; border: 1px solid #000;">${order.pincode || " "}</td>
         </tr>
         <tr>
           <td style="padding: 8px; border: 1px solid #000;"><strong>Confirmed and Packed On</strong></td>

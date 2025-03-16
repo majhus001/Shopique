@@ -4,6 +4,7 @@ import Navbar from "../navbar/Navbar";
 import axios from "axios";
 import "./Orderdetails.css";
 import API_BASE_URL from "../../api";
+import getCoordinates from "../../utils/Geolocation";
 
 const Orderdetails = () => {
   const location = useLocation();
@@ -11,26 +12,24 @@ const Orderdetails = () => {
 
   const {
     cartItems = [],
-    user,
     totalPrice = 0,
     discount = 0,
     platformFee = 50,
     deliveryFee = 20,
     path,
   } = location.state || {};
+  const stateUser = location.state?.user || null;
 
-  cartItems.map((item) => {
-    console.log(item.itemId);
-    console.log(item.quantity);
-    console.log(item.category);
-  });
-
+  const [user, setUser] = useState(stateUser);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileNumber, setMobileNumber] = useState(user.mobile || "");
+  const [pincode, setPincode] = useState(user.pincode || "");
   const [deliveryAddress, setDeliveryAddress] = useState(user.address || "");
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [isMobileDone, setIsMobileDone] = useState(false);
   const [isAddressDone, setIsAddressDone] = useState(false);
+  const [isPincodeDone, setIsPincodeDone] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -38,9 +37,78 @@ const Orderdetails = () => {
     }
   });
 
+  const checkvaliduser = async () => {
+    try {
+      setLoading(true);
+      console.log("Checking user validity...");
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
+      setUser(userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkvaliduser();
+  }, []);
+
+  // Separate handlers for each field
+  const handleMobileChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // digits only
+    if (value.length <= 10) {
+      setMobileNumber(value);
+    }
+  };
+
+  const handlePincodeChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // digits only
+    if (value.length <= 6) {
+      setPincode(value);
+      if (value.length === 6) {
+        getCoordinates(value).then((coordinates) => {
+          if (coordinates && coordinates.address) {
+            setDeliveryAddress(coordinates.address);
+            setIsPincodeDone(true);
+          }else{
+            alert("Invalid Pincode");
+            return;
+          }
+        });
+      }
+    }
+  };
+
+  const handleAddressChange = (e) => {
+    setDeliveryAddress(e.target.value);
+  };
+
   const handlePlaceOrder = async () => {
     if (!mobileNumber || !deliveryAddress) {
       alert("Please fill in all the details.");
+      return;
+    }
+
+    if (!user.pincode || !user.address) {
+      alert("Please fill in your pincode and address in your profile.");
+      navigate("/profilepage", { state: { user: user } });
       return;
     }
 
@@ -50,6 +118,7 @@ const Orderdetails = () => {
         cartItems,
         totalPrice: totalPrice + platformFee + deliveryFee - discount,
         mobileNumber,
+        pincode,
         deliveryAddress,
         paymentMethod,
       });
@@ -138,16 +207,18 @@ const Orderdetails = () => {
           </div>
 
           {/* Mobile Number Section */}
+          {/* Mobile Number Section */}
           <div className="input-group">
             <h4>2. Mobile Number</h4>
             {isLoggedIn ? (
               <>
                 <input
                   type="text"
+                  name="mobile"
                   placeholder="Enter your mobile number"
                   value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  disabled={isMobileDone} // Disable input if "Done" is clicked
+                  onChange={handleMobileChange}
+                  // disabled={isMobileDone}
                 />
                 {!isMobileDone && mobileNumber.length === 10 && (
                   <button
@@ -163,16 +234,42 @@ const Orderdetails = () => {
             )}
           </div>
 
-          {/* Delivery Address Section */}
+          {/* Pincode Section */}
           <div className="input-group">
-            <h4>3. Delivery Address</h4>
+            <h4>3. Pincode</h4>
             {isMobileDone ? (
               <>
+                <input
+                  type="text"
+                  name="pincode"
+                  placeholder="Enter your pincode"
+                  value={pincode}
+                  onChange={handlePincodeChange}
+                  // disabled={isPincodeDone}
+                />
+                {!isPincodeDone && pincode.length === 6 && (
+                  <button
+                    className="done-button"
+                    onClick={handlePincodeChange}
+                  >
+                    Done
+                  </button>
+                )}
+              </>
+            ) : null}
+          </div>
+
+          {/* Delivery Address Section */}
+          <div className="input-group">
+            <h4>4. Delivery Address</h4>
+            {isPincodeDone ? (
+              <>
                 <textarea
+                  name="address"
                   placeholder="Enter your delivery address"
                   value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  disabled={isAddressDone} // Disable input if "Done" is clicked
+                  onChange={handleAddressChange}
+                  // disabled={isAddressDone}
                 />
                 {!isAddressDone && deliveryAddress.trim() && (
                   <button
@@ -190,7 +287,7 @@ const Orderdetails = () => {
 
           {/* Payment Method Section */}
           <div className="input-group">
-            <h4>4. Payment Method</h4>
+            <h4>5. Payment Method</h4>
             {isAddressDone ? (
               <select
                 value={paymentMethod}
@@ -237,7 +334,7 @@ const Orderdetails = () => {
             <button
               className="buy-now-btn"
               onClick={handlePlaceOrder}
-              disabled={!isAddressDone} 
+              disabled={!isAddressDone}
             >
               Place Order
             </button>

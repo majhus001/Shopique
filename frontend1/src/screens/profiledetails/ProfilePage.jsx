@@ -4,11 +4,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
+import getCoordinates from "../../utils/Geolocation";
 
 const ProfilePage = () => {
   const location = useLocation();
-  const navigate = useNavigate(); 
-  const { user } = location.state || {}; 
+  const navigate = useNavigate();
+  const { user } = location.state || {};
 
   const [userDetails, setUserDetails] = useState({
     image: user.image,
@@ -17,43 +18,42 @@ const ProfilePage = () => {
     password: user.password,
     mobile: user.mobile,
     address: user.address,
+    pincode: user.pincode,
   });
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch user data using userId
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${API_BASE_URL}/api/auth/fetch/${userId}`
-  //       );
-  //       const fetchedData = response.data.data;
-
-  //       // Fix the image path by replacing backslashes with forward slashes
-  //       const fixedImagePath = fetchedData.image.replace(/\\/g, "/");
-
-  //       setUserDetails({
-  //         ...fetchedData,
-  //         image: fixedImagePath, // Set the fixed image path
-  //       });
-  //     } catch (error) {
-  //       console.error("Error fetching user data:", error);
-  //     }
-  //   };
-
-  //   if (userId) {
-  //     fetchUserData();
-  //   }
-  // }, [userId]);
-
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserDetails({
-      ...userDetails,
-      [name]: value,
-    });
+
+    if (name === "mobile") {
+      const digitsOnly = value.replace(/\D/g, ""); // Only digits
+      if (digitsOnly.length <= 10) {
+        setUserDetails((prev) => ({ ...prev, [name]: digitsOnly }));
+      }
+    } else if (name === "pincode") {
+      const digitsOnly = value.replace(/\D/g, ""); // Only digits
+      if (digitsOnly.length <= 6) {
+        setUserDetails((prev) => {
+          const updatedDetails = { ...prev, [name]: digitsOnly };
+
+          if (digitsOnly.length === 6) {
+            getCoordinates(digitsOnly).then((coordinates) => {
+              if (coordinates) {
+                setUserDetails((prev) => ({
+                  ...prev,
+                  address: coordinates.address,
+                }));
+              }
+            });
+          }
+          return updatedDetails;
+        });
+      }
+    } else {
+      setUserDetails((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   // Handle image change
@@ -74,12 +74,12 @@ const ProfilePage = () => {
     try {
       const formData = new FormData();
 
-      // Append user details to FormData
       formData.append("name", userDetails.username);
       formData.append("email", userDetails.email);
       formData.append("password", userDetails.password);
       formData.append("mobile", userDetails.mobile);
       formData.append("address", userDetails.address);
+      formData.append("pincode", userDetails.pincode);
 
       // If the user has selected a new image, append it to the FormData
       const imageFile = document.querySelector('input[type="file"]')?.files[0];
@@ -96,6 +96,7 @@ const ProfilePage = () => {
 
       // Handle response from the server
       if (response.status === 200) {
+        alert("Profile updated successfully");
         console.log("User details updated successfully:", response.data);
         setIsEditing(false);
       }
@@ -104,10 +105,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Function to handle button click and navigate to My Orders
-  const handleBtnClick = () => {
-    navigate("/myorders", { state: { user } });
-  };
   const handleOnClickprofile = () => {
     navigate("/profilepage", { state: { user } });
   };
@@ -127,40 +124,39 @@ const ProfilePage = () => {
   return (
     <div>
       <div className="prof-nav">
-        <Navbar user ={user} />
+        <Navbar user={user} />
       </div>
       {/* Sidebar */}
       <div className="prof-cont">
         <div className="user-prof-sidebar">
           <div className="ad-sb-img-cont">
-            <img
-              src={userDetails.image}
-              alt="admin"
-              className="ad-sb-img"
-            />
+            <img src={userDetails.image} alt="admin" className="ad-sb-img" />
             <h4 className="ad-sb-username">{userDetails.username}</h4>
           </div>
           <div className="ad-sb-list-cont">
             <ul className="ad-sb-list-items">
               <li>
-                <button className="ad-sb-btns"
-                onClick={handleOnClickprofile}>Profile</button>
+                <button className="ad-sb-btns" onClick={handleOnClickprofile}>
+                  Profile
+                </button>
               </li>
               <li>
-                <button className="ad-sb-btns"
-                onClick={handleOnClickwhishlist}>Whislist</button>
+                <button className="ad-sb-btns" onClick={handleOnClickwhishlist}>
+                  Whislist
+                </button>
               </li>
               <li>
-                <button className="ad-sb-btns"
-                onClick={handleOnClickorders}>My Orders</button>
+                <button className="ad-sb-btns" onClick={handleOnClickorders}>
+                  My Orders
+                </button>
               </li>
               <li>
-                <button className="ad-sb-btns"
-                onClick={handleOnClicksettings}>Settings</button>
+                <button className="ad-sb-btns" onClick={handleOnClicksettings}>
+                  Settings
+                </button>
               </li>
               <li>
-                <button className="ad-sb-btns" 
-                onClick={handleOnClicklogout}>
+                <button className="ad-sb-btns" onClick={handleOnClicklogout}>
                   Logout
                 </button>
               </li>
@@ -179,10 +175,7 @@ const ProfilePage = () => {
 
           <div className="profile-content">
             <div className="profile-image">
-              <img
-                src={userDetails.image}
-                alt="Profile"
-              />
+              <img src={userDetails.image} alt="Profile" />
               {isEditing && (
                 <input
                   type="file"
@@ -234,6 +227,25 @@ const ProfilePage = () => {
                   value={userDetails.mobile}
                   onChange={handleInputChange}
                   disabled={!isEditing}
+                  maxLength={10}
+                  pattern="\d*"
+                  inputMode="numeric"
+                  placeholder="Enter 10-digit number"
+                />
+              </div>
+
+              <div className="profile-field">
+                <label>Pincode:</label>
+                <input
+                  type="text"
+                  name="pincode"
+                  value={userDetails.pincode}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  maxLength={6}
+                  pattern="\d*"
+                  inputMode="numeric"
+                  placeholder="Enter 6-digit Pincode"
                 />
               </div>
 
@@ -249,8 +261,10 @@ const ProfilePage = () => {
             </div>
 
             {isEditing && (
-              <div className="save-button">
-                <button onClick={saveDetails}>Save</button>
+              <div>
+                <button onClick={saveDetails} className="update-btn">
+                  Update Profile
+                </button>
               </div>
             )}
           </div>
