@@ -29,18 +29,12 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const [mobilesRes, clothingsRes, homeAppliancesRes] = await Promise.all(
           [
-            fetch(
-              `${API_BASE_URL}/api/mobiles/fetch`
-            ),
-            fetch(
-              `${API_BASE_URL}/api/clothings/fetch`
-            ),
-            fetch(
-              `${API_BASE_URL}/api/hoappliances/fetch`
-            ),
+            fetch(`${API_BASE_URL}/api/mobiles/fetch`),
+            fetch(`${API_BASE_URL}/api/clothings/fetch`),
+            fetch(`${API_BASE_URL}/api/hoappliances/fetch`),
           ]
         );
 
@@ -97,7 +91,6 @@ const HomePage = () => {
 
   return (
     <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
-      
       <Navbar user={user} />
 
       <div className="main-container">
@@ -238,7 +231,7 @@ const HomePage = () => {
                       >
                         <img
                           src={item.image}
-                          alt={item.name} 
+                          alt={item.name}
                           className="product-image"
                         />
                         <h5>{item.description}</h5>
