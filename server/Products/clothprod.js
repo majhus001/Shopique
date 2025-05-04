@@ -27,7 +27,6 @@ router.post("/prod", upload.single("image"), async (req, res) => {
       rating,
       description,
       stock,
-      route,
       category,
       deliverytime,
     } = req.body;
@@ -45,7 +44,6 @@ router.post("/prod", upload.single("image"), async (req, res) => {
           rating,
           description,
           stock,
-          route,
           category,
           deliverytime,
         });
@@ -112,7 +110,6 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
     rating,
     description,
     stock,
-    route,
     category,
     deliverytime,
     image, // Keep this for the image URL (from previous entry)
@@ -131,7 +128,6 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
       rating,
       description,
       stock,
-      route,
       category,
       deliverytime,
     };

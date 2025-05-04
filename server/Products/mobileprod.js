@@ -25,36 +25,81 @@ router.post("/prod", upload.single("image"), async (req, res) => {
       rating,
       description,
       stock,
-      route,
       category,
       deliverytime,
     } = req.body;
 
-    const file = req.file;
-    const result = await cloudinary.uploader
-      .upload_stream({ folder: "mobiles" }, async (error, cloudResult) => {
-        if (error) return res.status(500).json({ message: "Upload failed" });
+    console.log("Request body:", req.body);
+    console.log("File:", req.file);
 
-        const newProduct = new mobile({
-          name,
-          price,
-          brand,
-          image: cloudResult.secure_url,
-          rating,
-          description,
-          stock,
-          route,
-          category,
-          deliverytime,
+    // Create product data object
+    const productData = {
+      name,
+      price,
+      brand,
+      rating,
+      description,
+      stock,
+      category,
+      deliverytime,
+      image: "https://res.cloudinary.com/demo/image/upload/v1/samples/default-placeholder.jpg"
+    };
+
+    const file = req.file;
+
+    // Only try to upload if we have a valid file
+    if (file && file.buffer) {
+      try {
+        // Use Promise to handle the upload stream
+        const cloudResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "mobiles" },
+            (error, result) => {
+              if (error) {
+                console.error("Cloudinary upload error:", error);
+                reject(error);
+                return;
+              }
+              resolve(result);
+            }
+          );
+
+          uploadStream.end(file.buffer);
         });
 
-        await newProduct.save();
-        res.status(201).json({ message: "Mobile product added successfully" });
-      })
-      .end(file.buffer);
+        // Update product with the image URL
+        productData.image = cloudResult.secure_url;
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        // Continue with default image if upload fails
+      }
+    }
+
+    // Create and save the product
+    const newProduct = new mobile(productData);
+
+    // Convert string values to appropriate types
+    if (productData.price) newProduct.price = Number(productData.price);
+    if (productData.stock) newProduct.stock = Number(productData.stock);
+    if (productData.rating) newProduct.rating = Number(productData.rating);
+
+    console.log("Saving product to MongoDB:", newProduct);
+
+    try {
+      const savedProduct = await newProduct.save();
+      console.log("Product saved successfully:", savedProduct);
+      res.status(201).json({ message: "Mobile product added successfully", product: savedProduct });
+    } catch (saveError) {
+      console.error("MongoDB save error:", saveError);
+      return res.status(500).json({
+        error: "Failed to save product to database",
+        details: saveError.message,
+        validationErrors: saveError.errors
+      });
+    }
   } catch (error) {
     console.error("Error adding product:", error);
-    res.status(500).json({ error: "Failed to add mobile product" });
+    res.status(500).json({ error: "Failed to add mobile product", details: error.message });
   }
 });
 
@@ -116,7 +161,6 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
     rating,
     description,
     stock,
-    route,
     category,
     deliverytime,
   } = req.body;
@@ -135,7 +179,6 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
       rating,
       description,
       stock,
-      route,
       category,
       deliverytime,
     };
@@ -143,39 +186,60 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
     if (req.file) {
       const file = req.file;
 
-      if (product.image) {
-        const publicId = product.image.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(publicId);
+      // Check if buffer exists
+      if (!file.buffer) {
+        return res.status(400).json({ error: "Invalid image file" });
       }
 
-      const cloudResult = await cloudinary.uploader.upload_stream(
-        {
-          folder: "mobiles",
-          public_id: _id,
-        },
-        async (error, result) => {
-          if (error)
-            return res.status(500).json({ message: "Image upload failed" });
+      if (product.image) {
+        try {
+          const publicId = product.image.split("/").pop().split(".")[0];
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error("Error deleting old image:", err);
+          // Continue with the update even if old image deletion fails
+        }
+      }
 
-          updateFields.image = result.secure_url;
-
-          const updatedProduct = await mobile.findByIdAndUpdate(
-            _id,
-            { $set: { ...updateFields, updatedAt: Date.now() } },
-            { new: true }
+      try {
+        const cloudResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "mobiles",
+              public_id: _id,
+            },
+            (error, result) => {
+              if (error) {
+                console.error("Cloudinary upload error:", error);
+                reject(error);
+                return;
+              }
+              resolve(result);
+            }
           );
 
-          if (!updatedProduct) {
-            return res.status(404).json({ error: "Product not found." });
-          }
+          uploadStream.end(file.buffer);
+        });
 
-          res.status(200).json({
-            message: "Product updated successfully",
-            product: updatedProduct,
-          });
+        updateFields.image = cloudResult.secure_url;
+
+        const updatedProduct = await mobile.findByIdAndUpdate(
+          _id,
+          { $set: { ...updateFields, updatedAt: Date.now() } },
+          { new: true }
+        );
+
+        if (!updatedProduct) {
+          return res.status(404).json({ error: "Product not found." });
         }
-      );
-      file.buffer && cloudResult.end(file.buffer);
+
+        res.status(200).json({
+          message: "Product updated successfully",
+          product: updatedProduct,
+        });
+      } catch (uploadError) {
+        return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+      }
     } else {
       const updatedProduct = await mobile.findByIdAndUpdate(
         _id,

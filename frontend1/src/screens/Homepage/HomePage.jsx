@@ -138,7 +138,7 @@ const HomePage = () => {
                   mobiles.map((item) => (
                     <div className="product-card" key={item.id || item._id}>
                       <Link
-                        to={`/${item.route}`}
+                        to={`/prodlist`}
                         state={{
                           user: user,
                           itemId: item._id,
@@ -176,7 +176,7 @@ const HomePage = () => {
                   clothings.map((item) => (
                     <div className="product-card" key={item.id || item._id}>
                       <Link
-                        to={`/${item.route}`}
+                        to={`/prodlist`}
                         state={{
                           user: user,
                           itemId: item._id,
@@ -214,7 +214,7 @@ const HomePage = () => {
                   homeAppliances.map((item) => (
                     <div className="product-card" key={item.id || item._id}>
                       <Link
-                        to={`/${item.route}`}
+                        to={`/prodlist`}
                         state={{
                           user: user,
                           itemId: item._id,

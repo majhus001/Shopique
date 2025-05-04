@@ -27,40 +27,84 @@ router.post("/prod", upload.single("image"), async (req, res) => {
       rating,
       description,
       stock,
-      route,
       category,
       deliverytime,
     } = req.body;
 
+    console.log("Request body:", req.body);
+    console.log("File:", req.file);
+
+    // Create product data object
+    const productData = {
+      name,
+      price: Number(price),
+      brand,
+      rating: Number(rating),
+      description,
+      stock: Number(stock),
+      category,
+      deliverytime,
+      // Default image if none provided
+      image:
+        "https://res.cloudinary.com/demo/image/upload/v1/samples/default-placeholder.jpg",
+    };
+
     const file = req.file;
-    const result = await cloudinary.uploader
-      .upload_stream(
-        { folder: "Homeappliances" },
-        async (error, cloudResult) => {
-          if (error) return res.status(500).json({ message: "Upload failed" });
 
-          const newProduct = new homeappliances({
-            name,
-            price,
-            brand,
-            image: imagePath,
-            rating,
-            description,
-            stock,
-            route,
-            category,
-            deliverytime,
-          });
+    // Only try to upload if we have a valid file
+    if (file && file.buffer) {
+      try {
+        // Use Promise to handle the upload stream
+        const cloudResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "Homeappliances" },
+            (error, result) => {
+              if (error) {
+                console.error("Cloudinary upload error:", error);
+                reject(error);
+                return;
+              }
+              resolve(result);
+            }
+          );
 
-          await newProduct.save();
+          uploadStream.end(file.buffer);
+        });
 
-          res.status(201).json({ message: "cloth product added successfully" });
-        }
-      )
-      .end(file.buffer);
+        // Update product with the image URL
+        productData.image = cloudResult.secure_url;
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        // Continue with default image if upload fails
+      }
+    }
+
+    // Create and save the product
+    const newProduct = new homeappliances(productData);
+
+    console.log("Saving product to MongoDB:", newProduct);
+
+    try {
+      const savedProduct = await newProduct.save();
+      console.log("Product saved successfully:", savedProduct);
+      res.status(201).json({
+        message: "Home appliance product added successfully",
+        product: savedProduct,
+      });
+    } catch (saveError) {
+      console.error("MongoDB save error:", saveError);
+      return res.status(500).json({
+        error: "Failed to save product to database",
+        details: saveError.message,
+        validationErrors: saveError.errors,
+      });
+    }
   } catch (error) {
     console.error("Error adding product:", error);
-    res.status(500).json({ error: "Failed to add cloth product" });
+    res.status(500).json({
+      error: "Failed to add home appliance product",
+      details: error.message,
+    });
   }
 });
 
@@ -97,13 +141,27 @@ router.get("/search", async (req, res) => {
 router.delete("/:_id", async (req, res) => {
   try {
     const productId = req.params._id;
-    const result = await homeappliances.deleteOne({ name: productId });
-    if (result.deletedCount === 0) {
+    console.log("Deleting product with ID:", productId);
+
+    // Use findByIdAndDelete for better error handling
+    const deletedProduct = await homeappliances.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      console.log("Product not found for deletion");
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json({ message: "Product deleted successfully" });
+
+    console.log("Product deleted successfully:", deletedProduct);
+    res.status(200).json({
+      message: "Product deleted successfully",
+      product: deletedProduct,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete product", error });
+    console.error("Error deleting product:", error);
+    res.status(500).json({
+      message: "Failed to delete product",
+      error: error.message,
+    });
   }
 });
 
@@ -117,76 +175,83 @@ router.put("/update/:_id", upload.single("image"), async (req, res) => {
     rating,
     description,
     stock,
-    route,
     category,
     deliverytime,
-    image,
   } = req.body;
 
   try {
+    // Find the product first to make sure it exists
+    const product = await homeappliances.findById(_id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found." });
+    }
+
+    // Prepare the update fields with proper type conversion
     const updateFields = {
       name,
-      price,
+      price: Number(price),
       brand,
-      rating,
+      rating: Number(rating),
       description,
-      stock,
-      route,
+      stock: Number(stock),
       category,
       deliverytime,
+      updatedAt: Date.now(),
     };
 
     // Update image if a new file is uploaded
-    if (req.file) {
-      const file = req.file;
-      const result = await cloudinary.uploader
-        .upload_stream(
-          { folder: "Homeappliances" },
-          async (error, cloudResult) => {
-            if (error) {
-              return res.status(500).json({ message: "Image upload failed" });
+    if (req.file && req.file.buffer) {
+      try {
+        // Use Promise to handle the upload stream
+        const cloudResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "Homeappliances" },
+            (error, result) => {
+              if (error) {
+                console.error("Cloudinary upload error:", error);
+                reject(error);
+                return;
+              }
+              resolve(result);
             }
+          );
 
-            updateFields.image = cloudResult.secure_url; // Update the image URL in update fields
+          uploadStream.end(req.file.buffer);
+        });
 
-            // Proceed to update the product in the database
-            const updatedProduct = await homeappliances.findOneAndUpdate(
-              { _id },
-              { $set: { ...updateFields, updatedAt: Date.now() } },
-              { new: true }
-            );
-
-            if (!updatedProduct) {
-              return res.status(404).json({ error: "Product not found." });
-            }
-
-            res.status(200).json({
-              message: "Product updated successfully",
-              product: updatedProduct,
-            });
-          }
-        )
-        .end(file.buffer); // Start the file upload to Cloudinary
-    } else {
-      // If no new image, just update other fields
-      const updatedProduct = await homeappliances.findOneAndUpdate(
-        { _id },
-        { $set: { ...updateFields, updatedAt: Date.now() } },
-        { new: true }
-      );
-
-      if (!updatedProduct) {
-        return res.status(404).json({ error: "Product not found." });
+        // Update the image URL in update fields
+        updateFields.image = cloudResult.secure_url;
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        return res.status(500).json({
+          message: "Image upload failed",
+          error: uploadError.message,
+        });
       }
-
-      res.status(200).json({
-        message: "Product updated successfully",
-        product: updatedProduct,
-      });
     }
+
+    console.log("Updating product with fields:", updateFields);
+
+    // Update the product in the database
+    const updatedProduct = await homeappliances.findByIdAndUpdate(
+      _id,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
+
+    console.log("Product updated successfully:", updatedProduct);
+
+    res.status(200).json({
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
   } catch (error) {
     console.error("Error updating product:", error);
-    res.status(500).json({ error: "Failed to update product" });
+    res.status(500).json({
+      error: "Failed to update product",
+      details: error.message,
+      validationErrors: error.errors,
+    });
   }
 });
 
@@ -206,11 +271,10 @@ router.get("/search/prod", async (req, res) => {
   }
 });
 
-
 router.post("/add/review", async (req, res) => {
   try {
     const { itemId, userId, review, rating } = req.body;
-    console.log(req.body)
+    console.log(req.body);
     if (!userId || !itemId || !review || !rating) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -220,7 +284,7 @@ router.post("/add/review", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-     product.reviews.push({ userId, review, rating });
+    product.reviews.push({ userId, review, rating });
 
     // Update average rating
     const totalRatings = product.reviews.reduce((sum, r) => sum + r.rating, 0);
@@ -238,7 +302,7 @@ router.post("/add/review", async (req, res) => {
 router.get("/fetch/reviews", async (req, res) => {
   try {
     const { itemId } = req.query;
-console.log(req.query)
+    console.log(req.query);
     if (!itemId) {
       return res.status(400).json({ message: "itemId is required" });
     }

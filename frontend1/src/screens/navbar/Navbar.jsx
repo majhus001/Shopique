@@ -90,7 +90,7 @@ export default function Navbar({ user, pageno = null }) {
   return (
     <nav className="hm-navbar">
       <div className="nav-logo">
-        <h2 onClick={() => navigate("/home", { state: { user } })}>SHOPIQUE</h2>
+        <h2 onClick={() => navigate("/home", { state: { user } })}>ShopiDeals</h2>
       </div>
 
       {!isOrderPage ? (

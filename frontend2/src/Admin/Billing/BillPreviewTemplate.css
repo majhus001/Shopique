@@ -1,0 +1,241 @@
+/* Bill Preview Template Styles */
+
+/* Hidden by default, only visible when printing */
+.shopique-bill-container {
+  display: none;
+}
+
+/* Print Styles */
+@media print {
+  /* Reset everything for printing */
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
+    font-size: 12pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Hide everything except the bill container */
+  body > *:not(.shopique-bill-container),
+  .admin-container,
+  .ad-nav,
+  .admin-header,
+  .billing-left-panel,
+  .billing-right-panel,
+  .sidebar,
+  .notification,
+  .search-container,
+  .category-tabs,
+  .product-count,
+  .products-grid,
+  .view-options,
+  .change-customer-btn,
+  .customer-search,
+  .new-customer-form,
+  .quantity-btn,
+  .remove-btn,
+  .invoice-notes textarea,
+  .invoice-actions,
+  .recent-invoices-section,
+  .add-new-customer-btn,
+  .billing-container {
+    display: none !important;
+  }
+
+  /* Show only the bill container */
+  .shopique-bill-container {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: white !important;
+    padding: 20mm 15mm !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important;
+  }
+
+  /* Company Header */
+  .shopique-bill-company-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-bottom: 20pt !important;
+  }
+
+  .shopique-bill-company-logo {
+    font-size: 24pt !important;
+    font-weight: bold !important;
+    color: #000 !important;
+  }
+
+  .shopique-bill-company-info {
+    text-align: right !important;
+    font-size: 10pt !important;
+  }
+
+  .shopique-bill-company-info p {
+    margin: 3pt 0 !important;
+  }
+
+  /* Bill Header */
+  .shopique-bill-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-bottom: 20pt !important;
+    padding-bottom: 10pt !important;
+    border-bottom: 1pt solid #000 !important;
+  }
+
+  .shopique-bill-title {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+  }
+
+  .shopique-bill-details {
+    text-align: right !important;
+  }
+
+  .shopique-bill-number {
+    font-weight: bold !important;
+    font-size: 12pt !important;
+    margin-bottom: 5pt !important;
+  }
+
+  .shopique-bill-date {
+    font-size: 10pt !important;
+  }
+
+  /* Customer and Billing Info */
+  .shopique-bill-customer-section {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-bottom: 20pt !important;
+  }
+
+  .shopique-bill-customer-info,
+  .shopique-bill-payment-info {
+    width: 48% !important;
+  }
+
+  .shopique-bill-section-title {
+    font-weight: bold !important;
+    font-size: 11pt !important;
+    margin-bottom: 5pt !important;
+    border-bottom: 0.5pt solid #000 !important;
+    padding-bottom: 3pt !important;
+  }
+
+  .shopique-bill-customer-name {
+    font-weight: bold !important;
+    font-size: 11pt !important;
+    margin-bottom: 5pt !important;
+  }
+
+  .shopique-bill-customer-detail {
+    font-size: 10pt !important;
+    margin-bottom: 3pt !important;
+  }
+
+  /* Items Table */
+  .shopique-bill-items-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 20pt !important;
+  }
+
+  .shopique-bill-items-table th {
+    background-color: #f5f5f5 !important;
+    border-bottom: 1pt solid #000 !important;
+    padding: 8pt !important;
+    text-align: left !important;
+    font-size: 10pt !important;
+    font-weight: bold !important;
+  }
+
+  .shopique-bill-items-table td {
+    padding: 8pt !important;
+    border-bottom: 0.5pt solid #ddd !important;
+    font-size: 10pt !important;
+    vertical-align: top !important;
+  }
+
+  .shopique-bill-item-name {
+    width: 40% !important;
+  }
+
+  .shopique-bill-item-price,
+  .shopique-bill-item-qty,
+  .shopique-bill-item-total {
+    width: 20% !important;
+    text-align: right !important;
+  }
+
+  /* Summary */
+  .shopique-bill-summary {
+    width: 50% !important;
+    margin-left: auto !important;
+    margin-bottom: 30pt !important;
+  }
+
+  .shopique-bill-summary-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 5pt 0 !important;
+    font-size: 10pt !important;
+  }
+
+  .shopique-bill-summary-row.shopique-bill-total {
+    font-weight: bold !important;
+    font-size: 12pt !important;
+    border-top: 1pt solid #000 !important;
+    padding-top: 8pt !important;
+    margin-top: 5pt !important;
+  }
+
+  /* Notes */
+  .shopique-bill-notes {
+    margin-bottom: 30pt !important;
+    font-size: 10pt !important;
+    font-style: italic !important;
+    padding: 10pt !important;
+    border: 0.5pt solid #ddd !important;
+    background-color: #f9f9f9 !important;
+  }
+
+  .shopique-bill-notes p {
+    margin: 5pt 0 !important;
+  }
+
+  /* Footer */
+  .shopique-bill-footer {
+    text-align: center !important;
+    font-size: 9pt !important;
+    color: #666 !important;
+    border-top: 0.5pt solid #ddd !important;
+    padding-top: 10pt !important;
+    margin-top: 20pt !important;
+  }
+
+  .shopique-bill-footer p {
+    margin: 3pt 0 !important;
+  }
+
+  /* Page settings */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}

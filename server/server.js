@@ -14,30 +14,40 @@ const adminRoutes = require("./Admin/userdatas");
 const reportgen = require("./Admin/Report");
 const sendVerificationotp = require("./Emailverification/emailotp");
 const recentActivityRoute = require("./RecentActivity/recentActivity");
+const customerRoutes = require("./routes/customers");
+const billingRoutes = require("./routes/billing");
+const productsRoutes = require("./routes/products");
 
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173", 
-  "https://shopique-iota.vercel.app", 
+  "http://localhost:5173",
+  "https://shopique-iota.vercel.app",
 ];
 
 // Middleware
 app.use(bodyParser.json());
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       console.log("Incoming origin:", origin);
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     methods: "GET,POST,PUT,DELETE",
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true, // Allow all origins
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
 );
-
 
 app.use(cookieParser());
 app.use(express.json());
@@ -52,6 +62,9 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/admin/reports", reportgen);
 app.use("/api/auth/send-verify-otp", sendVerificationotp);
 app.use("/api/user/reactivity", recentActivityRoute);
+app.use("/api/customers", customerRoutes);
+app.use("/api/billing", billingRoutes);
+app.use("/api/products", productsRoutes);
 
 
 // MongoDB Connection

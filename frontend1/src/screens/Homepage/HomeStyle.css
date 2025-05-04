@@ -6,6 +6,7 @@ body, html {
   color: #333;
   box-sizing: border-box;
   overflow-x: hidden;
+  scrollbar-width: none;
 }
 
 a {
@@ -264,24 +265,107 @@ a {
 .footer-links a:hover {
   color: #ddd;
 }
-
-/* Responsive Design */
 @media (max-width: 768px) {
+  body, html {
+    font-size: 14px;
+    margin-top: 150px;
+  }
+
+  .main-container {
+    padding: 10px;
+  }
+
+  .banner-section {
+    padding: 5px;
+  }
+
   .ad-banner {
-    flex-direction: column;
-    text-align: center;
+    height: 160px;
   }
 
   .ad-banner img {
-    margin-bottom: 15px;
+    height: 160px;
+  }
+
+  .banner-content {
+    top: 85%;
+    left: 50%;
+    width: 80%;
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .banner-content h2 {
+    font-size: 18px;
+  }
+
+  .banner-content p {
+    font-size: 12px;
+  }
+
+  .countdown-timer {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .timer {
+    gap: 10px;
+  }
+
+  .timer div {
+    min-width: 50px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .timer div span {
+    font-size: 18px;
   }
 
   .categories {
-    flex-direction: column;
+    gap: 15px;
+  }
+
+  .product-list {
+    gap: 10px;
+    padding: 5px;
+  }
+
+  .product-card {
+    flex: 0 0 140px;
+    height: 180px;
+    padding: 8px;
+  }
+
+  .product-card img {
+    width: 120px;
+    height: 100px;
+  }
+
+  .product-card h5 {
+    font-size: 12px;
+  }
+
+  .product-card p {
+    font-size: 12px;
+  }
+
+  .footer {
+    padding: 15px;
   }
 
   .footer-content {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .footer-links {
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .footer-links a {
+    font-size: 12px;
   }
 }

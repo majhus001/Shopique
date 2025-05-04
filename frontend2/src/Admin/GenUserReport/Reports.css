@@ -1,0 +1,413 @@
+  /* Admin Header Styling */
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .admin-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    position: relative;
+    display: inline-block;
+  }
+
+  .admin-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(to right, #4a6bdf, #3b5bdb);
+    border-radius: 3px;
+  }
+
+  /* Search Bar Styling */
+  .ad-ord-search-rep {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .ad-ord-search-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .ad-ord-search-input:focus {
+    border-color: #4a6bdf;
+    box-shadow: 0 0 0 3px rgba(74, 107, 223, 0.15);
+    outline: none;
+  }
+
+  .ad-ord-search-input::placeholder {
+    color: #adb5bd;
+  }
+
+  .ad-or-d-btn {
+    padding: 10px 18px;
+    background: linear-gradient(to right, #4a6bdf, #3b5bdb);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-left: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .ad-or-d-btn:hover {
+    background: linear-gradient(to right, #3b5bdb, #2a4bcc);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .ad-or-d-btn:disabled {
+    background: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Report List Container */
+  .report-list {
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
+    gap: 15px;
+  }
+
+  /* Individual Report Card */
+  .report-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.8fr;
+    gap: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+  }
+
+  .report-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(to bottom, #4a6bdf, #3b5bdb);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Hover Effect for Card */
+  .report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-color: #d0d7de;
+  }
+
+  .report-card:hover::before {
+    opacity: 1;
+  }
+
+  .report-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 10px;
+  }
+
+  /* Text Styling inside Card */
+  .report-card p {
+    margin: 8px 0;
+    font-size: 0.95rem;
+    color: #495057;
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Strong labels inside Card */
+  .report-card p strong {
+    color: #343a40;
+    font-weight: 600;
+    min-width: 80px;
+    display: inline-block;
+  }
+
+  .report-card p svg {
+    color: #4a6bdf;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  /* Address field specific styling */
+  .address-field {
+    align-items: flex-start !important;
+  }
+
+  .address-field span {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .report-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  /* Loading Spinners */
+  .loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  .loader-big {
+    border: 4px solid rgba(74, 107, 223, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #4a6bdf;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    display: block;
+    margin: 0 auto 15px;
+  }
+
+  .loader-text {
+    color: #6c757d;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .loader {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid #fff;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 8px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Pagination Styling */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .pagination-info {
+    padding: 0 15px;
+    font-size: 0.95rem;
+    color: #495057;
+    font-weight: 500;
+  }
+
+  .pagination-btn {
+    padding: 8px 16px;
+    background: linear-gradient(to right, #4a6bdf, #3b5bdb);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .pagination-btn:hover {
+    background: linear-gradient(to right, #3b5bdb, #2a4bcc);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .pagination-btn:disabled {
+    background: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* No Reports Found */
+  .no-reports-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    margin: 20px 0;
+    text-align: center;
+  }
+
+  .no-reports-icon {
+    font-size: 3rem;
+    color: #adb5bd;
+    margin-bottom: 20px;
+  }
+
+  .no-reports-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 10px;
+  }
+
+  .no-reports-text {
+    color: #6c757d;
+    font-size: 1rem;
+    max-width: 400px;
+    line-height: 1.6;
+  }
+
+  /* Mobile Responsive Adjustments */
+  @media (max-width: 992px) {
+    .report-card {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .report-actions {
+      grid-column: span 2;
+      align-items: flex-start;
+      margin-top: 10px;
+    }
+
+    .ad-or-d-btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .ad-ord-search-rep {
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px;
+    }
+
+    .ad-ord-search-input {
+      width: 100%;
+    }
+
+    .ad-or-d-btn {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .report-card {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 15px;
+    }
+
+    .report-actions {
+      grid-column: 1;
+    }
+
+    .pagination-buttons {
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .pagination-btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .report-card {
+      padding: 12px;
+    }
+
+    .report-card p {
+      font-size: 0.85rem;
+    }
+
+    .report-card p strong {
+      min-width: 70px;
+    }
+
+    .admin-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .pagination-info {
+      font-size: 0.85rem;
+    }
+
+    .no-reports-title {
+      font-size: 1.3rem;
+    }
+
+    .no-reports-text {
+      font-size: 0.9rem;
+    }
+  }

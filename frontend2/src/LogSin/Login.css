@@ -1,0 +1,792 @@
+/* Enhanced Login.css */
+
+/* Modern outer container with enhanced background */
+.outer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(125deg, #4158D0, #C850C0, #FFCC70);
+    background-size: 300% 300%;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Enhanced background decorative elements */
+.outer::before,
+.outer::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    filter: blur(20px);
+    opacity: 0.6;
+    animation: float 15s ease-in-out infinite;
+}
+
+.outer::before {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+    top: -200px;
+    right: -100px;
+    animation-delay: 0s;
+}
+
+.outer::after {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
+    bottom: -200px;
+    left: -100px;
+    animation-delay: 4s;
+}
+
+/* Additional decorative elements */
+.outer::before {
+    box-shadow: 0 0 80px 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Floating animation */
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+    33% {
+        transform: translateY(-30px) rotate(5deg) scale(1.05);
+    }
+    66% {
+        transform: translateY(20px) rotate(-3deg) scale(0.95);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+}
+
+/* Modern login container with glass morphism effect */
+.ad-lg-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+/* Container shine effect */
+.ad-lg-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+    z-index: -1;
+}
+
+.ad-lg-container:hover::before {
+    left: 100%;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ad-lg-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 35px 60px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Modern logo and branding */
+.brand-logo {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #C850C0, #4158D0);
+    border-radius: 50%;
+    color: white;
+    font-size: 2.2rem;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    animation: pulse 3s infinite;
+}
+
+.brand-logo::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+    animation: shine 6s linear infinite;
+}
+
+/* Add a glow effect */
+.brand-logo::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 25px 5px rgba(200, 80, 192, 0.5);
+    animation: glow 3s ease-in-out infinite alternate;
+    z-index: -1;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes shine {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes glow {
+    0% {
+        opacity: 0.5;
+        box-shadow: 0 0 20px 5px rgba(200, 80, 192, 0.5);
+    }
+    100% {
+        opacity: 0.8;
+        box-shadow: 0 0 30px 8px rgba(65, 88, 208, 0.7);
+    }
+}
+
+/* Modern heading with enhanced styling */
+.ad-lg-container h2 {
+    font-size: 34px;
+    color: white;
+    margin-bottom: 30px;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.5px;
+    animation: fadeIn 1s ease;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ad-lg-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
+    animation: expandWidth 1.5s ease-out forwards;
+}
+
+@keyframes expandWidth {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+    to {
+        width: 60px;
+        opacity: 1;
+    }
+}
+
+/* Form styling */
+.form {
+    margin-top: 35px;
+    width: 100%;
+}
+
+/* Modern form group with floating labels */
+.lg-input-group {
+    margin-bottom: 28px;
+    text-align: left;
+    width: 100%;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.lg-input-group:hover .label {
+    color: white;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+    display: block;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Input wrapper for icons */
+.input-wrapper {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Input field with glass morphism styling */
+.input {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding-right: 45px; /* Space for icon */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+}
+
+.input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.input:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.input:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Input icons */
+.input-icon {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+    font-size: 18px;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.input-wrapper:hover .input-icon {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.input:focus + .input-icon {
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+/* Modern forgot password link */
+.forgot-password {
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.forgot-password a {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    padding: 2px 4px;
+    letter-spacing: 0.3px;
+}
+
+.forgot-password a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: white;
+    transition: width 0.3s ease;
+    opacity: 0.7;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.forgot-password a:hover {
+    color: white;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.forgot-password a:hover::after {
+    width: 100%;
+}
+
+/* Button with enhanced styling */
+.sg-button {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(106, 17, 203, 0.2);
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+    max-width: 100%;
+}
+
+.sg-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sg-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(106, 17, 203, 0.3);
+}
+
+.sg-button:hover::before {
+    opacity: 1;
+}
+
+.sg-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(106, 17, 203, 0.2);
+}
+
+.sg-button span {
+    position: relative;
+    z-index: 1;
+}
+
+.sg-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 5px 15px rgba(106, 17, 203, 0.1);
+}
+
+/* Modern message styling with animation */
+.message {
+    margin-top: 20px;
+    font-size: 14px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    animation: fadeInUp 0.5s ease;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.3px;
+}
+
+.message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.message.error {
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    border-left: 3px solid #ff6b6b;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.message.error::before {
+    background-color: #ff6b6b;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+.message.success {
+    color: #2ecc71;
+    background-color: rgba(46, 204, 113, 0.1);
+    border-left: 3px solid #2ecc71;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.message.success::before {
+    background-color: #2ecc71;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modern divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 30px 0;
+    position: relative;
+}
+
+.divider-line {
+    flex-grow: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+}
+
+.divider-text {
+    padding: 0 18px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    font-weight: 500;
+    background-color: transparent;
+    position: relative;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Modern social login options */
+.social-login {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    animation: fadeIn 1s ease;
+}
+
+.social-btn {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.social-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.social-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.social-btn:hover::before {
+    opacity: 0.8;
+}
+
+.social-btn:active {
+    transform: translateY(-2px);
+}
+
+.social-btn.facebook {
+    background-color: rgba(59, 89, 152, 0.8);
+    color: white;
+    box-shadow: 0 5px 15px rgba(59, 89, 152, 0.3);
+}
+
+.social-btn.google {
+    background-color: rgba(219, 68, 55, 0.8);
+    color: white;
+    box-shadow: 0 5px 15px rgba(219, 68, 55, 0.3);
+}
+
+.social-btn.twitter {
+    background-color: rgba(29, 161, 242, 0.8);
+    color: white;
+    box-shadow: 0 5px 15px rgba(29, 161, 242, 0.3);
+}
+
+/* Modern link styling */
+.login-link {
+    margin-top: 30px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    position: relative;
+    padding-top: 20px;
+    font-weight: 500;
+    animation: fadeIn 1.2s ease;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.login-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.login-link a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 2px 4px;
+    margin-left: 5px;
+}
+
+.login-link a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: white;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.login-link a:hover {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.login-link a:hover::after {
+    width: 100%;
+}
+
+/* Enhanced spinner styles */
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    margin-left: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 480px) {
+    .ad-lg-container {
+        padding: 35px 25px;
+        max-width: 92%;
+        margin: 0 15px;
+    }
+
+    .ad-lg-container h2 {
+        font-size: 28px;
+    }
+
+    .brand-logo {
+        width: 75px;
+        height: 75px;
+        font-size: 1.9rem;
+    }
+
+    .input {
+        padding: 14px 16px;
+        font-size: 14px;
+    }
+
+    .label {
+        font-size: 13px;
+    }
+
+    .auth-button {
+        padding: 14px;
+    }
+
+    .social-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .login-link, .divider-text {
+        font-size: 14px;
+    }
+
+    .message {
+        font-size: 13px;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 360px) {
+    .ad-lg-container {
+        padding: 30px 20px;
+        max-width: 95%;
+    }
+
+    .brand-logo {
+        width: 70px;
+        height: 70px;
+        font-size: 1.7rem;
+        margin-bottom: 15px;
+    }
+
+    .ad-lg-container h2 {
+        font-size: 26px;
+        margin-bottom: 25px;
+    }
+
+    .lg-input-group {
+        margin-bottom: 22px;
+    }
+
+    .social-login {
+        gap: 15px;
+    }
+
+    .social-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+
+    .forgot-password a {
+        font-size: 12px;
+    }
+
+    .login-link {
+        font-size: 13px;
+    }
+}
+
+/* Animation for mobile devices */
+@media (prefers-reduced-motion: reduce) {
+    .ad-lg-container,
+    .brand-logo,
+    .social-btn,
+    .input,
+    .message {
+        animation: none !important;
+        transition: opacity 0.3s ease !important;
+    }
+
+    .outer::before,
+    .outer::after,
+    .brand-logo::before,
+    .brand-logo::after {
+        animation: none !important;
+    }
+}

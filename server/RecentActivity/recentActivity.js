@@ -7,7 +7,6 @@ const RecentActivity = require("../models/recActivitySchema");
 router.post("/add", async (req, res) => {
   try {
     const { name, activity } = req.body;
-
     if (!name || !activity) {
       return res
         .status(400)

@@ -1,0 +1,532 @@
+/* Filter Navigation Bar - Compact */
+.ad-or-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* Action Buttons - Compact */
+.ad-or-d-btn {
+  border: none;
+  background: #007bff;
+  color: #fff;
+  padding: 6px 12px;
+  margin: 3px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ad-or-d-btn:hover {
+  background: #0056d1;
+  color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+.ad-or-d-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 123, 255, 0.2);
+}
+
+/* Filter Buttons - Compact */
+.filter-btn {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: transparent;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.85rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.filter-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #0056d1;
+}
+
+.filter-btn:active {
+  transform: translateY(1px);
+}
+
+.filter-btn i {
+  font-size: 0.8rem;
+}
+
+/* Search Input - Compact */
+.search-container {
+  position: relative;
+  max-width: 250px;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 0.8rem;
+}
+
+.ad-ord-search-input {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 6px 12px 6px 30px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.ad-ord-search-input:focus {
+  border: 1px solid #007bff;
+  outline: none;
+  box-shadow: 0 1px 5px rgba(0, 123, 255, 0.15);
+}
+
+/* Search and Report Container - Compact */
+.ad-ord-search-rep {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+  background-color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 15px;
+  justify-content: space-between;
+}
+
+.order-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-text {
+  display: inline-block;
+  font-size: 0.85rem;
+}
+
+.ad-ord-rep {
+  width: 90px;
+  height: 30px;
+  color: #000;
+}
+
+/* Order Count Info - Compact */
+.ad-ord-tot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #2c3e50;
+  align-items: center;
+  background-color: rgba(0, 123, 255, 0.05);
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.ad-ord-tot-info:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.ad-ord-tot-info strong {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ad-ord-tot-info span {
+  background: #007bff;
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Order Card Styling - More Compact */
+.order-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.order-card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Order Header - Compact */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.order-id {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Order Status - Compact */
+.order-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.order-status.pending {
+  background-color: rgba(241, 196, 15, 0.1);
+  color: #f39c12;
+}
+
+.order-status.accepted {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #27ae60;
+}
+
+.order-status.completed {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: #2980b9;
+}
+
+.order-status.cancelled {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #c0392b;
+}
+
+/* Order Details - Collapsible */
+.order-details {
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  background-color: #fff;
+}
+
+.order-details.expanded {
+  padding: 15px;
+  max-height: 500px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.order-details p {
+  margin: 6px 0;
+  color: #555;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.order-details strong {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+/* Order Items - Collapsible */
+.order-items {
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  background-color: #fff;
+}
+
+.order-items.expanded {
+  padding: 15px;
+  max-height: 1000px;
+}
+
+.order-items h4 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.order-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.item-image {
+  flex: 0 0 70px;
+  height: 70px;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.item-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.item-details {
+  flex: 1;
+}
+
+.item-details p {
+  margin: 3px 0;
+  color: #555;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.item-details strong {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+/* Toggle Indicators */
+.toggle-indicator {
+  font-size: 0.8rem;
+  color: #007bff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Action buttons container */
+.order-actions {
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  text-align: right;
+}
+
+.order-actions.expanded {
+  padding: 10px 15px;
+  max-height: 60px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Pagination - Compact */
+.pagination-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+/* Admin Header - Compact */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.admin-header h1 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+}
+
+/* Admin Container and Sidebar Collapsed State */
+.admin-container {
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+.main-content {
+  flex: 1;
+  padding: 30px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: 60px; /* Adjust based on your collapsed sidebar width */
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .search-container {
+    max-width: 100%;
+  }
+
+  .ad-ord-search-rep {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-stats {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-right {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .ad-or-nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .order-item {
+    flex-direction: column;
+  }
+
+  .item-image {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-info {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .toggle-indicator {
+    font-size: 0.75rem;
+  }
+
+  /* Adjust sidebar collapsed state for mobile */
+  .sidebar-collapsed .main-content {
+    margin-left: 0;
+    padding-left: 70px; /* Adjust based on your collapsed sidebar width */
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-or-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .order-stats {
+    justify-content: space-around;
+  }
+
+  .ad-ord-tot-info {
+    padding: 5px 8px;
+  }
+
+  /* Further adjust sidebar collapsed state for very small screens */
+  .sidebar-collapsed .main-content {
+    padding-left: 60px;
+  }
+}
+
+@media (max-width: 360px) {
+  /* For very small screens, ensure content is still accessible when sidebar is collapsed */
+  .sidebar-collapsed .main-content {
+    padding-left: 50px;
+  }
+
+  .admin-header h1 {
+    font-size: 1.2rem;
+  }
+}

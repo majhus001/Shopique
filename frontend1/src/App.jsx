@@ -1,30 +1,30 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import AdminHome from './Admin/homepage/AdminHome';
-import Adnavbar from './Admin/Adnavbar/Adnavbar';
-import Adminorders from './Admin/Adminorders/Adminorders';
-import Adminprofile from './Admin/Adminprofile/Adminprofile';
-import Searchproducts from './screens/searchproducts/Searchproducts';
-import ProductAddPage from './Admin/AdminProducts/Productadd';
-import UserManagement from './Admin/AdminUserman/UserManagement';
-import Userhistory from './Admin/AdminUserman/Userhistory';
-import AdproductsList from './Admin/AdminProducts/AdproductsList';
-import RecentActivity from './Admin/homepage/RecentActivity/RecentActivity';
-import Sidebar from './Admin/sidebar/Sidebar';
+import AdminHome from "./Admin/homepage/AdminHome";
+import Adnavbar from "./Admin/Adnavbar/Adnavbar";
+import Adminorders from "./Admin/Adminorders/Adminorders";
+import Adminprofile from "./Admin/Adminprofile/Adminprofile";
+import ProductAddPage from "./Admin/AdminProducts/Productadd";
+import UserManagement from "./Admin/AdminUserman/UserManagement";
+import Userhistory from "./Admin/AdminUserman/Userhistory";
+import AdproductsList from "./Admin/AdminProducts/AdproductsList";
+import RecentActivity from "./Admin/homepage/RecentActivity/RecentActivity";
+import Sidebar from "./Admin/sidebar/Sidebar";
+import GenerateUserReport from "./Admin/GenUserReport/GenerateUserReport";
+import Reports from "./Admin/GenUserReport/Reports";
 
-import SignUp from './LogSin/SignUp';
-import Login from './LogSin/Login';
-import Navbar from './screens/navbar/Navbar';
-import HomePage from './screens/Homepage/HomePage';
-import ProductList from './screens/Productscreens/ProductList';
-import Cart from './screens/Productscreens/Cart';
-import Orderdetails from './screens/Order/Orderdetails';
-import ProfilePage from './screens/profiledetails/ProfilePage';
-import Orderhistory from './screens/Order/Orderhistory';
-import Buynow from './screens/Productscreens/Buynow';
-import GenerateUserReport from './Admin/GenUserReport/GenerateUserReport';
-import Reports from './Admin/GenUserReport/Reports';
+import SignUp from "./LogSin/SignUp";
+import Login from "./LogSin/Login";
+import Searchproducts from "./screens/searchproducts/Searchproducts";
+import Navbar from "./screens/navbar/Navbar";
+import HomePage from "./screens/Homepage/HomePage";
+import ProductList from "./screens/Productscreens/ProductList";
+import Cart from "./screens/Productscreens/Cart";
+import Orderdetails from "./screens/Order/Orderdetails";
+import ProfilePage from "./screens/profiledetails/ProfilePage";
+import Orderhistory from "./screens/Order/Orderhistory";
+import Buynow from "./screens/Productscreens/Buynow";
 
 const App = () => {
   return (
@@ -55,7 +55,6 @@ const App = () => {
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/generateuserreport" element={<GenerateUserReport />} />
         <Route path="/reports" element={<Reports />} />
-
       </Routes>
     </Router>
   );

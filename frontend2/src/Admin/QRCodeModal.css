@@ -1,0 +1,229 @@
+.qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.qr-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.qr-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.qr-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.qr-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.qr-close-btn:hover {
+  color: #333;
+}
+
+.qr-modal-body {
+  padding: 20px;
+}
+
+.qr-quantity-selector {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qr-quantity-selector label {
+  font-weight: 500;
+  color: #555;
+}
+
+.qr-quantity-selector input {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.qr-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.qr-preview h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.qr-code-preview {
+  margin-bottom: 15px;
+}
+
+.qr-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.qr-print-btn {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.qr-print-btn:hover {
+  background-color: #3a7bc8;
+}
+
+.qr-print-btn:disabled {
+  background-color: #a0c4e8;
+  cursor: not-allowed;
+}
+
+/* Print styles */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+  
+  .qr-print-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .qr-print-header h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  
+  .qr-print-header p {
+    font-size: 14px;
+    color: #666;
+    margin-top: 0;
+  }
+  
+  .qr-print-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    page-break-inside: avoid;
+  }
+  
+  .qr-code-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    page-break-inside: avoid;
+  }
+  
+  .qr-code-info {
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .qr-product-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  
+  .qr-product-price {
+    font-size: 14px;
+    color: #4a90e2;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .qr-product-id {
+    font-size: 12px;
+    color: #999;
+  }
+}
+
+/* QR code items in the preview */
+.qr-code-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.qr-code-info {
+  margin-top: 10px;
+  text-align: center;
+  width: 100%;
+}
+
+.qr-product-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.qr-product-price {
+  font-size: 14px;
+  color: #4a90e2;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.qr-product-id {
+  font-size: 12px;
+  color: #999;
+}

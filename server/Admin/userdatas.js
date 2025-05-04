@@ -29,7 +29,7 @@ router.get("/pendingorders", async (req, res) => {
 
 router.get("/fetchmobiles", async (req, res) => {
   try {
-    const products = await mobile.find().limit(10); // Fetch all products
+    const products = await mobile.find(); // Fetch all products
     res.status(200).json(products);
     
   } catch (error) {
@@ -40,7 +40,7 @@ router.get("/fetchmobiles", async (req, res) => {
 
 router.get("/fetchcloths", async (req, res) => {
   try {
-    const products = await cloth.find().limit(10); // Fetch all products
+    const products = await cloth.find(); // Fetch all products
     res.status(200).json(products);
     
   } catch (error) {
@@ -52,7 +52,7 @@ router.get("/fetchcloths", async (req, res) => {
 router.get("/fetchhomeappliance", async (req, res) => {
   try {
     
-    const products = await homeappliances.find().limit(10); // Fetch all products
+    const products = await homeappliances.find(); // Fetch all products
     res.status(200).json(products);
     
   } catch (error) {
