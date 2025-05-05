@@ -712,6 +712,147 @@
   animation: pulse 1.5s infinite;
 }
 
+
+.user-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+
+/* Base Action Button Styles */
+.action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Hover Effects */
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover::before {
+  transform: translateY(0);
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit Button Styles */
+.edit-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.edit-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #2573a7);
+}
+
+/* View Button Styles */
+.view-btn {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.view-btn:hover {
+  background: linear-gradient(135deg, #27ae60, #219d54);
+}
+
+/* Delete Button Styles */
+.delete-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.delete-btn:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+}
+
+/* Button Icon Animation */
+.action-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover svg {
+  transform: scale(1.2);
+}
+
+/* Button Tooltip */
+.action-btn::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.action-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .action-btn {
+    width: 46px;
+    height: 46px;
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .user-actions {
+    margin: 15px 0 0 0;
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .action-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.4rem;
+  }
+}
+
+
 @keyframes pulse {
   0% {
     transform: scale(1);

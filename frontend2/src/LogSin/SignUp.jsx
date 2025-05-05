@@ -107,60 +107,60 @@ const SignUp = () => {
   };
 
   return (
-    <div className="outer">
-      <div className="su-container">
-        <div className="brand-logo">
+    <div className="ad-outer">
+      <div className="ad-su-container">
+        <div className="ad-brand-logo">
           <FaShoppingBag />
         </div>
         <h2>{step === "signup" ? "Create Account" : "Verify OTP"}</h2>
 
         {step === "signup" && (
-          <form onSubmit={handleSignup} className="form">
-            <div className="lg-input-group">
-              <label className="label">Username</label>
-              <div className="input-wrapper">
+          <form onSubmit={handleSignup} className="ad-form">
+            <div className="ad-input-group">
+              <label className="ad-label">Username</label>
+              <div className="ad-input-wrapper">
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  className="input"
+                  className="ad-input"
                   placeholder="Enter your username"
                 />
-                <FaUser className="input-icon" />
+                <FaUser className="ad-input-icon" />
               </div>
             </div>
 
-            <div className="lg-input-group">
-              <label className="label">Email</label>
-              <div className="input-wrapper">
+            <div className="ad-input-group">
+              <label className="ad-label">Email</label>
+              <div className="ad-input-wrapper">
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="input"
+                  className="ad-input"
                   placeholder="Enter your email"
                 />
-                <FaEnvelope className="input-icon" />
+                <FaEnvelope className="ad-input-icon" />
               </div>
             </div>
 
-            <div className="lg-input-group">
-              <label className="label">Password</label>
-              <div className="input-wrapper">
+            <div className="ad-input-group">
+              <label className="ad-label">Password</label>
+              <div className="ad-input-wrapper">
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="input"
+                  className="ad-input"
                   placeholder="Create a password"
                 />
-                <FaLock className="input-icon" />
+                <FaLock className="ad-input-icon" />
               </div>
             </div>
 
@@ -176,21 +176,21 @@ const SignUp = () => {
         )}
 
         {step === "otp" && (
-          <div className="otp-container">
-            <p className="otp-info">
+          <div className="ad-otp-container">
+            <p className="ad-otp-info">
               We've sent a verification code to <strong>{formData.email}</strong>
             </p>
 
-            <div className="lg-input-group">
-              <label className="label">Enter OTP</label>
-              <div className="input-wrapper">
+            <div className="ad-input-group">
+              <label className="ad-label">Enter OTP</label>
+              <div className="ad-input-wrapper">
                 <input
                   type="text"
                   name="otp"
                   value={otp}
                   onChange={handleOtpChange}
                   required
-                  className="input otp-input"
+                  className="ad-input ad-otp-input"
                   placeholder="Enter verification code"
                 />
               </div>
@@ -205,33 +205,33 @@ const SignUp = () => {
               Verify & Create Account
             </AuthButton>
 
-            <p className="resend-otp">
+            <p className="ad-resend-otp">
               Didn't receive the code? <a href="#" onClick={(e) => { e.preventDefault(); handleSignup(e); }}>Resend OTP</a>
             </p>
           </div>
         )}
 
-        {message && <p className={`message ${message.includes("successful") ? "success" : message.includes("OTP sent") ? "success" : "error"}`}>{message}</p>}
+        {message && <p className={`ad-message ${message.includes("successful") ? "ad-success" : message.includes("OTP sent") ? "ad-success" : "ad-error"}`}>{message}</p>}
 
-        <div className="divider">
-          <div className="divider-line"></div>
-          <div className="divider-text">or sign up with</div>
-          <div className="divider-line"></div>
+        <div className="ad-divider">
+          <div className="ad-divider-line"></div>
+          <div className="ad-divider-text">or sign up with</div>
+          <div className="ad-divider-line"></div>
         </div>
 
-        <div className="social-login">
-          <button className="social-btn google">
+        <div className="ad-social-login">
+          <button className="ad-social-btn ad-google">
             <FaGoogle />
           </button>
-          <button className="social-btn facebook">
+          <button className="ad-social-btn ad-facebook">
             <FaFacebookF />
           </button>
-          <button className="social-btn twitter">
+          <button className="ad-social-btn ad-twitter">
             <FaTwitter />
           </button>
         </div>
 
-        <p className="login-link">
+        <p className="ad-login-link">
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </div>

@@ -3,9 +3,20 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import API_BASE_URL from "../../api";
-import { FiHome, FiUser, FiUsers, FiShoppingBag, FiPackage, FiSettings, FiLogOut, FiMenu, FiChevronLeft, FiDollarSign } from "react-icons/fi";
+import {
+  FiHome,
+  FiUser,
+  FiUsers,
+  FiShoppingBag,
+  FiPackage,
+  FiSettings,
+  FiLogOut,
+  FiMenu,
+  FiChevronLeft,
+  FiDollarSign,
+} from "react-icons/fi";
 
-const Sidebar = ({user, orders, onCollapsedChange}) => {
+const Sidebar = ({ user, orders, onCollapsedChange }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -41,6 +52,8 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
     navigate("/adprof", { state: { user, orders } });
   const handleUsemanclk = () =>
     navigate("/userman", { state: { user, orders } });
+  const handleCustomerclk = () =>
+    navigate("/customers", { state: { user, orders } });
   const handleOrderclk = () =>
     navigate("/adorders", { state: { user, orders } });
   const handleProdclk = () =>
@@ -62,7 +75,7 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
 
   return (
     <div>
-      <div className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+      <div className={`admin-sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-toggle" onClick={toggleSidebar}>
           {collapsed ? <FiMenu /> : <FiChevronLeft />}
         </div>
@@ -71,11 +84,11 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
           {user?.image ? (
             <img src={user.image} alt="admin" className="ad-sb-img" />
           ) : (
-            <div className="placeholder-img">
-              {!collapsed && "No Image"}
-            </div>
+            <div className="placeholder-img">{!collapsed && "No Image"}</div>
           )}
-          {!collapsed && <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>}
+          {!collapsed && (
+            <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>
+          )}
         </div>
 
         <div className="ad-sb-list-cont">
@@ -100,32 +113,12 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
                 {!collapsed && <span>Profile</span>}
               </button>
             </li>
-            <li>
-              <button
-                className={`ad-sb-btns ${isActive("/userman") ? "active" : ""}`}
-                onClick={handleUsemanclk}
-                title="User Management"
-              >
-                <FiUsers className="menu-icon" />
-                {!collapsed && <span>User Management</span>}
-              </button>
-            </li>
-
             <div className="menu-divider"></div>
-
             <li>
               <button
-                className={`ad-sb-btns ${isActive("/adorders") ? "active" : ""}`}
-                onClick={handleOrderclk}
-                title="Orders"
-              >
-                <FiShoppingBag className="menu-icon" />
-                {!collapsed && <span>Orders</span>}
-              </button>
-            </li>
-            <li>
-              <button
-                className={`ad-sb-btns ${isActive("/adprodlist") ? "active" : ""}`}
+                className={`ad-sb-btns ${
+                  isActive("/adprodlist") ? "active" : ""
+                }`}
                 onClick={handleProdclk}
                 title="Products"
               >
@@ -133,6 +126,19 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
                 {!collapsed && <span>Products</span>}
               </button>
             </li>
+            <li>
+              <button
+                className={`ad-sb-btns ${
+                  isActive("/adorders") ? "active" : ""
+                }`}
+                onClick={handleOrderclk}
+                title="Orders"
+              >
+                <FiShoppingBag className="menu-icon" />
+                {!collapsed && <span>Orders</span>}
+              </button>
+            </li>
+            <div className="menu-divider"></div>
             <li>
               <button
                 className={`ad-sb-btns ${isActive("/billing") ? "active" : ""}`}
@@ -143,12 +149,45 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
                 {!collapsed && <span>Billing</span>}
               </button>
             </li>
-
+            <div className="menu-divider"></div>
+            <li>
+              <button
+                className={`ad-sb-btns ${isActive("/userman") ? "active" : ""}`}
+                onClick={handleUsemanclk}
+                title="User Management"
+              >
+                <FiUsers className="menu-icon" />
+                {!collapsed && <span>Online Users</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                className={`ad-sb-btns ${isActive("/employees") ? "active" : ""}`}
+                onClick={handleUsemanclk}
+                title="Employee Management"
+              >
+                <FiUsers className="menu-icon" />
+                {!collapsed && <span>Employees </span>}
+              </button>
+            </li>
+            <li>
+              <button
+                className={`ad-sb-btns ${isActive("/customers") ? "active" : ""}`}
+                onClick={handleCustomerclk}
+                title="Customer Management"
+              >
+                <FiUsers className="menu-icon" />
+                {!collapsed && <span>Customers </span>}
+              </button>
+            </li>
+            
             <div className="menu-divider"></div>
 
             <li>
               <button
-                className={`ad-sb-btns ${isActive("/settings") ? "active" : ""}`}
+                className={`ad-sb-btns ${
+                  isActive("/settings") ? "active" : ""
+                }`}
                 title="Settings"
               >
                 <FiSettings className="menu-icon" />
@@ -169,7 +208,7 @@ const Sidebar = ({user, orders, onCollapsedChange}) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

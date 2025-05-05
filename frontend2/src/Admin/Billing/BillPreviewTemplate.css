@@ -3,6 +3,12 @@
 /* Hidden by default, only visible when printing */
 .shopique-bill-container {
   display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  z-index: -1; /* Keep it behind other content when not printing */
 }
 
 /* Print Styles */

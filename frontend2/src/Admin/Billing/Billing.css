@@ -41,6 +41,58 @@
 }
 .product-search-section {
   margin-bottom: 20px;
+  position: relative;
+}
+
+/* Add scroll indicators for category tabs */
+.category-tabs {
+  position: relative;
+}
+
+/* Add a subtle arrow indicator to show scrollability */
+.category-tabs::after {
+  content: '→';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.9));
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  color: #3498db;
+  font-size: 18px;
+  font-weight: bold;
+  opacity: 0.7;
+}
+
+.category-tabs::before {
+  content: '←';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 100%;
+  background: linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,0.9));
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  color: #3498db;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Show left gradient only when scrolled */
+.category-tabs.scrolled-left::before {
+  opacity: 0.7;
 }
 
 .search-container {
@@ -79,13 +131,56 @@
   background-color: #fff;
 }
 
+.ad-search-scan{
+  display: flex;
+  gap: 80px;
+}
+.ad-bill-scan{
+  background-color: #3498db;
+  color: white;
+  width: 180px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+}
+
+.ad-bill-scan:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+}
+
+.ad-bill-scan:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+}
+
 .category-tabs {
   display: flex;
   gap: 12px;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 8px;
   margin-bottom: 15px;
   position: relative;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  width: 100%;
+  scrollbar-width: 5px;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 5px;
 }
 
 .category-tabs::after {
@@ -105,15 +200,18 @@
 .category-tabs::-webkit-scrollbar-track {
   background: #f5f5f5;
   border-radius: 10px;
+  margin: 0 15px;
 }
 
 .category-tabs::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #3498db;
   border-radius: 10px;
+  opacity: 0.7;
 }
 
 .category-tabs::-webkit-scrollbar-thumb:hover {
-  background: #bbb;
+  background: #2980b9;
+  opacity: 1;
 }
 
 .category-tab {
@@ -127,11 +225,13 @@
   cursor: pointer;
   transition: all 0.25s ease;
   white-space: nowrap;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   position: relative;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  flex-shrink: 0;
+  margin: 2px;
 }
 
 .category-tab:hover {
@@ -241,7 +341,7 @@
   flex-direction: column;
   position: relative;
   height: 100%;
-  min-height: 170px; /* Smaller height for simplified card */
+  min-height: 180px; /* Smaller height for simplified card */
 }
 
 .product-card:hover {
@@ -1435,7 +1535,24 @@
   body > *:not(.shopique-bill-container),
   .admin-container,
   .billing-container,
-  .main-content > *:not(.shopique-bill-container) {
+  .main-content,
+  .ad-nav,
+  .notification,
+  .sidebar,
+  .admin-header,
+  .billing-left-panel,
+  .billing-right-panel {
     display: none !important;
+  }
+
+  /* Make sure the bill container is visible */
+  .shopique-bill-container {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    z-index: 9999 !important;
   }
 }

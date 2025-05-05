@@ -65,47 +65,47 @@ const Login = () => {
   };
 
   return (
-    <div className="outer">
+    <div className="ad-outer">
       <div className="ad-lg-container">
-        <div className="brand-logo">
+        <div className="ad-brand-logo">
           <FaShoppingBag />
         </div>
         <h2>Welcome Back</h2>
 
-        <form onSubmit={handleSubmit} className="form">
-          <div className="lg-input-group">
-            <label className="label">Email</label>
-            <div className="input-wrapper">
+        <form onSubmit={handleSubmit} className="ad-form">
+          <div className="ad-input-group">
+            <label className="ad-label">Email</label>
+            <div className="ad-input-wrapper">
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="input"
+                className="ad-input"
                 placeholder="Enter your email"
               />
-              <FaUser className="input-icon" />
+              <FaUser className="ad-input-icon" />
             </div>
           </div>
 
-          <div className="lg-input-group">
-            <label className="label">Password</label>
-            <div className="input-wrapper">
+          <div className="ad-input-group">
+            <label className="ad-label">Password</label>
+            <div className="ad-input-wrapper">
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="input"
+                className="ad-input"
                 placeholder="Enter your password"
               />
-              <FaLock className="input-icon" />
+              <FaLock className="ad-input-icon" />
             </div>
           </div>
 
-          <div className="forgot-password">
+          <div className="ad-forgot-password">
             <Link to="/forgot-password">Forgot password?</Link>
           </div>
 
@@ -119,27 +119,27 @@ const Login = () => {
           </AuthButton>
         </form>
 
-        {message && <p className={`message ${message.includes("successful") ? "success" : "error"}`}>{message}</p>}
+        {message && <p className={`ad-message ${message.includes("successful") ? "ad-success" : "ad-error"}`}>{message}</p>}
 
-        <div className="divider">
-          <div className="divider-line"></div>
-          <div className="divider-text">or login with</div>
-          <div className="divider-line"></div>
+        <div className="ad-divider">
+          <div className="ad-divider-line"></div>
+          <div className="ad-divider-text">or login with</div>
+          <div className="ad-divider-line"></div>
         </div>
 
-        <div className="social-login">
-          <button className="social-btn google">
+        <div className="ad-social-login">
+          <button className="ad-social-btn ad-google">
             <FaGoogle />
           </button>
-          <button className="social-btn facebook">
+          <button className="ad-social-btn ad-facebook">
             <FaFacebookF />
           </button>
-          <button className="social-btn twitter">
+          <button className="ad-social-btn ad-twitter">
             <FaTwitter />
           </button>
         </div>
 
-        <p className="login-link">
+        <p className="ad-login-link">
           Don't have an account? <Link to="/signup">Sign up</Link>
         </p>
       </div>

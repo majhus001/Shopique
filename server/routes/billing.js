@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Bill = require("../models/BillSchema");
 const { product } = require("../models/products");
+const Customer = require("../models/Customer");
 
 const { authenticateToken } = require("../middleware/auth");
 
@@ -10,6 +11,8 @@ const { authenticateToken } = require("../middleware/auth");
 router.post("/savebill", authenticateToken, async (req, res) => {
   try {
     const billData = req.body;
+    const customerId = billData.customerId;
+    console.log(customerId)
     // Check if bill with this number already exists
     const existingBill = await Bill.findOne({
       billNumber: billData.billNumber,
@@ -25,7 +28,6 @@ router.post("/savebill", authenticateToken, async (req, res) => {
     const newBill = new Bill(billData);
     await newBill.save();
 
-    // Reduce stock for each product in the bill using the common product schema
     try {
       for (const item of billData.items) {
         // Find and update the product in the common products collection
@@ -35,7 +37,9 @@ router.post("/savebill", authenticateToken, async (req, res) => {
           await product.findByIdAndUpdate(item.productId, {
             $inc: { stock: -item.quantity },
           });
-          console.log(`Updated stock for product: ${item.name}, reduced by ${item.quantity}`);
+          console.log(
+            `Updated stock for product: ${item.name}, reduced by ${item.quantity}`
+          );
         } else {
           console.warn(`Could not find product with ID: ${item.productId}`);
         }
@@ -43,6 +47,20 @@ router.post("/savebill", authenticateToken, async (req, res) => {
     } catch (stockError) {
       console.error("Error updating product stock:", stockError);
       // Continue with the response even if stock update fails
+    }
+
+    try {
+      const customer = await Customer.findOne({ _id: customerId });
+
+      if (!customer) {
+        console.log("Customer not found");
+      } else {
+        customer.totalPurchases += 1;
+        await customer.save(); // Important to save the changes
+        console.log("Purchase count updated");
+      }
+    } catch (error) {
+      console.error("Error while updating customer:", error); // Catch block should show the error
     }
 
     return res.status(201).json({

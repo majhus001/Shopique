@@ -7,6 +7,7 @@ const QRCodeScanner = ({ onScan, onClose }) => {
   const [scanning, setScanning] = useState(true);
   const [scanned, setScanned] = useState(false);
   const [qrDetected, setQrDetected] = useState(false);
+  const [cameraLoading, setCameraLoading] = useState(true);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -51,7 +52,19 @@ const QRCodeScanner = ({ onScan, onClose }) => {
   // Initialize camera when component mounts
   useEffect(() => {
     const startCamera = async () => {
+      setCameraLoading(true);
+      console.log("Starting camera initialization...");
+
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('Browser does not support mediaDevices API');
+        setError('Your browser does not support camera access. Please try a different browser or use the alternative options below.');
+        setCameraLoading(false);
+        return;
+      }
+
       try {
+        // First try with environment camera (back camera on mobile)
         const constraints = {
           video: {
             facingMode: 'environment',
@@ -60,49 +73,143 @@ const QRCodeScanner = ({ onScan, onClose }) => {
           }
         };
 
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        streamRef.current = stream;
+        console.log("Requesting camera access with environment facing mode...");
 
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          streamRef.current = stream;
 
-          // Start scanning for QR codes
-          scanIntervalRef.current = setInterval(() => {
-            if (videoRef.current && canvasRef.current && !scanned) {
-              const canvas = canvasRef.current;
-              const context = canvas.getContext('2d');
+          if (videoRef.current) {
+            console.log("Camera access granted, setting up video stream...");
+            videoRef.current.srcObject = stream;
 
-              // Set canvas dimensions to match video
-              canvas.width = videoRef.current.videoWidth;
-              canvas.height = videoRef.current.videoHeight;
+            // Add event listeners for video element
+            videoRef.current.onloadedmetadata = () => {
+              console.log("Video metadata loaded, playing video...");
+              videoRef.current.play()
+                .then(() => {
+                  console.log("Video playing successfully");
+                  setCameraLoading(false);
 
-              // Draw current video frame to canvas
-              context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-
-              // Get image data for QR code detection
-              const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-              try {
-                // Use jsQR to detect QR codes
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                  inversionAttempts: "dontInvert",
+                  // Start scanning for QR codes after video is playing
+                  startQRScanning();
+                })
+                .catch(playError => {
+                  console.error("Error playing video:", playError);
+                  setError('Error starting video stream. Please try again or use the alternative options below.');
+                  setCameraLoading(false);
                 });
+            };
 
-                if (code) {
-                  console.log("QR Code detected:", code.data);
-                  setQrDetected(true);
+            videoRef.current.onerror = () => {
+              console.error("Video element error");
+              setError('Error with video stream. Please try again or use the alternative options below.');
+              setCameraLoading(false);
+            };
+          } else {
+            console.error("Video ref is not available");
+            setError('Camera initialization failed. Please try again.');
+            setCameraLoading(false);
+          }
+        } catch (envError) {
+          console.error('Error accessing environment camera:', envError);
 
-                  // Process the QR code data
+          // Try with any camera as fallback
+          try {
+            console.log("Trying fallback to any available camera...");
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            streamRef.current = fallbackStream;
+
+            if (videoRef.current) {
+              videoRef.current.srcObject = fallbackStream;
+
+              videoRef.current.onloadedmetadata = () => {
+                videoRef.current.play()
+                  .then(() => {
+                    console.log("Fallback video playing successfully");
+                    setCameraLoading(false);
+                    startQRScanning();
+                  })
+                  .catch(playError => {
+                    console.error("Error playing fallback video:", playError);
+                    setError('Error starting video stream. Please use the alternative options below.');
+                    setCameraLoading(false);
+                  });
+              };
+            }
+          } catch (fallbackError) {
+            console.error('Error accessing any camera:', fallbackError);
+            setError('Could not access camera. Please check your camera permissions and try again, or use the alternative options below.');
+            setCameraLoading(false);
+          }
+        }
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        setError('Error accessing camera. Please make sure you have granted camera permissions or use the alternative options below.');
+        setCameraLoading(false);
+      }
+    };
+
+    // Function to start QR code scanning
+    const startQRScanning = () => {
+      console.log("Starting QR code scanning...");
+
+      // Start scanning for QR codes
+      scanIntervalRef.current = setInterval(() => {
+        if (videoRef.current && canvasRef.current && !scanned && videoRef.current.readyState === 4) {
+          const canvas = canvasRef.current;
+          const context = canvas.getContext('2d');
+
+          // Set canvas dimensions to match video
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+
+          // Draw current video frame to canvas
+          context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+          // Get image data for QR code detection
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+          try {
+            // Use jsQR to detect QR codes
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert",
+            });
+
+            if (code) {
+              console.log("QR Code detected:", code.data);
+              setQrDetected(true);
+
+              // Process the QR code data
+              try {
+                // Try to extract data from URL format
+                const url = new URL(code.data);
+                const dataParam = url.searchParams.get('data');
+
+                if (dataParam) {
+                  // Parse the JSON data
+                  const productData = JSON.parse(decodeURIComponent(dataParam));
+
+                  // Stop scanning and camera
+                  setScanned(true);
+                  setScanning(false);
+
+                  // Make sure camera is fully stopped before proceeding
+                  console.log("QR code detected, stopping camera...");
+                  stopCamera();
+
+                  // Call the onScan callback with the product data after a delay
+                  // to ensure camera has time to fully stop
+                  console.log("Preparing to call onScan callback...");
+                  setTimeout(() => {
+                    console.log("Calling onScan with product data");
+                    onScan(productData);
+                  }, 1000);
+                } else {
+                  // If it's not in our expected format, try direct JSON parsing
                   try {
-                    // Try to extract data from URL format
-                    const url = new URL(code.data);
-                    const dataParam = url.searchParams.get('data');
-
-                    if (dataParam) {
-                      // Parse the JSON data
-                      const productData = JSON.parse(decodeURIComponent(dataParam));
-
+                    const productData = JSON.parse(code.data);
+                    if (productData && productData.id) {
                       // Stop scanning and camera
                       setScanned(true);
                       setScanning(false);
@@ -112,64 +219,16 @@ const QRCodeScanner = ({ onScan, onClose }) => {
                       stopCamera();
 
                       // Call the onScan callback with the product data after a delay
-                      // to ensure camera has time to fully stop
                       console.log("Preparing to call onScan callback...");
                       setTimeout(() => {
                         console.log("Calling onScan with product data");
                         onScan(productData);
-                      }, 1500);
-                    } else {
-                      // If it's not in our expected format, try direct JSON parsing
-                      try {
-                        const productData = JSON.parse(code.data);
-                        if (productData && productData.id) {
-                          // Stop scanning and camera
-                          setScanned(true);
-                          setScanning(false);
-
-                          // Make sure camera is fully stopped before proceeding
-                          console.log("QR code detected, stopping camera...");
-                          stopCamera();
-
-                          // Call the onScan callback with the product data after a delay
-                          console.log("Preparing to call onScan callback...");
-                          setTimeout(() => {
-                            console.log("Calling onScan with product data");
-                            onScan(productData);
-                          }, 1500);
-                        }
-                      } catch (jsonError) {
-                        // Not JSON either, just use as ID
-                        const productId = code.data.trim();
-                        if (productId) {
-                          // Stop scanning and camera
-                          setScanned(true);
-                          setScanning(false);
-
-                          // Make sure camera is fully stopped before proceeding
-                          console.log("QR code detected, stopping camera...");
-                          stopCamera();
-
-                          // Create simple product data with just the ID
-                          const productData = {
-                            id: productId,
-                            name: "Product " + productId,
-                            price: 0
-                          };
-
-                          // Call the onScan callback with the product data after a delay
-                          console.log("Preparing to call onScan callback...");
-                          setTimeout(() => {
-                            console.log("Calling onScan with product data");
-                            onScan(productData);
-                          }, 1500);
-                        }
-                      }
+                      }, 1000);
                     }
-                  } catch (err) {
-                    console.error("Error processing QR code data:", err);
-                    // Just use the raw data as product ID
-                    if (code.data) {
+                  } catch (jsonError) {
+                    // Not JSON either, just use as ID
+                    const productId = code.data.trim();
+                    if (productId) {
                       // Stop scanning and camera
                       setScanned(true);
                       setScanning(false);
@@ -180,8 +239,8 @@ const QRCodeScanner = ({ onScan, onClose }) => {
 
                       // Create simple product data with just the ID
                       const productData = {
-                        id: code.data,
-                        name: "Product " + code.data,
+                        id: productId,
+                        name: "Product " + productId,
                         price: 0
                       };
 
@@ -190,20 +249,43 @@ const QRCodeScanner = ({ onScan, onClose }) => {
                       setTimeout(() => {
                         console.log("Calling onScan with product data");
                         onScan(productData);
-                      }, 1500);
+                      }, 1000);
                     }
                   }
                 }
-              } catch (error) {
-                console.error("Error scanning QR code:", error);
+              } catch (err) {
+                console.error("Error processing QR code data:", err);
+                // Just use the raw data as product ID
+                if (code.data) {
+                  // Stop scanning and camera
+                  setScanned(true);
+                  setScanning(false);
+
+                  // Make sure camera is fully stopped before proceeding
+                  console.log("QR code detected, stopping camera...");
+                  stopCamera();
+
+                  // Create simple product data with just the ID
+                  const productData = {
+                    id: code.data,
+                    name: "Product " + code.data,
+                    price: 0
+                  };
+
+                  // Call the onScan callback with the product data after a delay
+                  console.log("Preparing to call onScan callback...");
+                  setTimeout(() => {
+                    console.log("Calling onScan with product data");
+                    onScan(productData);
+                  }, 1000);
+                }
               }
             }
-          }, 300);
+          } catch (error) {
+            console.error("Error scanning QR code:", error);
+          }
         }
-      } catch (err) {
-        console.error('Error accessing camera:', err);
-        setError('Error accessing camera. Please make sure you have granted camera permissions.');
-      }
+      }, 300);
     };
 
     if (scanning) {
@@ -393,11 +475,18 @@ const QRCodeScanner = ({ onScan, onClose }) => {
         {scanning ? (
           <div className="qr-scanner-content">
             <div className="video-container">
+              {cameraLoading && (
+                <div className="camera-loading-overlay">
+                  <div className="camera-loading-spinner"></div>
+                  <p>Initializing camera...</p>
+                </div>
+              )}
               <video
                 ref={videoRef}
                 className="qr-video"
                 playsInline
                 muted
+                autoPlay
               />
               <div className={`scan-region-highlight ${qrDetected ? 'detected' : ''}`}></div>
             </div>

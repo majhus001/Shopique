@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import API_BASE_URL from "../../api";
-import QRCodeModal from "../QRCodeModal";
-import QRCodeScanner from "../QRCodeScanner";
+import QRCodeModal from "../Qrcode/QRCodeModal";
+import QRCodeScanner from "../Qrcode/QRCodeScanner";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import Sidebar from "../sidebar/Sidebar";
 import "./AddProducts.css";
@@ -259,9 +259,6 @@ const AddProducts = () => {
   const handleQRScan = (productData) => {
     console.log("QR scan result received:", productData);
 
-    // Process the data - note that we don't close the scanner here
-    // as the QRCodeScanner component will handle its own cleanup
-    // and call onClose which will set showQRScanner to false
     if (productData && productData.id) {
       setMessage({
         text: "Fetching product data...",
@@ -282,11 +279,17 @@ const AddProducts = () => {
 
           if (response.data.success && response.data.data) {
             // Successfully fetched product data
-            console.log("Product data fetched successfully:", response.data.data);
+            console.log(
+              "Product data fetched successfully:",
+              response.data.data
+            );
             handleSelectProduct(response.data.data);
           } else {
             // API returned success: false or no data
-            console.error("API returned success: false or no data", response.data);
+            console.error(
+              "API returned success: false or no data",
+              response.data
+            );
             setMessage({
               text: "Could not find product with the scanned ID",
               type: "error",
@@ -296,7 +299,9 @@ const AddProducts = () => {
           // API call failed
           console.error("Error fetching product by ID:", error);
           setMessage({
-            text: `Error loading product: ${error.response?.data?.error || error.message}`,
+            text: `Error loading product: ${
+              error.response?.data?.error || error.message
+            }`,
             type: "error",
           });
         }
@@ -485,7 +490,7 @@ const AddProducts = () => {
           );
 
           // Check if the update was successful
-          if (res.data && (res.data.success !== false)) {
+          if (res.data && res.data.success !== false) {
             setMessage({
               text: "Product updated successfully!",
               type: "success",
@@ -521,7 +526,7 @@ const AddProducts = () => {
           });
 
           // Check if the add was successful
-          if (res.data && (res.data.success !== false)) {
+          if (res.data && res.data.success !== false) {
             setMessage({
               text: "Product added successfully!",
               type: "success",
@@ -582,7 +587,11 @@ const AddProducts = () => {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -590,391 +599,405 @@ const AddProducts = () => {
         />
         <div className="main-content">
           <div className="test-add-products-container">
-      <div className="header-section">
-        <h2>{isEditMode ? "Edit Product" : "Add New Product"}</h2>
+            <div className="header-section">
+              <h2>{isEditMode ? "Edit Product" : "Add New Product"}</h2>
 
-        <div className="header-actions">
-          <button
-            type="button"
-            className="scan-qr-btn"
-            onClick={() => setShowQRScanner(true)}
-          >
-            <span className="scan-icon">📷</span> Scan QR Code
-          </button>
+              <div className="header-actions">
+                <button
+                  type="button"
+                  className="scan-qr-btn"
+                  onClick={() => setShowQRScanner(true)}
+                >
+                  <span className="scan-icon">📷</span> Scan QR Code
+                </button>
 
-          <div className="search-container" ref={searchRef}>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={handleSearch}
-              className="search-input"
-            />
+                <div className="search-container" ref={searchRef}>
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    className="search-input"
+                  />
 
-            {showSuggestions && searchResults.length > 0 && (
-              <div className="search-results">
-                {searchResults.map((item) => (
-                  <div
-                    key={item._id}
-                    className="search-result-item"
-                    onClick={() => handleSelectProduct(item)}
-                  >
-                    <div className="search-result-image">
-                      {item.images && item.images.length > 0 ? (
-                        <img src={item.images[0]} alt={item.name} />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
+                  {showSuggestions && searchResults.length > 0 && (
+                    <div className="search-results">
+                      {searchResults.map((item) => (
+                        <div
+                          key={item._id}
+                          className="search-result-item"
+                          onClick={() => handleSelectProduct(item)}
+                        >
+                          <div className="search-result-image">
+                            {item.images && item.images.length > 0 ? (
+                              <img src={item.images[0]} alt={item.name} />
+                            ) : (
+                              <div className="no-image">No Image</div>
+                            )}
+                          </div>
+                          <div className="search-result-details">
+                            <div className="search-result-name">
+                              {item.name}
+                            </div>
+                            <div className="search-result-price">
+                              ₹{item.price}
+                            </div>
+                            <div className="search-result-category">
+                              {item.category}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="search-result-details">
-                      <div className="search-result-name">{item.name}</div>
-                      <div className="search-result-price">₹{item.price}</div>
-                      <div className="search-result-category">
-                        {item.category}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {isEditMode && (
+              <div className="action-buttons">
+                <button
+                  type="button"
+                  className="reset-btn"
+                  onClick={handleResetForm}
+                >
+                  Cancel Edit
+                </button>
+                <button
+                  type="button"
+                  className="delete-btn"
+                  onClick={handleDeleteProduct}
+                >
+                  Delete Product
+                </button>
+                <button
+                  type="button"
+                  className="qr-btn"
+                  onClick={() => {
+                    if (currentProductId && product.name && product.price) {
+                      // Only generate QR code if we have valid product data
+                      setSavedProduct({
+                        _id: currentProductId,
+                        name: product.name,
+                        price: product.price,
+                        brand: product.brand || "",
+                        category: product.category || "",
+                        subCategory: product.subCategory || "",
+                      });
+                      setShowQRModal(true);
+                    } else {
+                      // Show error message if product data is incomplete
+                      setMessage({
+                        text: "Cannot generate QR code: Product data is incomplete",
+                        type: "error",
+                      });
+                    }
+                  }}
+                >
+                  Generate QR Code
+                </button>
               </div>
             )}
-          </div>
-        </div>
-      </div>
 
-      {isEditMode && (
-        <div className="action-buttons">
-          <button type="button" className="reset-btn" onClick={handleResetForm}>
-            Cancel Edit
-          </button>
-          <button
-            type="button"
-            className="delete-btn"
-            onClick={handleDeleteProduct}
-          >
-            Delete Product
-          </button>
-          <button
-            type="button"
-            className="qr-btn"
-            onClick={() => {
-              if (currentProductId && product.name && product.price) {
-                // Only generate QR code if we have valid product data
-                setSavedProduct({
-                  _id: currentProductId,
-                  name: product.name,
-                  price: product.price,
-                  brand: product.brand || "",
-                  category: product.category || "",
-                  subCategory: product.subCategory || "",
-                });
-                setShowQRModal(true);
-              } else {
-                // Show error message if product data is incomplete
-                setMessage({
-                  text: "Cannot generate QR code: Product data is incomplete",
-                  type: "error",
-                });
-              }
-            }}
-          >
-            Generate QR Code
-          </button>
-        </div>
-      )}
+            {message.text && (
+              <div className={`message ${message.type}`}>{message.text}</div>
+            )}
 
-      {message.text && (
-        <div className={`message ${message.type}`}>{message.text}</div>
-      )}
+            <form onSubmit={handleSubmit} className="product-form">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="name">Product Name</label>
+                  <input
+                    id="name"
+                    name="name"
+                    value={product.name}
+                    onChange={handleChange}
+                    placeholder="Product Name"
+                    required
+                  />
+                </div>
 
-      <form onSubmit={handleSubmit} className="product-form">
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="name">Product Name</label>
-            <input
-              id="name"
-              name="name"
-              value={product.name}
-              onChange={handleChange}
-              placeholder="Product Name"
-              required
-            />
-          </div>
+                <div className="form-group">
+                  <label htmlFor="price">Price</label>
+                  <input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={product.price}
+                    onChange={handleChange}
+                    placeholder="Price"
+                    required
+                  />
+                </div>
 
-          <div className="form-group">
-            <label htmlFor="price">Price</label>
-            <input
-              id="price"
-              name="price"
-              type="number"
-              value={product.price}
-              onChange={handleChange}
-              placeholder="Price"
-              required
-            />
-          </div>
+                <div className="form-group">
+                  <label htmlFor="brand">Brand</label>
+                  <input
+                    id="brand"
+                    name="brand"
+                    value={product.brand}
+                    onChange={handleChange}
+                    placeholder="Brand"
+                  />
+                </div>
 
-          <div className="form-group">
-            <label htmlFor="brand">Brand</label>
-            <input
-              id="brand"
-              name="brand"
-              value={product.brand}
-              onChange={handleChange}
-              placeholder="Brand"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="category">Category</label>
-            <select
-              id="category"
-              name="category"
-              value={product.category}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Category</option>
-              <option value="electronics">Electronics</option>
-              <option value="clothing">Clothing</option>
-              <option value="home">Home & Kitchen</option>
-              <option value="beauty">Beauty & Personal Care</option>
-              <option value="sports">Sports & Outdoors</option>
-              <option value="Stationaries">Stationaries</option>
-              <option value="toys">Toys & Games</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="subCategory">Sub Category</label>
-            <input
-              id="subCategory"
-              name="subCategory"
-              value={product.subCategory}
-              onChange={handleChange}
-              placeholder="Sub Category"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="stock">Stock</label>
-            <input
-              id="stock"
-              name="stock"
-              type="number"
-              value={product.stock}
-              onChange={handleChange}
-              placeholder="Stock"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="rating">Rating (1-5)</label>
-            <input
-              id="rating"
-              name="rating"
-              type="number"
-              min="0"
-              max="5"
-              step="0.1"
-              value={product.rating}
-              onChange={handleChange}
-              placeholder="Rating (1-5)"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="deliveryTime">Delivery Time</label>
-            <input
-              id="deliveryTime"
-              name="deliveryTime"
-              value={product.deliveryTime}
-              onChange={handleChange}
-              placeholder="e.g. 2-3 days"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="offerPrice">Offer Price</label>
-            <input
-              id="offerPrice"
-              name="offerPrice"
-              type="number"
-              value={product.offerPrice}
-              onChange={handleChange}
-              placeholder="Offer Price (optional)"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="tags">Tags (comma-separated)</label>
-            <input
-              id="tags"
-              name="tags"
-              value={product.tags.join(",")}
-              onChange={handleTagsChange}
-              placeholder="e.g. bestseller, eco-friendly"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="images">Product Images </label>
-            <input
-              id="images"
-              name="images"
-              type="file"
-              accept="image/*"
-              multiple="multiple"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-            />
-            <small className="helper-text">
-              You can select multiple images by holding Ctrl (Windows) or
-              Command (Mac) while clicking on files.
-              {isEditMode && imagePreviewUrls.length > 0 && (
-                <span className="edit-mode-note">
-                  <br />
-                  Note: If you don't select new images, the existing ones will
-                  be kept.
-                </span>
-              )}
-            </small>
-
-            {imagePreviewUrls.length > 0 && (
-              <div className="image-preview-container">
-                {imagePreviewUrls.map((url, index) => (
-                  <div
-                    key={`preview-${index}-${url.substring(0, 10)}`}
-                    className="image-preview"
+                <div className="form-group">
+                  <label htmlFor="category">Category</label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={product.category}
+                    onChange={handleChange}
+                    required
                   >
-                    <img
-                      src={url}
-                      alt={`Preview ${index + 1}`}
-                      onError={(e) => {
-                        console.error(`Failed to load image: ${url}`);
-                        e.target.src =
-                          "https://via.placeholder.com/100x100?text=Image+Error";
-                      }}
+                    <option value="">Select Category</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="home">Home & Kitchen</option>
+                    <option value="beauty">Beauty & Personal Care</option>
+                    <option value="sports">Sports & Outdoors</option>
+                    <option value="Stationaries">Stationaries</option>
+                    <option value="toys">Toys & Games</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="subCategory">Sub Category</label>
+                  <input
+                    id="subCategory"
+                    name="subCategory"
+                    value={product.subCategory}
+                    onChange={handleChange}
+                    placeholder="Sub Category"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="stock">Stock</label>
+                  <input
+                    id="stock"
+                    name="stock"
+                    type="number"
+                    value={product.stock}
+                    onChange={handleChange}
+                    placeholder="Stock"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="rating">Rating (1-5)</label>
+                  <input
+                    id="rating"
+                    name="rating"
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    value={product.rating}
+                    onChange={handleChange}
+                    placeholder="Rating (1-5)"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="deliveryTime">Delivery Time</label>
+                  <input
+                    id="deliveryTime"
+                    name="deliveryTime"
+                    value={product.deliveryTime}
+                    onChange={handleChange}
+                    placeholder="e.g. 2-3 days"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="offerPrice">Offer Price</label>
+                  <input
+                    id="offerPrice"
+                    name="offerPrice"
+                    type="number"
+                    value={product.offerPrice}
+                    onChange={handleChange}
+                    placeholder="Offer Price (optional)"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="tags">Tags (comma-separated)</label>
+                  <input
+                    id="tags"
+                    name="tags"
+                    value={product.tags.join(",")}
+                    onChange={handleTagsChange}
+                    placeholder="e.g. bestseller, eco-friendly"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="images">Product Images </label>
+                  <input
+                    id="images"
+                    name="images"
+                    type="file"
+                    accept="image/*"
+                    multiple="multiple"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                  />
+                  <small className="helper-text">
+                    You can select multiple images by holding Ctrl (Windows) or
+                    Command (Mac) while clicking on files.
+                    {isEditMode && imagePreviewUrls.length > 0 && (
+                      <span className="edit-mode-note">
+                        <br />
+                        Note: If you don't select new images, the existing ones
+                        will be kept.
+                      </span>
+                    )}
+                  </small>
+
+                  {imagePreviewUrls.length > 0 && (
+                    <div className="image-preview-container">
+                      {imagePreviewUrls.map((url, index) => (
+                        <div
+                          key={`preview-${index}-${url.substring(0, 10)}`}
+                          className="image-preview"
+                        >
+                          <img
+                            src={url}
+                            alt={`Preview ${index + 1}`}
+                            onError={(e) => {
+                              console.error(`Failed to load image: ${url}`);
+                              e.target.src =
+                                "https://via.placeholder.com/100x100?text=Image+Error";
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="remove-image-btn"
+                            onClick={() => removeImage(index)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="isFeatured"
+                      checked={product.isFeatured}
+                      onChange={handleChange}
+                    />
+                    Featured Product
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={product.description}
+                  onChange={handleChange}
+                  placeholder="Product Description"
+                  rows="4"
+                  required
+                />
+              </div>
+
+              <div className="specifications-section">
+                <h3>Specifications</h3>
+                {specifications.map((spec, index) => (
+                  <div key={index} className="specification-row">
+                    <input
+                      placeholder="Key (e.g. Size)"
+                      value={spec.key}
+                      onChange={(e) =>
+                        handleSpecificationChange(index, "key", e.target.value)
+                      }
+                    />
+                    <input
+                      placeholder="Value (e.g. Large)"
+                      value={spec.value}
+                      onChange={(e) =>
+                        handleSpecificationChange(
+                          index,
+                          "value",
+                          e.target.value
+                        )
+                      }
                     />
                     <button
                       type="button"
-                      className="remove-image-btn"
-                      onClick={() => removeImage(index)}
+                      className="remove-btn"
+                      onClick={() => removeSpecificationField(index)}
                     >
                       ✕
                     </button>
                   </div>
                 ))}
+                <button
+                  type="button"
+                  className="add-spec-btn"
+                  onClick={addSpecificationField}
+                >
+                  + Add Specification
+                </button>
               </div>
+
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="back-btn"
+                  onClick={() =>
+                    navigate("/adprodlist", { state: { user, orders } })
+                  }
+                >
+                  Back to Products
+                </button>
+                <button type="submit" className="submit-btn" disabled={loading}>
+                  {loading
+                    ? isEditMode
+                      ? "Updating Product..."
+                      : "Adding Product..."
+                    : isEditMode
+                    ? "Update Product"
+                    : "Add Product"}
+                </button>
+              </div>
+            </form>
+
+            {/* QR Code Modal */}
+            {showQRModal && savedProduct && (
+              <QRCodeModal
+                isOpen={showQRModal}
+                onClose={handleQRModalClose}
+                product={savedProduct}
+              />
             )}
-          </div>
 
-          <div className="form-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                name="isFeatured"
-                checked={product.isFeatured}
-                onChange={handleChange}
+            {/* QR Code Scanner */}
+            {showQRScanner && (
+              <QRCodeScanner
+                onScan={handleQRScan}
+                onClose={() => {
+                  console.log("Closing QR scanner");
+                  // Use a longer delay to ensure camera cleanup completes before unmounting
+                  setTimeout(() => {
+                    console.log("Setting showQRScanner to false");
+                    setShowQRScanner(false);
+                  }, 500);
+                }}
               />
-              Featured Product
-            </label>
-          </div>
-        </div>
-
-        <div className="form-group full-width">
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={product.description}
-            onChange={handleChange}
-            placeholder="Product Description"
-            rows="4"
-            required
-          />
-        </div>
-
-        <div className="specifications-section">
-          <h3>Specifications</h3>
-          {specifications.map((spec, index) => (
-            <div key={index} className="specification-row">
-              <input
-                placeholder="Key (e.g. Size)"
-                value={spec.key}
-                onChange={(e) =>
-                  handleSpecificationChange(index, "key", e.target.value)
-                }
-              />
-              <input
-                placeholder="Value (e.g. Large)"
-                value={spec.value}
-                onChange={(e) =>
-                  handleSpecificationChange(index, "value", e.target.value)
-                }
-              />
-              <button
-                type="button"
-                className="remove-btn"
-                onClick={() => removeSpecificationField(index)}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className="add-spec-btn"
-            onClick={addSpecificationField}
-          >
-            + Add Specification
-          </button>
-        </div>
-
-        <div className="form-actions">
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => navigate("/adprodlist", { state: { user, orders } })}
-          >
-            Back to Products
-          </button>
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading
-              ? isEditMode
-                ? "Updating Product..."
-                : "Adding Product..."
-              : isEditMode
-              ? "Update Product"
-              : "Add Product"}
-          </button>
-        </div>
-      </form>
-
-      {/* QR Code Modal */}
-      {showQRModal && savedProduct && (
-        <QRCodeModal
-          isOpen={showQRModal}
-          onClose={handleQRModalClose}
-          product={savedProduct}
-        />
-      )}
-
-      {/* QR Code Scanner */}
-      {showQRScanner && (
-        <QRCodeScanner
-          onScan={handleQRScan}
-          onClose={() => {
-            console.log("Closing QR scanner");
-            // Use a longer delay to ensure camera cleanup completes before unmounting
-            setTimeout(() => {
-              console.log("Setting showQRScanner to false");
-              setShowQRScanner(false);
-            }, 500);
-          }}
-        />
-      )}
+            )}
           </div>
         </div>
       </div>
@@ -982,4 +1005,4 @@ const AddProducts = () => {
   );
 };
 
-export default TestAddProducts;
+export default AddProducts;

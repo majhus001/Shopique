@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./Billing.css";
+import QRCodeScanner from "../Qrcode/QRCodeScanner";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import Sidebar from "../sidebar/Sidebar";
 import BillPreviewTemplate from "./BillPreviewTemplate";
@@ -30,6 +31,7 @@ import {
   FiShoppingBag,
   FiSmartphone,
   FiFilter,
+  FiCamera,
 } from "react-icons/fi";
 import RecentBills from "./RecentBills";
 
@@ -63,8 +65,10 @@ const Billing = () => {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [recentBills, setRecentBills] = useState([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
-
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
+  const [categoryTabsScrolled, setCategoryTabsScrolled] = useState(false);
+  const categoryTabsRef = useRef(null);
   const [newCustomer, setNewCustomer] = useState({
     mobile: "",
     username: "",
@@ -119,10 +123,9 @@ const Billing = () => {
   useEffect(() => {
     const fetchRecentBills = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/billing/fetch`,
-          { withCredentials: true }
-        );
+        const response = await axios.get(`${API_BASE_URL}/api/billing/fetch`, {
+          withCredentials: true,
+        });
         if (response.data.success) {
           setRecentBills(response.data.data || []);
         }
@@ -137,6 +140,27 @@ const Billing = () => {
   // Initialize invoice number
   useEffect(() => {
     generateInvoiceNumber();
+  }, []);
+
+  // Handle category tabs scroll
+  useEffect(() => {
+    const handleCategoryTabsScroll = () => {
+      if (categoryTabsRef.current) {
+        setCategoryTabsScrolled(categoryTabsRef.current.scrollLeft > 10);
+      }
+    };
+
+    const categoryTabsElement = categoryTabsRef.current;
+    if (categoryTabsElement) {
+      categoryTabsElement.addEventListener('scroll', handleCategoryTabsScroll);
+
+      // Initial check
+      handleCategoryTabsScroll();
+
+      return () => {
+        categoryTabsElement.removeEventListener('scroll', handleCategoryTabsScroll);
+      };
+    }
   }, []);
 
   // Filter products based on search and category
@@ -208,11 +232,11 @@ const Billing = () => {
   const getCategoryCounts = () => {
     // Start with 'all' category
     const counts = {
-      all: products.length
+      all: products.length,
     };
 
     // Dynamically count products by category
-    products.forEach(product => {
+    products.forEach((product) => {
       if (product.category) {
         if (!counts[product.category]) {
           counts[product.category] = 0;
@@ -259,11 +283,16 @@ const Billing = () => {
   const fetchProductData = async () => {
     try {
       setLoadingProducts(true);
-      const productres = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
+      const productres = await axios.get(
+        `${API_BASE_URL}/api/products/fetchAll`
+      );
 
       if (productres.data.data) {
         setProducts(productres.data.data);
-        console.log("Products fetched successfully:", productres.data.data.length);
+        console.log(
+          "Products fetched successfully:",
+          productres.data.data.length
+        );
       } else {
         console.log("No products found or invalid response format");
         setProducts([]);
@@ -501,12 +530,10 @@ const Billing = () => {
     setShowCustomerSearch(false);
   };
 
-  // Handle view all bills
   const handleViewAllBills = () => {
     setBillingPage(false);
   };
 
-  // Save bill to database and then print
   const printInvoice = async () => {
     if (cart.length === 0) {
       showNotification("Please add products to the cart", "error");
@@ -521,7 +548,6 @@ const Billing = () => {
     try {
       setLoading(true);
 
-      // Prepare bill data
       const billData = {
         billNumber: invoiceNumber,
         customerId: customer._id,
@@ -549,6 +575,7 @@ const Billing = () => {
         createdBy: user._id,
         createdAt: new Date(),
       };
+
       // Save bill to database
       const response = await axios.post(
         `${API_BASE_URL}/api/billing/savebill`,
@@ -559,11 +586,18 @@ const Billing = () => {
       if (response.data.success) {
         showNotification("Bill saved successfully", "success");
 
-        // Update recent bills with data from the server
         setRecentBills(response.data.recentbills || []);
 
-        window.print();
-        generateInvoiceNumber();
+        setTimeout(() => {
+          window.print();
+
+          setTimeout(() => {
+            generateInvoiceNumber();
+
+            setCart([]);
+            setCustomer(null)
+          }, 500);
+        }, 300);
       } else {
         showNotification(
           response.data.message || "Failed to save bill",
@@ -578,6 +612,52 @@ const Billing = () => {
     }
   };
 
+  const handleQRScan = async (productData) => {
+    console.log("QR scan result received:", productData);
+
+    if (productData && productData.id) {
+      try {
+        console.log(`Fetching product with ID: ${productData.id}`);
+
+        const response = await axios.get(
+          `${API_BASE_URL}/api/products/fetch/${productData.id}`
+        );
+
+        console.log("API response:", response.data);
+
+        if (response.data.success && response.data.data) {
+          console.log("Product data fetched successfully:", response.data.data);
+          addToCart(response.data.data);
+        } else {
+          console.error(
+            "API returned success: false or no data",
+            response.data
+          );
+          setMessage({
+            text: "Could not find product with the scanned ID",
+            type: "error",
+          });
+        }
+      } catch (error) {
+        // API call failed
+        console.error("Error fetching product by ID:", error);
+        setMessage({
+          text: `Error loading product: ${
+            error.response?.data?.error || error.message
+          }`,
+          type: "error",
+        });
+      }
+    } else {
+      // Invalid QR code data
+      console.error("Invalid QR code data:", productData);
+      setMessage({
+        text: "Invalid QR code data. Please try again.",
+        type: "error",
+      });
+    }
+  };
+
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       {notification.show && (
@@ -585,6 +665,22 @@ const Billing = () => {
           <p>{notification.message}</p>
         </div>
       )}
+
+      {/* Bill Preview Template for printing */}
+      <BillPreviewTemplate
+        invoiceNumber={invoiceNumber}
+        customer={customer}
+        cart={cart}
+        paymentMethod={paymentMethod}
+        tax={tax}
+        discount={discount}
+        note={note}
+        calculateSubtotal={calculateSubtotal}
+        calculateTaxAmount={calculateTaxAmount}
+        calculateDiscountAmount={calculateDiscountAmount}
+        calculateTotal={calculateTotal}
+      />
+
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
@@ -623,18 +719,42 @@ const Billing = () => {
             <div className="billing-container">
               <div className="billing-left-panel">
                 <div className="product-search-section">
-                  <div className="search-container">
-                    <FiSearch className="search-icon" />
-                    <input
-                      type="text"
-                      placeholder="Search products by name, brand, or description..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="search-input-bill"
-                    />
+                  <div className="ad-search-scan">
+                    <div className="search-container">
+                      <FiSearch className="search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Search products by name, brand, or description..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input-bill"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="ad-bill-scan"
+                      onClick={() => setShowQRScanner(true)}
+                    >
+                      <span className="scan-icon">📷</span> Scan QR Code
+                    </button>
                   </div>
-
-                  <div className="category-tabs">
+                  {showQRScanner && (
+                    <QRCodeScanner
+                      onScan={handleQRScan}
+                      onClose={() => {
+                        console.log("Closing QR scanner");
+                        // Use a longer delay to ensure camera cleanup completes before unmounting
+                        setTimeout(() => {
+                          console.log("Setting showQRScanner to false");
+                          setShowQRScanner(false);
+                        }, 500);
+                      }}
+                    />
+                  )}
+                  <div
+                    ref={categoryTabsRef}
+                    className={`category-tabs ${categoryTabsScrolled ? 'scrolled-left' : ''}`}
+                  >
                     {/* Always show "All Products" tab */}
                     <button
                       className={`category-tab ${
@@ -652,7 +772,8 @@ const Billing = () => {
                       .map(([category, count]) => {
                         // Choose icon based on category name
                         let CategoryIcon = FiPackage; // Default icon
-                        let categoryLabel = category.charAt(0).toUpperCase() + category.slice(1); // Capitalize first letter
+                        let categoryLabel =
+                          category.charAt(0).toUpperCase() + category.slice(1); // Capitalize first letter
 
                         // Assign specific icons based on category name
                         if (category === "mobiles") {
@@ -685,7 +806,8 @@ const Billing = () => {
                 <div className="product-count">
                   <span className="count-text">
                     {filteredProducts.length}{" "}
-                    {filteredProducts.length === 1 ? "product" : "products"} found
+                    {filteredProducts.length === 1 ? "product" : "products"}{" "}
+                    found
                   </span>
                   <div className="view-options">
                     <button className="view-option active" title="Grid View">
@@ -713,7 +835,9 @@ const Billing = () => {
                         onClick={() => product.stock > 0 && addToCart(product)}
                       >
                         <div className="product-image">
-                          {product.images && product.images.length > 0 && product.images[0] ? (
+                          {product.images &&
+                          product.images.length > 0 &&
+                          product.images[0] ? (
                             <img
                               src={product.images[0]}
                               alt={product.name}
@@ -724,7 +848,6 @@ const Billing = () => {
                               }}
                             />
                           ) : product.image ? (
-                            // Support for products with a single 'image' property instead of 'images' array
                             <img
                               src={product.image}
                               alt={product.name}
@@ -906,7 +1029,9 @@ const Billing = () => {
                                 className="customer-search-item"
                                 onClick={() => selectCustomer(c)}
                               >
-                                <div className="customer-name">{c.username}</div>
+                                <div className="customer-name">
+                                  {c.username}
+                                </div>
                                 <div className="customer-info">
                                   {c.mobile && (
                                     <span>
@@ -985,7 +1110,10 @@ const Billing = () => {
                                   <button
                                     className="quantity-btn"
                                     onClick={() =>
-                                      updateQuantity(item._id, item.quantity - 1)
+                                      updateQuantity(
+                                        item._id,
+                                        item.quantity - 1
+                                      )
                                     }
                                   >
                                     <FiMinus />
@@ -994,7 +1122,10 @@ const Billing = () => {
                                   <button
                                     className="quantity-btn"
                                     onClick={() =>
-                                      updateQuantity(item._id, item.quantity + 1)
+                                      updateQuantity(
+                                        item._id,
+                                        item.quantity + 1
+                                      )
                                     }
                                   >
                                     <FiPlus />
@@ -1038,7 +1169,9 @@ const Billing = () => {
                         min="0"
                         max="100"
                         value={tax}
-                        onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          setTax(parseFloat(e.target.value) || 0)
+                        }
                       />
                     </div>
                     <div className="discount-input">
@@ -1162,28 +1295,25 @@ const Billing = () => {
                       <tr key={index}>
                         <td>{bill.billNumber}</td>
                         <td>{bill.customerName}</td>
-                        <td>
-                          {bill.customerMobile}
-                        </td>
-                        <td>
-                          {new Date(bill.createdAt).toLocaleDateString()}
-                        </td>
-                        <td>
-                          {new Date(bill.createdAt).toLocaleTimeString()}
-                        </td>
+                        <td>{bill.customerMobile}</td>
+                        <td>{new Date(bill.createdAt).toLocaleDateString()}</td>
+                        <td>{new Date(bill.createdAt).toLocaleTimeString()}</td>
                         <td>₹{bill.subtotal.toFixed(2)}</td>
                         <td>₹{bill.discountAmount.toFixed(2)}</td>
                         <td>₹{bill.grandTotal.toFixed(2)}</td>
                         <td>
-                          <span className="status-badge paid">{bill.paymentStatus}/{bill.paymentMethod}</span>
+                          <span className="status-badge paid">
+                            {bill.paymentStatus}/{bill.paymentMethod}
+                          </span>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                  <button className="show-all-btn"
-                  onClick={handleViewAllBills}
-                  >Show more {recentBills.length > 5 ? recentBills.length - 5 : 0}</button>
+                <button className="show-all-btn" onClick={handleViewAllBills}>
+                  Show more{" "}
+                  {recentBills.length > 5 ? recentBills.length - 5 : 0}
+                </button>
               </div>
             </div>
           )}

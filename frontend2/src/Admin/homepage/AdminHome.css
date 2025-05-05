@@ -23,8 +23,8 @@
   .main-content {
     flex-grow: 1;
     background-color: #f5f7fa;
-    padding: 25px 30px;
-    margin-left: 260px; /* Matches expanded sidebar width */
+    padding: 0 30px;
+    margin-left: 260px; 
     overflow-y: auto;
     scrollbar-width: none;
     min-height: calc(100vh - 60px);
@@ -135,13 +135,15 @@
     box-shadow: 0 2px 4px rgba(46, 204, 113, 0.2);
   }
 
-  .logout-btn {
-    background-color: #e74c3c;
-    box-shadow: 0 4px 6px rgba(231, 76, 60, 0.2);
-  }
+    .logout-btn {
+      background-color: #e74c3c;
+      color: #fff;
+      box-shadow: 0 4px 6px rgba(231, 76, 60, 0.2);
+    }
 
   .btn-icon {
     font-size: 1.1rem;
+    color: #fff;
   }
 
   .logout-btn:hover {

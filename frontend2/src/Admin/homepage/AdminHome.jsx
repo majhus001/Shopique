@@ -27,9 +27,10 @@ const AdminHome = () => {
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [userData, setUserData] = useState([]);
+  const [customersDataRes, setCustomersDataRes] = useState([]);
   const [recactivity, setRecactivity] = useState([]);
   const [pendingOrders, setUsersPendingOrder] = useState([]);
-  const [mobileprod, setMobileProducts] = useState([]);
+  const [productsRes, setProductsRes] = useState([]);
   const [clothprod, setClothProducts] = useState([]);
   const [homeappliprod, setHomeAppliProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -95,23 +96,25 @@ const AdminHome = () => {
         setLoading(true);
         const [
           userDataRes,
+          customersDataRes,
           userRecActRes,
-          mobileProdRes,
+          productsRes,
           clothProdRes,
           homeAppliRes,
         ] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/admin/userdata`),
+          axios.get(`${API_BASE_URL}/api/customers/fetch`),
           axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
-          axios.get(`${API_BASE_URL}/api/admin/fetchmobiles`),
+          axios.get(`${API_BASE_URL}/api/products/fetchAll`),
           axios.get(`${API_BASE_URL}/api/admin/fetchcloths`),
           axios.get(`${API_BASE_URL}/api/admin/fetchhomeappliance`),
         ]);
 
         setUserData(userDataRes.data);
+        setCustomersDataRes(customersDataRes.data.data);
         setRecactivity(userRecActRes.data);
-        setMobileProducts(mobileProdRes.data);
-        setClothProducts(clothProdRes.data);
-        setHomeAppliProducts(homeAppliRes.data);
+        setProductsRes(productsRes.data.data);
+        
       } catch (err) {
         console.error("Error fetching additional data:", err);
       } finally {
@@ -140,6 +143,8 @@ const AdminHome = () => {
 
   const handleUsemanclk = () =>
     navigate("/userman", { state: { user, orders } });
+  const handlecustomersclk = () =>
+    navigate("/customers", { state: { user, orders } });
   const handleOrderclk = () =>
     navigate("/adorders", { state: { user, orders } });
   const handleProdclk = () =>
@@ -197,8 +202,19 @@ const AdminHome = () => {
                 <FiUsers className="card-icon" />
               </div>
               <div className="card-content">
-                <h3>Total Users</h3>
+                <h3>Total Online Users</h3>
                 <p>{userData.length}</p>
+                <span className="card-description">Registered accounts</span>
+              </div>
+            </div>
+
+            <div className="ad-det-card" onClick={handlecustomersclk}>
+              <div className="card-icon-wrapper users-icon">
+                <FiUsers className="card-icon" />
+              </div>
+              <div className="card-content">
+                <h3>Total Customers</h3>
+                <p>{customersDataRes.length}</p>
                 <span className="card-description">Registered accounts</span>
               </div>
             </div>
@@ -209,7 +225,7 @@ const AdminHome = () => {
               </div>
               <div className="card-content">
                 <h3>Total Products</h3>
-                <p>{mobileprod.length + clothprod.length + homeappliprod.length}</p>
+                <p>{productsRes.length }</p>
                 <span className="card-description">Items in inventory</span>
               </div>
             </div>

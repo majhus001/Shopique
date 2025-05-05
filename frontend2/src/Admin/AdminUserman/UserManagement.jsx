@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
 import "./Usermanagement.css";
-import "./UserActionButtons.css"; // Import the new action buttons styles
 import Sidebar from "../sidebar/Sidebar";
 import {
   FiUsers,
@@ -233,7 +232,7 @@ const UserManagement = () => {
         <div className="main-content">
           <header className="admin-header">
             <div className="header-greeting">
-              <h1><FiUsers className="header-icon" /> User Management</h1>
+              <h1><FiUsers className="header-icon" /> Online Users Management</h1>
               <p className="subtitle">Manage and monitor user accounts</p>
             </div>
             <div className="admin-info">

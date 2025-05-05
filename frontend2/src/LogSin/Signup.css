@@ -1,7 +1,7 @@
 /* Enhanced Signup.css */
 
 /* Outer container with background gradient */
-.outer {
+.ad-outer {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,8 +27,8 @@
 }
 
 /* Background decorative elements */
-.outer::before,
-.outer::after {
+.ad-outer::before,
+.ad-outer::after {
     content: '';
     position: absolute;
     width: 400px;
@@ -39,13 +39,13 @@
     animation: float 8s ease-in-out infinite;
 }
 
-.outer::before {
+.ad-outer::before {
     top: -150px;
     right: -150px;
     animation-delay: 0s;
 }
 
-.outer::after {
+.ad-outer::after {
     bottom: -150px;
     left: -150px;
     animation-delay: 4s;
@@ -65,7 +65,7 @@
 
 
 /* Signup container with enhanced styling */
-.su-container {
+.ad-su-container {
     width: 100%;
     max-width: 420px;
     padding: 40px;
@@ -93,14 +93,14 @@
     }
 }
 
-.su-container:hover {
+.ad-su-container:hover {
     transform: translateY(-5px);
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2), 0 15px 25px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 /* Logo and branding */
-.brand-logo {
+.ad-brand-logo {
     width: 90px;
     height: 90px;
     margin: 0 auto 25px;
@@ -118,7 +118,7 @@
     animation: pulse 2s infinite;
 }
 
-.brand-logo::before {
+.ad-brand-logo::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -154,7 +154,7 @@
 }
 
 /* Heading with enhanced styling */
-.su-container h2 {
+.ad-su-container h2 {
     font-size: 34px;
     background: linear-gradient(135deg, #6a11cb, #2575fc);
     background-clip: text;
@@ -168,7 +168,7 @@
     animation: fadeIn 1s ease;
 }
 
-.su-container h2::after {
+.ad-su-container h2::after {
     content: '';
     position: absolute;
     bottom: -10px;
@@ -191,19 +191,19 @@
 }
 
 /* Form styling */
-.form {
+.ad-form {
     margin-top: 30px;
 }
 
 /* Form group with floating labels */
-.lg-input-group {
+.ad-input-group {
     margin-bottom: 25px;
     text-align: left;
     width: 100%;
     position: relative;
 }
 
-.label {
+.ad-label {
     font-size: 14px;
     color: #555;
     margin-bottom: 8px;
@@ -213,12 +213,12 @@
 }
 
 /* Input wrapper for icons */
-.input-wrapper {
+.ad-input-wrapper {
     position: relative;
 }
 
 /* Input field with enhanced styling */
-.input {
+.ad-input {
     width: 100%;
     padding: 15px 20px;
     font-size: 15px;
@@ -231,14 +231,14 @@
     padding-right: 40px; /* Space for icon */
 }
 
-.input:focus {
+.ad-input:focus {
     border-color: #6a11cb;
     box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1);
     background-color: #fff;
 }
 
 /* Input icons */
-.input-icon {
+.ad-input-icon {
     position: absolute;
     top: 50%;
     right: 15px;
@@ -248,17 +248,17 @@
     font-size: 16px;
 }
 
-.input:focus + .input-icon {
+.ad-input:focus + .ad-input-icon {
     color: #6a11cb;
 }
 
 /* OTP Container */
-.otp-container {
+.ad-otp-container {
     margin-top: 25px;
     animation: fadeIn 0.8s ease;
 }
 
-.otp-info {
+.ad-otp-info {
     margin-bottom: 25px;
     color: #555;
     font-size: 15px;
@@ -269,7 +269,7 @@
     border-left: 3px solid rgba(106, 17, 203, 0.5);
 }
 
-.otp-input {
+.ad-otp-input {
     letter-spacing: 8px;
     font-size: 18px;
     text-align: center;
@@ -277,7 +277,7 @@
     padding-left: 15px !important;
 }
 
-.resend-otp {
+.ad-resend-otp {
     margin-top: 20px;
     font-size: 14px;
     color: #555;
@@ -287,7 +287,7 @@
     background: rgba(0, 0, 0, 0.02);
 }
 
-.resend-otp a {
+.ad-resend-otp a {
     color: #6a11cb;
     text-decoration: none;
     font-weight: 600;
@@ -296,7 +296,7 @@
     padding: 2px 4px;
 }
 
-.resend-otp a::after {
+.ad-resend-otp a::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -307,11 +307,11 @@
     transition: width 0.3s ease;
 }
 
-.resend-otp a:hover {
+.ad-resend-otp a:hover {
     color: #2575fc;
 }
 
-.resend-otp a:hover::after {
+.ad-resend-otp a:hover::after {
     width: 100%;
 }
 
@@ -373,7 +373,7 @@
 }
 
 /* Message styling with animation */
-.message {
+.ad-message {
     margin-top: 20px;
     font-size: 14px;
     padding: 10px 15px;
@@ -382,13 +382,13 @@
     font-weight: 500;
 }
 
-.message.error {
+.ad-message.ad-error {
     color: #e74c3c;
     background-color: rgba(231, 76, 60, 0.1);
     border-left: 3px solid #e74c3c;
 }
 
-.message.success {
+.ad-message.ad-success {
     color: #2ecc71;
     background-color: rgba(46, 204, 113, 0.1);
     border-left: 3px solid #2ecc71;
@@ -406,33 +406,33 @@
 }
 
 /* Divider */
-.divider {
+.ad-divider {
     display: flex;
     align-items: center;
     margin: 25px 0;
 }
 
-.divider-line {
+.ad-divider-line {
     flex-grow: 1;
     height: 1px;
     background-color: #e0e0e0;
 }
 
-.divider-text {
+.ad-divider-text {
     padding: 0 15px;
     color: #888;
     font-size: 14px;
 }
 
 /* Social login options */
-.social-login {
+.ad-social-login {
     margin-top: 30px;
     display: flex;
     justify-content: center;
     gap: 15px;
 }
 
-.social-btn {
+.ad-social-btn {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -448,28 +448,28 @@
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
-.social-btn:hover {
+.ad-social-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
-.social-btn.facebook {
+.ad-social-btn.ad-facebook {
     background-color: #3b5998;
     color: white;
 }
 
-.social-btn.google {
+.ad-social-btn.ad-google {
     background-color: #db4437;
     color: white;
 }
 
-.social-btn.twitter {
+.ad-social-btn.ad-twitter {
     background-color: #1da1f2;
     color: white;
 }
 
 /* Link styling */
-.login-link {
+.ad-login-link {
     margin-top: 25px;
     font-size: 15px;
     color: #555;
@@ -477,7 +477,7 @@
     padding-top: 15px;
 }
 
-.login-link::before {
+.ad-login-link::before {
     content: '';
     position: absolute;
     top: 0;
@@ -488,7 +488,7 @@
     background-color: #e0e0e0;
 }
 
-.login-link a {
+.ad-login-link a {
     color: #2575fc;
     text-decoration: none;
     font-weight: 600;
@@ -497,7 +497,7 @@
     padding-bottom: 2px;
 }
 
-.login-link a::after {
+.ad-login-link a::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -508,11 +508,11 @@
     transition: width 0.3s ease;
 }
 
-.login-link a:hover {
+.ad-login-link a:hover {
     color: #6a11cb;
 }
 
-.login-link a:hover::after {
+.ad-login-link a:hover::after {
     width: 100%;
 }
 

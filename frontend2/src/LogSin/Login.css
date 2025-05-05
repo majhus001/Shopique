@@ -1,7 +1,7 @@
 /* Enhanced Login.css */
 
 /* Modern outer container with enhanced background */
-.outer {
+.ad-outer {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,8 +28,8 @@
 }
 
 /* Enhanced background decorative elements */
-.outer::before,
-.outer::after {
+.ad-outer::before,
+.ad-outer::after {
     content: '';
     position: absolute;
     border-radius: 50%;
@@ -39,7 +39,7 @@
     animation: float 15s ease-in-out infinite;
 }
 
-.outer::before {
+.ad-outer::before {
     width: 500px;
     height: 500px;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
@@ -48,7 +48,7 @@
     animation-delay: 0s;
 }
 
-.outer::after {
+.ad-outer::after {
     width: 600px;
     height: 600px;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
@@ -58,7 +58,7 @@
 }
 
 /* Additional decorative elements */
-.outer::before {
+.ad-outer::before {
     box-shadow: 0 0 80px 20px rgba(255, 255, 255, 0.2);
 }
 
@@ -138,7 +138,7 @@
 }
 
 /* Modern logo and branding */
-.brand-logo {
+.ad-brand-logo {
     width: 90px;
     height: 90px;
     margin: 0 auto 30px;
@@ -156,7 +156,7 @@
     animation: pulse 3s infinite;
 }
 
-.brand-logo::before {
+.ad-brand-logo::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -168,7 +168,7 @@
 }
 
 /* Add a glow effect */
-.brand-logo::after {
+.ad-brand-logo::after {
     content: '';
     position: absolute;
     top: 0;
@@ -252,13 +252,13 @@
 }
 
 /* Form styling */
-.form {
+.ad-form {
     margin-top: 35px;
     width: 100%;
 }
 
 /* Modern form group with floating labels */
-.lg-input-group {
+.ad-input-group {
     margin-bottom: 28px;
     text-align: left;
     width: 100%;
@@ -266,12 +266,12 @@
     transition: all 0.3s ease;
 }
 
-.lg-input-group:hover .label {
+.ad-input-group:hover .ad-label {
     color: white;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.label {
+.ad-label {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 8px;
@@ -283,13 +283,13 @@
 }
 
 /* Input wrapper for icons */
-.input-wrapper {
+.ad-input-wrapper {
     position: relative;
     transition: all 0.3s ease;
 }
 
 /* Input field with glass morphism styling */
-.input {
+.ad-input {
     width: 100%;
     padding: 16px 20px;
     font-size: 15px;
@@ -304,16 +304,16 @@
     backdrop-filter: blur(5px);
 }
 
-.input::placeholder {
+.ad-input::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
 
-.input:hover {
+.ad-input:hover {
     border-color: rgba(255, 255, 255, 0.3);
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-.input:focus {
+.ad-input:focus {
     border-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
     background-color: rgba(255, 255, 255, 0.2);
@@ -321,7 +321,7 @@
 }
 
 /* Input icons */
-.input-icon {
+.ad-input-icon {
     position: absolute;
     top: 50%;
     right: 18px;
@@ -332,25 +332,25 @@
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
 }
 
-.input-wrapper:hover .input-icon {
+.ad-input-wrapper:hover .ad-input-icon {
     color: rgba(255, 255, 255, 0.8);
 }
 
-.input:focus + .input-icon {
+.ad-input:focus + .ad-input-icon {
     color: white;
     transform: translateY(-50%) scale(1.1);
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
 }
 
 /* Modern forgot password link */
-.forgot-password {
+.ad-forgot-password {
     text-align: right;
     margin-top: -10px;
     margin-bottom: 25px;
     position: relative;
 }
 
-.forgot-password a {
+.ad-forgot-password a {
     color: rgba(255, 255, 255, 0.7);
     font-size: 13px;
     text-decoration: none;
@@ -361,7 +361,7 @@
     letter-spacing: 0.3px;
 }
 
-.forgot-password a::after {
+.ad-forgot-password a::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -374,12 +374,12 @@
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
-.forgot-password a:hover {
+.ad-forgot-password a:hover {
     color: white;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.forgot-password a:hover::after {
+.ad-forgot-password a:hover::after {
     width: 100%;
 }
 
@@ -441,7 +441,7 @@
 }
 
 /* Modern message styling with animation */
-.message {
+.ad-message {
     margin-top: 20px;
     font-size: 14px;
     padding: 12px 18px;
@@ -456,7 +456,7 @@
     letter-spacing: 0.3px;
 }
 
-.message::before {
+.ad-message::before {
     content: '';
     position: absolute;
     top: 0;
@@ -465,26 +465,26 @@
     height: 100%;
 }
 
-.message.error {
+.ad-message.ad-error {
     color: #ff6b6b;
     background-color: rgba(255, 107, 107, 0.1);
     border-left: 3px solid #ff6b6b;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.message.error::before {
+.ad-message.ad-error::before {
     background-color: #ff6b6b;
     box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
 }
 
-.message.success {
+.ad-message.ad-success {
     color: #2ecc71;
     background-color: rgba(46, 204, 113, 0.1);
     border-left: 3px solid #2ecc71;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.message.success::before {
+.ad-message.ad-success::before {
     background-color: #2ecc71;
     box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
 }
@@ -501,20 +501,20 @@
 }
 
 /* Modern divider */
-.divider {
+.ad-divider {
     display: flex;
     align-items: center;
     margin: 30px 0;
     position: relative;
 }
 
-.divider-line {
+.ad-divider-line {
     flex-grow: 1;
     height: 1px;
     background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
 }
 
-.divider-text {
+.ad-divider-text {
     padding: 0 18px;
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
@@ -526,7 +526,7 @@
 }
 
 /* Modern social login options */
-.social-login {
+.ad-social-login {
     margin-top: 30px;
     display: flex;
     justify-content: center;
@@ -534,7 +534,7 @@
     animation: fadeIn 1s ease;
 }
 
-.social-btn {
+.ad-social-btn {
     width: 55px;
     height: 55px;
     border-radius: 50%;
@@ -554,7 +554,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.social-btn::before {
+.ad-social-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -566,40 +566,40 @@
     transition: opacity 0.3s ease;
 }
 
-.social-btn:hover {
+.ad-social-btn:hover {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.social-btn:hover::before {
+.ad-social-btn:hover::before {
     opacity: 0.8;
 }
 
-.social-btn:active {
+.ad-social-btn:active {
     transform: translateY(-2px);
 }
 
-.social-btn.facebook {
+.ad-social-btn.ad-facebook {
     background-color: rgba(59, 89, 152, 0.8);
     color: white;
     box-shadow: 0 5px 15px rgba(59, 89, 152, 0.3);
 }
 
-.social-btn.google {
+.ad-social-btn.ad-google {
     background-color: rgba(219, 68, 55, 0.8);
     color: white;
     box-shadow: 0 5px 15px rgba(219, 68, 55, 0.3);
 }
 
-.social-btn.twitter {
+.ad-social-btn.ad-twitter {
     background-color: rgba(29, 161, 242, 0.8);
     color: white;
     box-shadow: 0 5px 15px rgba(29, 161, 242, 0.3);
 }
 
 /* Modern link styling */
-.login-link {
+.ad-login-link {
     margin-top: 30px;
     font-size: 15px;
     color: rgba(255, 255, 255, 0.7);
@@ -611,7 +611,7 @@
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.login-link::before {
+.ad-login-link::before {
     content: '';
     position: absolute;
     top: 0;
@@ -623,7 +623,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.login-link a {
+.ad-login-link a {
     color: white;
     text-decoration: none;
     font-weight: 600;
@@ -633,7 +633,7 @@
     margin-left: 5px;
 }
 
-.login-link a::after {
+.ad-login-link a::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -645,11 +645,11 @@
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.login-link a:hover {
+.ad-login-link a:hover {
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.login-link a:hover::after {
+.ad-login-link a:hover::after {
     width: 100%;
 }
 
