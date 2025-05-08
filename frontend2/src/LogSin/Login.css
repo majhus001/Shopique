@@ -5,12 +5,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
+    width: 100vw;
     background: linear-gradient(125deg, #4158D0, #C850C0, #FFCC70);
     background-size: 300% 300%;
     font-family: 'Poppins', sans-serif;
     margin: 0;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
     animation: gradientShift 15s ease infinite;
 }
@@ -81,10 +86,10 @@
 /* Modern login container with glass morphism effect */
 .ad-lg-container {
     width: 100%;
-    max-width: 420px;
-    padding: 40px;
+    max-width: 380px;
+    padding: 20px;
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 24px;
+    border-radius: 20px;
     box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
     text-align: center;
     position: relative;
@@ -96,6 +101,9 @@
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     animation: fadeInUp 0.8s ease forwards;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Container shine effect */
@@ -139,16 +147,16 @@
 
 /* Modern logo and branding */
 .ad-brand-logo {
-    width: 90px;
-    height: 90px;
-    margin: 0 auto 30px;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #C850C0, #4158D0);
     border-radius: 50%;
     color: white;
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     font-weight: bold;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     position: relative;
@@ -215,9 +223,9 @@
 
 /* Modern heading with enhanced styling */
 .ad-lg-container h2 {
-    font-size: 34px;
+    font-size: 24px;
     color: white;
-    margin-bottom: 30px;
+    margin-bottom: 8px;
     font-weight: 700;
     position: relative;
     display: inline-block;
@@ -240,6 +248,124 @@
     animation: expandWidth 1.5s ease-out forwards;
 }
 
+/* Enhanced User type selector */
+.ad-user-type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 8px 0 12px;
+    position: relative;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.ad-user-type-selector::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    z-index: -1;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1));
+    border-radius: 18px;
+    pointer-events: none;
+}
+
+.ad-user-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: rgba(255, 255, 255, 0.7);
+    width: 100px;
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+}
+
+.ad-user-type-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(200, 80, 192, 0.2), rgba(65, 88, 208, 0.2));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+
+.ad-user-type-btn.active {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.ad-user-type-btn.active::before {
+    opacity: 1;
+}
+
+.ad-user-type-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.ad-user-type-btn:hover::before {
+    opacity: 0.5;
+}
+
+.ad-user-type-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.ad-user-type-btn.active .ad-user-type-icon {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+    animation: ad-pulse-icon 2s infinite ease-in-out;
+}
+
+@keyframes ad-pulse-icon {
+    0% { transform: scale(1.2); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.2); }
+}
+
+.ad-user-type-btn span {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.ad-user-type-btn.active span {
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
 @keyframes expandWidth {
     from {
         width: 0;
@@ -259,7 +385,7 @@
 
 /* Modern form group with floating labels */
 .ad-input-group {
-    margin-bottom: 28px;
+    margin-bottom: 12px;
     text-align: left;
     width: 100%;
     position: relative;
@@ -272,13 +398,13 @@
 }
 
 .ad-label {
-    font-size: 14px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     display: block;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.3s ease;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -291,15 +417,15 @@
 /* Input field with glass morphism styling */
 .ad-input {
     width: 100%;
-    padding: 16px 20px;
-    font-size: 15px;
+    padding: 10px 14px;
+    font-size: 13px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
+    border-radius: 10px;
     outline: none;
     transition: all 0.3s ease;
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
-    padding-right: 45px; /* Space for icon */
+    padding-right: 36px; /* Space for icon */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(5px);
 }
@@ -324,11 +450,11 @@
 .ad-input-icon {
     position: absolute;
     top: 50%;
-    right: 18px;
+    right: 14px;
     transform: translateY(-50%);
     color: rgba(255, 255, 255, 0.6);
     transition: all 0.3s ease;
-    font-size: 18px;
+    font-size: 16px;
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
 }
 
@@ -345,14 +471,14 @@
 /* Modern forgot password link */
 .ad-forgot-password {
     text-align: right;
-    margin-top: -10px;
-    margin-bottom: 25px;
+    margin-top: -6px;
+    margin-bottom: 10px;
     position: relative;
 }
 
 .ad-forgot-password a {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 13px;
+    font-size: 11px;
     text-decoration: none;
     transition: all 0.3s ease;
     font-weight: 500;
@@ -442,10 +568,10 @@
 
 /* Modern message styling with animation */
 .ad-message {
-    margin-top: 20px;
-    font-size: 14px;
-    padding: 12px 18px;
-    border-radius: 12px;
+    margin-top: 10px;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 10px;
     animation: fadeInUp 0.5s ease;
     font-weight: 500;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -504,7 +630,7 @@
 .ad-divider {
     display: flex;
     align-items: center;
-    margin: 30px 0;
+    margin: 15px 0;
     position: relative;
 }
 
@@ -527,16 +653,16 @@
 
 /* Modern social login options */
 .ad-social-login {
-    margin-top: 30px;
+    margin-top: 10px;
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 12px;
     animation: fadeIn 1s ease;
 }
 
 .ad-social-btn {
-    width: 55px;
-    height: 55px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -544,7 +670,7 @@
     border: none;
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
-    font-size: 22px;
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -600,11 +726,11 @@
 
 /* Modern link styling */
 .ad-login-link {
-    margin-top: 30px;
-    font-size: 15px;
+    margin-top: 10px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.7);
     position: relative;
-    padding-top: 20px;
+    padding-top: 8px;
     font-weight: 500;
     animation: fadeIn 1.2s ease;
     letter-spacing: 0.3px;
@@ -687,45 +813,66 @@
 /* Enhanced Responsive Design */
 @media (max-width: 480px) {
     .ad-lg-container {
-        padding: 35px 25px;
+        padding: 25px 20px;
         max-width: 92%;
-        margin: 0 15px;
+        margin: 20px 15px;
     }
 
     .ad-lg-container h2 {
         font-size: 28px;
     }
 
-    .brand-logo {
+    .ad-brand-logo {
         width: 75px;
         height: 75px;
         font-size: 1.9rem;
     }
 
-    .input {
+    .ad-input {
         padding: 14px 16px;
         font-size: 14px;
     }
 
-    .label {
+    .ad-label {
         font-size: 13px;
     }
 
-    .auth-button {
+    .ad-user-type-selector {
+        gap: 10px;
+        padding: 4px;
+        margin: 20px 0 15px;
+    }
+
+    .ad-user-type-btn {
+        padding: 12px 10px;
+        width: auto;
+        flex: 1;
+    }
+
+    .ad-user-type-icon {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    .ad-user-type-btn span {
+        font-size: 12px;
+    }
+
+    .ad-auth-button {
         padding: 14px;
     }
 
-    .social-btn {
+    .ad-social-btn {
         width: 48px;
         height: 48px;
         font-size: 18px;
     }
 
-    .login-link, .divider-text {
+    .ad-login-link, .ad-divider-text {
         font-size: 14px;
     }
 
-    .message {
+    .ad-message {
         font-size: 13px;
         padding: 10px 15px;
     }
@@ -737,7 +884,7 @@
         max-width: 95%;
     }
 
-    .brand-logo {
+    .ad-brand-logo {
         width: 70px;
         height: 70px;
         font-size: 1.7rem;
@@ -746,28 +893,46 @@
 
     .ad-lg-container h2 {
         font-size: 26px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
-    .lg-input-group {
+    .ad-input-group {
         margin-bottom: 22px;
     }
 
-    .social-login {
+    .ad-user-type-selector {
+        flex-direction: column;
+        gap: 8px;
+        margin: 15px 0;
+    }
+
+    .ad-user-type-btn {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px 15px;
+    }
+
+    .ad-user-type-icon {
+        margin-bottom: 0;
+    }
+
+    .ad-social-login {
         gap: 15px;
     }
 
-    .social-btn {
+    .ad-social-btn {
         width: 45px;
         height: 45px;
         font-size: 16px;
     }
 
-    .forgot-password a {
+    .ad-forgot-password a {
         font-size: 12px;
     }
 
-    .login-link {
+    .ad-login-link {
         font-size: 13px;
     }
 }

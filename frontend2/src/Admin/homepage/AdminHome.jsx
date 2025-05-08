@@ -23,6 +23,7 @@ const AdminHome = () => {
 
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
+  const isEmployee = location.state?.isEmployee || null;
 
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);

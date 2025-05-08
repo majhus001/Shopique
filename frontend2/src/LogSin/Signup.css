@@ -1,15 +1,21 @@
 /* Enhanced Signup.css */
 
-/* Outer container with background gradient */
+/* Modern outer container with enhanced background */
 .ad-outer {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(125deg, #4158D0, #C850C0, #FFCC70);
+    background-size: 300% 300%;
     font-family: 'Poppins', sans-serif;
     margin: 0;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
     animation: gradientShift 15s ease infinite;
 }
@@ -26,60 +32,93 @@
     }
 }
 
-/* Background decorative elements */
+/* Enhanced background decorative elements */
 .ad-outer::before,
 .ad-outer::after {
     content: '';
     position: absolute;
-    width: 400px;
-    height: 400px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
     z-index: 0;
-    animation: float 8s ease-in-out infinite;
+    filter: blur(20px);
+    opacity: 0.6;
+    animation: float 15s ease-in-out infinite;
 }
 
 .ad-outer::before {
-    top: -150px;
-    right: -150px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+    top: -200px;
+    right: -100px;
     animation-delay: 0s;
 }
 
 .ad-outer::after {
-    bottom: -150px;
-    left: -150px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
+    bottom: -200px;
+    left: -100px;
     animation-delay: 4s;
 }
 
+/* Additional decorative elements */
+.ad-outer::before {
+    box-shadow: 0 0 80px 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Floating animation */
 @keyframes float {
     0% {
-        transform: translateY(0) rotate(0deg);
+        transform: translateY(0) rotate(0deg) scale(1);
     }
-    50% {
-        transform: translateY(-20px) rotate(5deg);
+    33% {
+        transform: translateY(-30px) rotate(5deg) scale(1.05);
+    }
+    66% {
+        transform: translateY(20px) rotate(-3deg) scale(0.95);
     }
     100% {
-        transform: translateY(0) rotate(0deg);
+        transform: translateY(0) rotate(0deg) scale(1);
     }
 }
 
 
-/* Signup container with enhanced styling */
+/* Signup container with glass morphism styling */
 .ad-su-container {
     width: 100%;
-    max-width: 420px;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+    max-width: 380px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     text-align: center;
     position: relative;
     z-index: 1;
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.5s ease;
     animation: fadeInUp 0.8s ease forwards;
+    margin: 0;
+}
+
+.ad-su-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    z-index: -1;
+    animation: ad-pulse 10s infinite linear;
+}
+
+@keyframes ad-pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 0.5; }
 }
 
 @keyframes fadeInUp {
@@ -95,27 +134,29 @@
 
 .ad-su-container:hover {
     transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2), 0 15px 25px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* Logo and branding */
 .ad-brand-logo {
-    width: 90px;
-    height: 90px;
-    margin: 0 auto 25px;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     color: white;
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: bold;
-    box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     position: relative;
     overflow: hidden;
-    animation: pulse 2s infinite;
+    animation: ad-logo-pulse 2s infinite;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .ad-brand-logo::before {
@@ -126,25 +167,25 @@
     width: 200%;
     height: 200%;
     background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-    animation: shine 3s infinite;
+    animation: ad-logo-shine 6s infinite linear;
 }
 
-@keyframes pulse {
+@keyframes ad-logo-pulse {
     0% {
         transform: scale(1);
-        box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
     50% {
         transform: scale(1.05);
-        box-shadow: 0 12px 25px rgba(106, 17, 203, 0.5);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
     }
     100% {
         transform: scale(1);
-        box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
 }
 
-@keyframes shine {
+@keyframes ad-logo-shine {
     0% {
         transform: rotate(0deg);
     }
@@ -155,17 +196,15 @@
 
 /* Heading with enhanced styling */
 .ad-su-container h2 {
-    font-size: 34px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 30px;
+    font-size: 30px;
+    color: white;
+    margin-bottom: 15px;
     font-weight: 700;
     position: relative;
     display: inline-block;
     letter-spacing: 0.5px;
     animation: fadeIn 1s ease;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .ad-su-container h2::after {
@@ -175,9 +214,10 @@
     left: 50%;
     transform: translateX(-50%);
     width: 60px;
-    height: 4px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    height: 3px;
+    background: white;
     border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
     animation: expandWidth 1.5s ease-out forwards;
 }
 
@@ -197,7 +237,7 @@
 
 /* Form group with floating labels */
 .ad-input-group {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     text-align: left;
     width: 100%;
     position: relative;
@@ -205,11 +245,12 @@
 
 .ad-label {
     font-size: 14px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.8);
     margin-bottom: 8px;
     display: block;
     font-weight: 500;
     transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Input wrapper for icons */
@@ -217,24 +258,30 @@
     position: relative;
 }
 
-/* Input field with enhanced styling */
+/* Input field with glass morphism styling */
 .ad-input {
     width: 100%;
-    padding: 15px 20px;
+    padding: 14px 18px;
     font-size: 15px;
-    border: 2px solid #e0e0e0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
     outline: none;
     transition: all 0.3s ease;
-    background-color: #f9f9f9;
-    color: #333;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
     padding-right: 40px; /* Space for icon */
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ad-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .ad-input:focus {
-    border-color: #6a11cb;
-    box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1);
-    background-color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Input icons */
@@ -243,13 +290,13 @@
     top: 50%;
     right: 15px;
     transform: translateY(-50%);
-    color: #aaa;
+    color: rgba(255, 255, 255, 0.6);
     transition: all 0.3s ease;
     font-size: 16px;
 }
 
 .ad-input:focus + .ad-input-icon {
-    color: #6a11cb;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /* OTP Container */
@@ -260,13 +307,14 @@
 
 .ad-otp-info {
     margin-bottom: 25px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 15px;
     line-height: 1.6;
-    background: rgba(106, 17, 203, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     padding: 15px;
     border-radius: 12px;
-    border-left: 3px solid rgba(106, 17, 203, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
 }
 
 .ad-otp-input {
@@ -280,15 +328,17 @@
 .ad-resend-otp {
     margin-top: 20px;
     font-size: 14px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.8);
     position: relative;
     padding: 10px;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ad-resend-otp a {
-    color: #6a11cb;
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -303,12 +353,13 @@
     left: 0;
     width: 0;
     height: 1px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    background: rgba(255, 255, 255, 0.7);
     transition: width 0.3s ease;
 }
 
 .ad-resend-otp a:hover {
-    color: #2575fc;
+    color: white;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .ad-resend-otp a:hover::after {
@@ -376,22 +427,25 @@
 .ad-message {
     margin-top: 20px;
     font-size: 14px;
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 12px 15px;
+    border-radius: 12px;
     animation: fadeIn 0.5s ease;
     font-weight: 500;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .ad-message.ad-error {
-    color: #e74c3c;
-    background-color: rgba(231, 76, 60, 0.1);
-    border-left: 3px solid #e74c3c;
+    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(231, 76, 60, 0.2);
+    border-left: 3px solid rgba(231, 76, 60, 0.7);
 }
 
 .ad-message.ad-success {
-    color: #2ecc71;
-    background-color: rgba(46, 204, 113, 0.1);
-    border-left: 3px solid #2ecc71;
+    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(46, 204, 113, 0.2);
+    border-left: 3px solid rgba(46, 204, 113, 0.7);
 }
 
 @keyframes fadeIn {
@@ -415,13 +469,14 @@
 .ad-divider-line {
     flex-grow: 1;
     height: 1px;
-    background-color: #e0e0e0;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .ad-divider-text {
     padding: 0 15px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
+    font-weight: 500;
 }
 
 /* Social login options */
@@ -439,40 +494,40 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    background-color: #f5f5f5;
-    color: #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
     font-size: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
 }
 
 .ad-social-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .ad-social-btn.ad-facebook {
-    background-color: #3b5998;
-    color: white;
+    background-color: rgba(59, 89, 152, 0.2);
 }
 
 .ad-social-btn.ad-google {
-    background-color: #db4437;
-    color: white;
+    background-color: rgba(219, 68, 55, 0.2);
 }
 
 .ad-social-btn.ad-twitter {
-    background-color: #1da1f2;
-    color: white;
+    background-color: rgba(29, 161, 242, 0.2);
 }
 
 /* Link styling */
 .ad-login-link {
     margin-top: 25px;
     font-size: 15px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.8);
     position: relative;
     padding-top: 15px;
 }
@@ -485,11 +540,11 @@
     transform: translateX(-50%);
     width: 60px;
     height: 1px;
-    background-color: #e0e0e0;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .ad-login-link a {
-    color: #2575fc;
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -504,12 +559,14 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    background: white;
     transition: width 0.3s ease;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .ad-login-link a:hover {
-    color: #6a11cb;
+    color: white;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .ad-login-link a:hover::after {
@@ -549,85 +606,99 @@
 
 /* Responsive Design */
 @media (max-width: 480px) {
-    .su-container {
-        padding: 35px 25px;
+    .ad-su-container {
+        padding: 25px 20px;
         max-width: 92%;
-        margin: 0 15px;
+        margin: 20px 15px;
     }
 
-    .su-container h2 {
+    .ad-su-container h2 {
         font-size: 28px;
     }
 
-    .brand-logo {
+    .ad-brand-logo {
         width: 75px;
         height: 75px;
         font-size: 1.9rem;
     }
 
-    .input {
+    .ad-input {
         padding: 14px 16px;
         font-size: 14px;
     }
 
-    .label {
+    .ad-label {
         font-size: 13px;
     }
 
-    .otp-input {
+    .ad-otp-input {
         letter-spacing: 6px;
         font-size: 16px;
     }
 
-    .otp-info {
+    .ad-otp-info {
         font-size: 14px;
         padding: 12px;
     }
 
-    .auth-button {
+    .ad-auth-button {
         padding: 14px;
     }
 
-    .social-btn {
+    .ad-social-btn {
         width: 48px;
         height: 48px;
         font-size: 18px;
     }
+
+    .ad-login-link, .ad-divider-text {
+        font-size: 14px;
+    }
+
+    .ad-message {
+        font-size: 13px;
+        padding: 10px 15px;
+    }
 }
 
 @media (max-width: 360px) {
-    .su-container {
+    .ad-su-container {
         padding: 30px 20px;
     }
 
-    .brand-logo {
+    .ad-brand-logo {
         width: 70px;
         height: 70px;
         font-size: 1.7rem;
         margin-bottom: 15px;
     }
 
-    .su-container h2 {
+    .ad-su-container h2 {
         font-size: 26px;
         margin-bottom: 25px;
     }
 
-    .lg-input-group {
+    .ad-input-group {
         margin-bottom: 22px;
     }
 
-    .otp-input {
+    .ad-otp-input {
         letter-spacing: 4px;
         font-size: 15px;
     }
 
-    .social-login {
+    .ad-social-login {
         gap: 15px;
     }
 
-    .social-btn {
+    .ad-social-btn {
         width: 45px;
         height: 45px;
         font-size: 16px;
+    }
+
+    .ad-resend-otp {
+        font-size: 13px;
+        padding: 8px;
     }
 }

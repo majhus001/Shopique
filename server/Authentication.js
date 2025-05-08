@@ -4,6 +4,7 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 const User = require("./models/userschema");
+const Employee = require("./models/EmployeeSchema");
 const jwt = require("jsonwebtoken");
 const AdminEmail = require("./Admin/AdminEmail")
 
@@ -148,8 +149,91 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/employee/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required"
+    });
+  }
+
+  try {
+    const employee = await Employee.findOne({ email });
+
+    if (!employee || employee.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    // Check if employee is active
+    if (employee.status !== 'Active') {
+      return res.status(403).json({
+        success: false,
+        message: `Your account is currently ${employee.status.toLowerCase()}. Please contact the administrator.`
+      });
+    }
+
+    employee.attendance.push({
+      date: new Date(), 
+      status: 'Present', 
+      checkIn: new Date()
+    });
+    await employee.save();
+
+    // Create JWT token
+    const token = jwt.sign(
+      {
+        employeeId: employee._id,
+        fullName: employee.fullName,
+        email: employee.email,
+        position: employee.position,
+        department: employee.department
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    // Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+     
+    // Return success response
+    res.status(200).json({
+      success: true,
+      message: "Login successful!",
+      employee: {
+        _id: employee._id,
+        fullName: employee.fullName,
+        email: employee.email,
+        position: employee.position,
+        department: employee.department,
+        role: "Employee"
+      }
+    });
+  } catch (error) {
+    console.error("Error during employee login:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again."
+    });
+  }
+});
+
 router.post("/logout", (req, res) => {
   console.log("logingg out")
+  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
+  res.json({ success: true, message: "Logged out successfully!" });
+});
+
+router.post("/employee/logout", (req, res) => {
+  console.log("employee logingg out")
   res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
   res.json({ success: true, message: "Logged out successfully!" });
 });

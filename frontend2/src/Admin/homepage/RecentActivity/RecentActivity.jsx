@@ -107,7 +107,7 @@ const RecentActivity = () => {
             <header className="recent-activity-header">
               <h2>Recent User Activities</h2>
               <button className="back-btn" onClick={handleBack}>
-                ← Back to Dashboard
+                Back to Dashboard
               </button>
             </header>
 

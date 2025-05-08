@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api";
 import "./Login.css";
 import AuthButton from "./AuthButton";
-import { FaUser, FaLock, FaShoppingBag, FaGoogle, FaFacebookF, FaTwitter } from "react-icons/fa";
+import { FaUser, FaLock, FaShoppingBag, FaGoogle, FaFacebookF, FaTwitter, FaUserTie, FaUserShield } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [userType, setUserType] = useState("admin"); // Default to admin login
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,29 +24,52 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log(formData)
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/login/`,
-        formData,
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        const user = response.data.user;
 
-        setMessage("Login successful!");
-        setTimeout(() => {
-          if (response.data.role === "Admin") {
-            navigate("/adhome", { state: { user } });
-          } else {
-            navigate("/home", { state: { user } });
-          }
-        }, 1000);
+    try {
+      let response;
+
+      // Choose the appropriate API endpoint based on user type
+      if (userType === "employee") {
+        // Employee login
+        response = await axios.post(
+          `${API_BASE_URL}/api/auth/employee/login`,
+          formData,
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          const employee = response.data.employee;
+          setMessage("Login successful!");
+          setTimeout(() => {
+            // Navigate to employee dashboard
+            navigate("/empdash", {
+              state: {
+                user: employee,
+                isEmployee: true
+              }
+            });
+          }, 1000);
+        }
       } else {
-        setMessage(response.data.message || "Login failed. Try again.");
-        setTimeout(() => {
-          setMessage("");
-        }, 3000);
+        // Admin/regular user login
+        response = await axios.post(
+          `${API_BASE_URL}/api/auth/login/`,
+          formData,
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          const user = response.data.user;
+
+          setMessage("Login successful!");
+          setTimeout(() => {
+            if (response.data.role === "Admin") {
+              navigate("/adhome", { state: { user } });
+            } else {
+              navigate("/", { state: { user } });
+            }
+          }, 1000);
+        }
       }
     } catch (error) {
       console.error("Error logging in:", error);
@@ -71,6 +95,25 @@ const Login = () => {
           <FaShoppingBag />
         </div>
         <h2>Welcome Back</h2>
+
+        <div className="ad-user-type-selector">
+          <button
+            type="button"
+            className={`ad-user-type-btn ${userType === 'admin' ? 'active' : ''}`}
+            onClick={() => setUserType('admin')}
+          >
+            <FaUserShield className="ad-user-type-icon" />
+            <span>Admin</span>
+          </button>
+          <button
+            type="button"
+            className={`ad-user-type-btn ${userType === 'employee' ? 'active' : ''}`}
+            onClick={() => setUserType('employee')}
+          >
+            <FaUserTie className="ad-user-type-icon" />
+            <span>Employee</span>
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="ad-form">
           <div className="ad-input-group">

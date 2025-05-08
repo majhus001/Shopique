@@ -17,6 +17,8 @@ import {
   FiLogOut,
   FiChevronLeft,
   FiChevronRight,
+  FiChevronUp,
+  FiChevronDown,
   FiUser,
   FiMail,
   FiPhone,
@@ -80,6 +82,7 @@ const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [usersPendingOrder, setUsersPendingOrder] = useState([]);
 
   // Enhanced state variables
   const [filteredCustomers, setFilteredCustomers] = useState([]);
@@ -116,6 +119,9 @@ const Customers = () => {
     new: 0, // new in last 30 days
     withOrders: 0
   });
+
+  // Track expanded cards
+  const [expandedCards, setExpandedCards] = useState({});
 
   const customersPerPage = 12;
 
@@ -254,7 +260,7 @@ const Customers = () => {
     try {
       setLoading(true);
       const response = await axios.put(
-        `${API_BASE_URL}/api/auth/update/${editUser._id}`,
+        `${API_BASE_URL}/api/customers/update/${editUser._id}`,
         editUser
       );
 
@@ -292,7 +298,7 @@ const Customers = () => {
   const confirmDelete = async () => {
     try {
       setLoading(true);
-      const response = await axios.delete(`${API_BASE_URL}/api/auth/delete/${userToDelete._id}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/customers/delete/${userToDelete._id}`);
 
       if (response.data.success) {
         // Update local state
@@ -398,6 +404,14 @@ const Customers = () => {
   // Handle sidebar collapse state change
   const handleSidebarCollapse = (collapsed) => {
     setSidebarCollapsed(collapsed);
+  };
+
+  // Toggle card expanded state
+  const toggleCardExpanded = (userId) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }));
   };
 
   // Handle adding a new customer
@@ -642,9 +656,9 @@ const Customers = () => {
                 currentUsers.map((u) => (
                   <div
                     key={u._id}
-                    className={`user-card ${viewMode === 'list' ? 'list-view' : ''}`}
+                    className={`user-card ${viewMode === 'list' ? 'list-view' : ''} ${expandedCards[u._id] ? 'expanded' : ''}`}
                   >
-                    <div className="user-header">
+                    <div className="user-header" onClick={() => toggleCardExpanded(u._id)}>
                       <div
                         className="user-avatar"
                         style={{
@@ -655,81 +669,76 @@ const Customers = () => {
                       </div>
                       <div className="user-name-email">
                         <h3 className="user-name">{u.username}</h3>
-                        <p className="user-email">
-                          <FiMail className="detail-icon-inline" /> {u.email}
-                        </p>
                       </div>
-                      {viewMode === 'list' && (
-                        <div className="user-mobile">
-                          <FiPhone className="detail-icon-inline" /> {u.mobile || "No mobile"}
-                        </div>
-                      )}
+
+                      <button className="expand-toggle">
+                        {expandedCards[u._id] ? <FiChevronUp /> : <FiChevronDown />}
+                      </button>
                     </div>
 
-                    <div className="user-details">
-                      {viewMode === 'grid' && (
-                        <p className="user-detail">
-                          <FiPhone className="detail-icon" />
-                          {u.mobile || "No mobile"}
-                        </p>
-                      )}
-                      <p className="user-detail address">
-                        <FiHome className="detail-icon" />
-                        {u.address || "No address"}
-                      </p>
-
-                      {viewMode === 'grid' && (
-                        <p className="user-detail">
-                          <FiInfo className="detail-icon" />
-                          ID: {u._id?.substring(0, 8)}...
-                        </p>
-                      )}
-
-                      {viewMode === 'list' && (
-                        <>
+                    {expandedCards[u._id] && (
+                      <>
+                        <div className="user-details">
                           <p className="user-detail">
-                            <FiCalendar className="detail-icon" />
-                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "Unknown date"}
+                            <FiMail className="detail-icon" />
+                            {u.email}
                           </p>
+
+                          <p className="user-detail">
+                            <FiPhone className="detail-icon" />
+                            {u.mobile || "No mobile"}
+                          </p>
+
+                          <p className="user-detail address">
+                            <FiHome className="detail-icon" />
+                            {u.address || "No address"}
+                          </p>
+
+                          <p className="user-detail">
+                            <FiInfo className="detail-icon" />
+                            ID: {u._id?.substring(0, 8)}...
+                          </p>
+
+                          {u.createdAt && (
+                            <p className="user-detail">
+                              <FiCalendar className="detail-icon" />
+                              {new Date(u.createdAt).toLocaleDateString()}
+                            </p>
+                          )}
+
                           <p className="user-detail">
                             <FiShoppingBag className="detail-icon" />
                             {u.orders?.length || 0} orders
                           </p>
-                        </>
-                      )}
-                    </div>
+                        </div>
 
-                    <div className="user-actions">
-                      <button
-                        className="edit-btn"
-                        onClick={() => handleEditClick(u)}
-                        title="Edit Customer"
-                      >
-                        <FiEdit2 />
-                        {viewMode === 'list' && <span>Edit</span>}
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDeleteClick(u)}
-                        title="Delete Customer"
-                      >
-                        <FiTrash2 />
-                        {viewMode === 'list' && <span>Delete</span>}
-                      </button>
-                      <button
-                        className="view-btn"
-                        onClick={() => handleUserclk(u)}
-                        title="View Details"
-                      >
-                        <FiEye />
-                        {viewMode === 'list' && <span>View</span>}
-                      </button>
-                    </div>
-
-                    {viewMode === 'list' && (
-                      <div className="user-id">
-                        <FiInfo className="detail-icon-inline" /> ID: {u._id}
-                      </div>
+                        <div className="user-actions">
+                          <button
+                            className="edit-btn"
+                            onClick={() => handleEditClick(u)}
+                            title="Edit Customer"
+                          >
+                            <FiEdit2 />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDeleteClick(u)}
+                            title="Delete Customer"
+                          >
+                            <FiTrash2 />
+                            <span>Delete</span>
+                          </button>
+                          <button
+                            className="view-btn"
+                            onClick={() => handleUserclk(u)}
+                            title="View Details"
+                          >
+                            <FiEye />
+                            <span>View</span>
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
                 ))

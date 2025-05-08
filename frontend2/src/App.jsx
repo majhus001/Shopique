@@ -18,6 +18,9 @@ import Login from "./LogSin/Login";
 import SignUp from "./LogSin/SignUp";
 import AddProducts from "./Admin/AdminProducts/AddProducts";
 import Customers from "./Admin/Customers/Customers";
+import Employees from "./Admin/Employees/Employees";
+import AddEmployee from "./Admin/Employees/AddEmployee";
+import EmpDash from "./Employees/Dashboard/EmpDash";
 const App = () => {
   return (
     <Router>
@@ -41,6 +44,9 @@ const App = () => {
          <Route path="/recentbillings" element={<RecentBills />} />
          <Route path="/addproducts" element={<AddProducts />} /> 
          <Route path="/customers" element={<Customers />} /> 
+         <Route path="/employees" element={<Employees />} /> 
+         <Route path="/addemployees" element={<AddEmployee />} /> 
+         <Route path="/empdash" element={<EmpDash />} /> 
         
       </Routes>
     </Router>

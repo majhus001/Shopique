@@ -1,5 +1,5 @@
 /* Modern Auth Button Styles with Glass Morphism */
-.auth-button {
+.ad-auth-button {
   width: 100%;
   padding: 16px;
   font-size: 16px;
@@ -20,7 +20,7 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.auth-button::before {
+.ad-auth-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -32,7 +32,7 @@
   transition: opacity 0.4s ease;
 }
 
-.auth-button::after {
+.ad-auth-button::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -46,39 +46,39 @@
   transform-origin: 50% 50%;
 }
 
-.auth-button:hover {
+.ad-auth-button:hover {
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-.auth-button:hover::before {
+.ad-auth-button:hover::before {
   opacity: 1;
 }
 
-.auth-button:active {
+.ad-auth-button:active {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.auth-button:focus {
+.ad-auth-button:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2), 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.auth-button span {
+.ad-auth-button span {
   position: relative;
   z-index: 1;
   display: block;
   transition: all 0.3s ease;
 }
 
-.auth-button:hover span {
+.ad-auth-button:hover span {
   transform: scale(1.05);
   letter-spacing: 1px;
 }
 
-.auth-button:disabled {
+.ad-auth-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
@@ -86,7 +86,7 @@
 }
 
 /* Modern loading container */
-.loading-container {
+.ad-loading-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,42 +94,42 @@
   z-index: 1;
 }
 
-.spinner {
+.ad-spinner {
   border: 3px solid rgba(255, 255, 255, 0.1);
   border-top: 3px solid rgba(255, 255, 255, 0.9);
   border-right: 3px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   width: 24px;
   height: 24px;
-  animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+  animation: ad-spin 0.8s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
 }
 
-.loading-text {
+.ad-loading-text {
   margin-left: 12px;
   font-size: 15px;
   font-weight: 500;
   position: relative;
   z-index: 1;
   letter-spacing: 0.5px;
-  animation: pulse-text 1.5s ease infinite;
+  animation: ad-pulse-text 1.5s ease infinite;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes spin {
+@keyframes ad-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-@keyframes pulse-text {
+@keyframes ad-pulse-text {
   0% { opacity: 0.7; }
   50% { opacity: 1; }
   100% { opacity: 0.7; }
 }
 
 /* Glow effect on spinner */
-.spinner::after {
+.ad-spinner::after {
   content: '';
   position: absolute;
   top: -5px;
@@ -139,43 +139,43 @@
   border-radius: 50%;
   background: transparent;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-  animation: glow-pulse 1.5s ease-in-out infinite alternate;
+  animation: ad-glow-pulse 1.5s ease-in-out infinite alternate;
 }
 
-@keyframes glow-pulse {
+@keyframes ad-glow-pulse {
   0% { opacity: 0.3; }
   100% { opacity: 0.7; }
 }
 
 /* Responsive styles */
 @media (max-width: 480px) {
-  .auth-button {
+  .ad-auth-button {
     padding: 14px;
     font-size: 15px;
   }
 
-  .spinner {
+  .ad-spinner {
     width: 22px;
     height: 22px;
   }
 
-  .loading-text {
+  .ad-loading-text {
     font-size: 14px;
   }
 }
 
 @media (max-width: 360px) {
-  .auth-button {
+  .ad-auth-button {
     padding: 12px;
     font-size: 14px;
   }
 
-  .spinner {
+  .ad-spinner {
     width: 20px;
     height: 20px;
   }
 
-  .loading-text {
+  .ad-loading-text {
     font-size: 13px;
     margin-left: 10px;
   }

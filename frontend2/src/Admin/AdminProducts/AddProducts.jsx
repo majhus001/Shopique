@@ -665,7 +665,7 @@ const AddProducts = () => {
                 </button>
                 <button
                   type="button"
-                  className="delete-btn"
+                  className="ad-delete-btn"
                   onClick={handleDeleteProduct}
                 >
                   Delete Product

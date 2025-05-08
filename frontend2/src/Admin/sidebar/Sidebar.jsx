@@ -20,7 +20,7 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-
+  const [isEmployee, setisEmployee] = useState(false);
   // Check if current path matches the menu item path
   const isActive = (path) => {
     return location.pathname === path;
@@ -31,16 +31,29 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
     if (onCollapsedChange) {
       onCollapsedChange(collapsed);
     }
+
+    if (user.role == "Employee") {
+      setisEmployee(true);
+    }
   }, [collapsed, onCollapsedChange]);
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      console.log(response.data.message);
+      if (isEmployee) {
+        const response = await axios.post(
+          `${API_BASE_URL}/api/auth/employee/logout`,
+          {},
+          { withCredentials: true }
+        );
+        console.log(response.data.message);
+      } else {
+        const response = await axios.post(
+          `${API_BASE_URL}/api/auth/logout`,
+          {},
+          { withCredentials: true }
+        );
+        console.log(response.data.message);
+      }
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -54,6 +67,8 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
     navigate("/userman", { state: { user, orders } });
   const handleCustomerclk = () =>
     navigate("/customers", { state: { user, orders } });
+  const handleEmployeesclk = () =>
+    navigate("/employees", { state: { user, orders } });
   const handleOrderclk = () =>
     navigate("/adorders", { state: { user, orders } });
   const handleProdclk = () =>
@@ -84,10 +99,16 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
           {user?.image ? (
             <img src={user.image} alt="admin" className="ad-sb-img" />
           ) : (
-            <div className="placeholder-img">{!collapsed && "No Image"}</div>
+            <div className="placeholder-img">
+              {!collapsed && (isEmployee ? "Employee" : "Admin")}
+            </div>
           )}
           {!collapsed && (
-            <h4 className="ad-sb-username">{user?.username || "Admin"}</h4>
+            <h4 className="ad-sb-username">
+              {user?.username ||
+                user?.fullName ||
+                (isEmployee ? "Employee" : "Admin")}
+            </h4>
           )}
         </div>
 
@@ -126,18 +147,22 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
                 {!collapsed && <span>Products</span>}
               </button>
             </li>
-            <li>
-              <button
-                className={`ad-sb-btns ${
-                  isActive("/adorders") ? "active" : ""
-                }`}
-                onClick={handleOrderclk}
-                title="Orders"
-              >
-                <FiShoppingBag className="menu-icon" />
-                {!collapsed && <span>Orders</span>}
-              </button>
-            </li>
+
+            {!isEmployee ? (
+              <li>
+                <button
+                  className={`ad-sb-btns ${
+                    isActive("/adorders") ? "active" : ""
+                  }`}
+                  onClick={handleOrderclk}
+                  title="Orders"
+                >
+                  <FiShoppingBag className="menu-icon" />
+                  {!collapsed && <span>Orders</span>}
+                </button>
+              </li>
+            ) : null}
+
             <div className="menu-divider"></div>
             <li>
               <button
@@ -150,29 +175,41 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
               </button>
             </li>
             <div className="menu-divider"></div>
+
+            {!isEmployee ? (
+              <>
+                <li>
+                  <button
+                    className={`ad-sb-btns ${
+                      isActive("/userman") ? "active" : ""
+                    }`}
+                    onClick={handleUsemanclk}
+                    title="User Management"
+                  >
+                    <FiUsers className="menu-icon" />
+                    {!collapsed && <span>Online Users</span>}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`ad-sb-btns ${
+                      isActive("/employees") ? "active" : ""
+                    }`}
+                    onClick={handleEmployeesclk}
+                    title="Employee Management"
+                  >
+                    <FiUsers className="menu-icon" />
+                    {!collapsed && <span>Employees</span>}
+                  </button>
+                </li>
+              </>
+            ) : null}
+
             <li>
               <button
-                className={`ad-sb-btns ${isActive("/userman") ? "active" : ""}`}
-                onClick={handleUsemanclk}
-                title="User Management"
-              >
-                <FiUsers className="menu-icon" />
-                {!collapsed && <span>Online Users</span>}
-              </button>
-            </li>
-            <li>
-              <button
-                className={`ad-sb-btns ${isActive("/employees") ? "active" : ""}`}
-                onClick={handleUsemanclk}
-                title="Employee Management"
-              >
-                <FiUsers className="menu-icon" />
-                {!collapsed && <span>Employees </span>}
-              </button>
-            </li>
-            <li>
-              <button
-                className={`ad-sb-btns ${isActive("/customers") ? "active" : ""}`}
+                className={`ad-sb-btns ${
+                  isActive("/customers") ? "active" : ""
+                }`}
                 onClick={handleCustomerclk}
                 title="Customer Management"
               >
@@ -180,7 +217,7 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
                 {!collapsed && <span>Customers </span>}
               </button>
             </li>
-            
+
             <div className="menu-divider"></div>
 
             <li>
