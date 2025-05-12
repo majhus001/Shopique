@@ -39,20 +39,19 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
 
   const handleLogout = async () => {
     try {
+      const empId = user._id;
       if (isEmployee) {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/auth/employee/logout`,
+        await axios.post(
+          `${API_BASE_URL}/api/auth/employee/logout/${empId}`,
           {},
           { withCredentials: true }
         );
-        console.log(response.data.message);
       } else {
-        const response = await axios.post(
+        await axios.post(
           `${API_BASE_URL}/api/auth/logout`,
           {},
           { withCredentials: true }
         );
-        console.log(response.data.message);
       }
       navigate("/login");
     } catch (error) {
@@ -60,7 +59,13 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
     }
   };
 
-  const handleDashclk = () => navigate("/adhome", { state: { user, orders } });
+  const handleDashclk = () => {
+    if (isEmployee) {
+      navigate("/empdash", { state: { user, orders } });
+    } else {
+      navigate("/adhome", { state: { user, orders } });
+    }
+  };
   const handleprofileclk = () =>
     navigate("/adprof", { state: { user, orders } });
   const handleUsemanclk = () =>

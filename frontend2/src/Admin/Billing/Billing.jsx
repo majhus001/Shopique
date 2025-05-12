@@ -11,7 +11,6 @@ import {
   FiSearch,
   FiShoppingCart,
   FiPlus,
-  FiMinus,
   FiTrash2,
   FiPrinter,
   FiDownload,
@@ -76,6 +75,7 @@ const Billing = () => {
     address: "",
   });
   const [searchByMobile, setSearchByMobile] = useState(true); // Toggle between mobile and name search
+  const [isEmployee, setisEmployee] = useState(false);
 
   // Notification system
   const [notification, setNotification] = useState({
@@ -94,6 +94,13 @@ const Billing = () => {
     }, 3000);
   };
 
+  useEffect(() => {
+    if (user.role == "Employee") {
+      setisEmployee(true);
+    }
+    fetchUserData();
+  }, []);
+
   // Generate invoice number
   const generateInvoiceNumber = () => {
     const date = new Date();
@@ -106,13 +113,6 @@ const Billing = () => {
 
     setInvoiceNumber(`INV-${year}${month}${day}-${random}`);
   };
-
-  // Fetch user data if not available in state
-  useEffect(() => {
-    if (!user) {
-      fetchUserData();
-    }
-  }, [user]);
 
   // Fetch product data from backend
   useEffect(() => {
@@ -152,13 +152,16 @@ const Billing = () => {
 
     const categoryTabsElement = categoryTabsRef.current;
     if (categoryTabsElement) {
-      categoryTabsElement.addEventListener('scroll', handleCategoryTabsScroll);
+      categoryTabsElement.addEventListener("scroll", handleCategoryTabsScroll);
 
       // Initial check
       handleCategoryTabsScroll();
 
       return () => {
-        categoryTabsElement.removeEventListener('scroll', handleCategoryTabsScroll);
+        categoryTabsElement.removeEventListener(
+          "scroll",
+          handleCategoryTabsScroll
+        );
       };
     }
   }, []);
@@ -248,8 +251,6 @@ const Billing = () => {
     return counts;
   };
 
-  // Get the category counts (used directly in the render)
-
   // Fetch user data from backend
   const fetchUserData = async () => {
     try {
@@ -261,15 +262,23 @@ const Billing = () => {
         }
       );
 
-      if (!response.data.user) {
+      const loggedInUser = response.data.user;
+      if (!loggedInUser) {
         navigate("/login");
         return;
       }
 
-      const userId = response.data.user.userId;
+      const isEmp = loggedInUser.role === "Employee";
+      setisEmployee(isEmp);
+
+      const userId = isEmp ? loggedInUser.employeeId : loggedInUser.userId;
+
       const userRes = await axios.get(
-        `${API_BASE_URL}/api/auth/fetch/${userId}`
+        isEmp
+          ? `${API_BASE_URL}/api/employees/fetch/${userId}`
+          : `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
+
       setUser(userRes.data.data);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -313,12 +322,20 @@ const Billing = () => {
   // Handle logout
   const handleLogout = async () => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      console.log(response.data.message);
+      const empId = user._id;
+      if (isEmployee) {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/employee/logout/${empId}`,
+          {},
+          { withCredentials: true }
+        );
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/logout`,
+          {},
+          { withCredentials: true }
+        );
+      }
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -550,6 +567,7 @@ const Billing = () => {
 
       const billData = {
         billNumber: invoiceNumber,
+        employeeId: user._id,
         customerId: customer._id,
         customerName: customer.username,
         customerMobile: customer.mobile || "",
@@ -595,7 +613,7 @@ const Billing = () => {
             generateInvoiceNumber();
 
             setCart([]);
-            setCustomer(null)
+            setCustomer(null);
           }, 500);
         }, 300);
       } else {
@@ -753,7 +771,9 @@ const Billing = () => {
                   )}
                   <div
                     ref={categoryTabsRef}
-                    className={`category-tabs ${categoryTabsScrolled ? 'scrolled-left' : ''}`}
+                    className={`category-tabs ${
+                      categoryTabsScrolled ? "scrolled-left" : ""
+                    }`}
                   >
                     {/* Always show "All Products" tab */}
                     <button
@@ -1116,7 +1136,7 @@ const Billing = () => {
                                       )
                                     }
                                   >
-                                    <FiMinus />
+                                    - 
                                   </button>
                                   <span>{item.quantity}</span>
                                   <button
@@ -1128,7 +1148,7 @@ const Billing = () => {
                                       )
                                     }
                                   >
-                                    <FiPlus />
+                                 +
                                   </button>
                                 </div>
                               </td>

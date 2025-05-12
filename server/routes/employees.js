@@ -5,6 +5,7 @@ const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const Employee = require("../models/EmployeeSchema");
+const EmployeeRecentActivity = require("../models/EmployeeRecentActivity");
 
 // Configure Cloudinary
 cloudinary.config({
@@ -149,6 +150,7 @@ router.get("/fetchByPhone/:phone", async (req, res) => {
     });
   }
 });
+
 
 // Update employee
 router.put("/update/:id", async (req, res) => {
@@ -303,6 +305,57 @@ router.post("/upload-document", upload.single("document"), async (req, res) => {
     });
   }
 });
+
+
+// GET activities for a specific employee
+router.get("/activities/fetch/:employeeId", async (req, res) => {
+  try {
+    const employeeId = req.params.employeeId;
+
+    const activities = await EmployeeRecentActivity.find({ employeeId })
+      .sort({ createdAt: -1 }); // latest first
+
+    res.status(200).json({
+      success: true,
+      data: activities
+    });
+  } catch (error) {
+    console.error("Error fetching activities:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching activities",
+      error: error.message
+    });
+  }
+});
+
+router.get("/fetchbyemployee/today/:id", async (req, res) => {
+  try {
+    const employeeId = req.params.id;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const activities = await EmployeeRecentActivity.find({
+      employeeId,
+      timestamp: { $gte: startOfDay, $lte: endOfDay }
+    }).sort({ timestamp: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: activities
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching today's activities",
+      error: error.message
+    });
+  }
+});
+
 
 
 module.exports = router;

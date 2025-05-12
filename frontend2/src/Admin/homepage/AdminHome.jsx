@@ -14,7 +14,7 @@ import {
   FiLogOut,
   FiCalendar,
   FiClock,
-  FiDollarSign
+  FiDollarSign,
 } from "react-icons/fi";
 
 const AdminHome = () => {
@@ -95,27 +95,18 @@ const AdminHome = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [
-          userDataRes,
-          customersDataRes,
-          userRecActRes,
-          productsRes,
-          clothProdRes,
-          homeAppliRes,
-        ] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/admin/userdata`),
-          axios.get(`${API_BASE_URL}/api/customers/fetch`),
-          axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
-          axios.get(`${API_BASE_URL}/api/products/fetchAll`),
-          axios.get(`${API_BASE_URL}/api/admin/fetchcloths`),
-          axios.get(`${API_BASE_URL}/api/admin/fetchhomeappliance`),
-        ]);
+        const [userDataRes, customersDataRes, userRecActRes, productsRes] =
+          await Promise.all([
+            axios.get(`${API_BASE_URL}/api/admin/userdata`),
+            axios.get(`${API_BASE_URL}/api/customers/fetch`),
+            axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
+            axios.get(`${API_BASE_URL}/api/products/fetchAll`),
+          ]);
 
         setUserData(userDataRes.data);
         setCustomersDataRes(customersDataRes.data.data);
         setRecactivity(userRecActRes.data);
         setProductsRes(productsRes.data.data);
-        
       } catch (err) {
         console.error("Error fetching additional data:", err);
       } finally {
@@ -148,6 +139,8 @@ const AdminHome = () => {
     navigate("/customers", { state: { user, orders } });
   const handleOrderclk = () =>
     navigate("/adorders", { state: { user, orders } });
+  const handleReportsclk = () =>
+    navigate("/adreports", { state: { user, orders } });
   const handleProdclk = () =>
     navigate("/adprodlist", { state: { user, orders } });
 
@@ -169,7 +162,11 @@ const AdminHome = () => {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -180,7 +177,14 @@ const AdminHome = () => {
           <header className="admin-header">
             <div className="header-greeting">
               <h1>Welcome to the Admin Dashboard</h1>
-              <p className="date-display">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p className="date-display">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
             </div>
             <div className="admin-info">
               <button className="billing-btn" onClick={handleBillingClick}>
@@ -194,7 +198,9 @@ const AdminHome = () => {
 
           <div className="dashboard-summary">
             <h2 className="section-title">Dashboard Overview</h2>
-            <p className="section-subtitle">Quick summary of your store's performance</p>
+            <p className="section-subtitle">
+              Quick summary of your store's performance
+            </p>
           </div>
 
           <div className="admin-dashboard">
@@ -226,7 +232,7 @@ const AdminHome = () => {
               </div>
               <div className="card-content">
                 <h3>Total Products</h3>
-                <p>{productsRes.length }</p>
+                <p>{productsRes.length}</p>
                 <span className="card-description">Items in inventory</span>
               </div>
             </div>
@@ -242,7 +248,7 @@ const AdminHome = () => {
               </div>
             </div>
 
-            <div className="ad-det-card">
+            <div className="ad-det-card" onClick={handleReportsclk}>
               <div className="card-icon-wrapper reports-icon">
                 <FiPieChart className="card-icon" />
               </div>
@@ -259,7 +265,10 @@ const AdminHome = () => {
               <h2 className="section-title">
                 <FiActivity className="section-icon" /> Recent Activity
               </h2>
-              <button className="view-all-btn" onClick={handleRecentActivityClick}>
+              <button
+                className="view-all-btn"
+                onClick={handleRecentActivityClick}
+              >
                 View All
               </button>
             </div>
@@ -276,7 +285,8 @@ const AdminHome = () => {
                         <div className="activity-header">
                           <strong className="username">{item.username}</strong>
                           <span className="activity-time">
-                            <FiCalendar className="time-icon" /> {new Date(item.createdAt).toLocaleString()}
+                            <FiCalendar className="time-icon" />{" "}
+                            {new Date(item.createdAt).toLocaleString()}
                           </span>
                         </div>
                         <p className="activity-description">{item.activity}</p>

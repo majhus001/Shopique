@@ -100,7 +100,7 @@ const QRCodeModal = ({ isOpen, onClose, product }) => {
   };
 
   // Create URL with product data
-  const qrValue = `${window.location.origin}/admin/products?data=${encodeURIComponent(JSON.stringify(productData))}`;
+  const qrValue = `${ window.location.origin}/admin/products?data=${encodeURIComponent(JSON.stringify(productData))}`;
 
   const handlePrint = () => {
     setIsGenerating(true);

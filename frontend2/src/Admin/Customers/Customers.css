@@ -698,29 +698,32 @@
   }
 
   /* Edit Button Styles */
-  .edit-btn {
+  .cust-edit-btn {
     background: #3498db;
   }
 
-  .edit-btn:hover {
+  .cust-edit-btn:hover {
     background: #2980b9;
   }
 
   /* View Button Styles */
-  .view-btn {
+  .cust-view-btn {
     background: #2ecc71;
+    
   }
 
-  .view-btn:hover {
+  .cust-view-btn:hover {
     background: #27ae60;
   }
 
   /* Delete Button Styles */
-  .delete-btn {
+  .cust-delete-btn {
     background: #e74c3c;
+    width: auto;
+    height: 100px;
   }
 
-  .delete-btn:hover {
+  .cust-delete-btn:hover {
     background: #c0392b;
   }
 

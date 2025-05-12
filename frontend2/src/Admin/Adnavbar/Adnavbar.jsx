@@ -6,6 +6,13 @@ import { FiHome, FiUser, FiLogOut } from "react-icons/fi";
 const Adnavbar = ({ user }) => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isEmployee, setisEmployee] = useState(false);
+  
+  useEffect(() => {
+    if (user.role == "Employee") {
+      setisEmployee(true);
+    }
+  });
 
   useEffect(() => {
     if (user) {
@@ -23,17 +30,17 @@ const Adnavbar = ({ user }) => {
         </h2>
       </div>
 
-      <h2 className="admin-title" onClick={() => navigate("/adhome")}>Admin Panel</h2>
-
-      
+      <h2 className="admin-title" onClick={() => navigate("/adhome")}>
+        Admin Panel
+      </h2>
 
       {isLoggedIn ? (
         <button
           className="nav-btns"
           aria-label="Go to profile page"
-          onClick={()=>navigate("/adprof")}
+          onClick={() => navigate("/adprof")}
         >
-          <FiUser className="nav-icon" /> {user.username}
+          <FiUser className="nav-icon" /> {user.username || user.fullName || "User"}
         </button>
       ) : (
         <button

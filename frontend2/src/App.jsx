@@ -21,6 +21,8 @@ import Customers from "./Admin/Customers/Customers";
 import Employees from "./Admin/Employees/Employees";
 import AddEmployee from "./Admin/Employees/AddEmployee";
 import EmpDash from "./Employees/Dashboard/EmpDash";
+import AdminReports from "./Admin/AdminReports/AdminReports";
+import ViewCustormers from "./Admin/Customers/ViewCustormers";
 const App = () => {
   return (
     <Router>
@@ -44,9 +46,11 @@ const App = () => {
          <Route path="/recentbillings" element={<RecentBills />} />
          <Route path="/addproducts" element={<AddProducts />} /> 
          <Route path="/customers" element={<Customers />} /> 
+         <Route path="/viewcustomers" element={<ViewCustormers />} /> 
          <Route path="/employees" element={<Employees />} /> 
          <Route path="/addemployees" element={<AddEmployee />} /> 
          <Route path="/empdash" element={<EmpDash />} /> 
+         <Route path="/adreports" element={<AdminReports />} /> 
         
       </Routes>
     </Router>

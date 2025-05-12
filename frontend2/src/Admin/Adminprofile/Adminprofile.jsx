@@ -17,7 +17,7 @@ import {
   FiSave,
   FiLogOut,
   FiX,
-  FiUpload
+  FiUpload,
 } from "react-icons/fi";
 
 const Adminprofile = () => {
@@ -32,11 +32,17 @@ const Adminprofile = () => {
   const [orders, setOrders] = useState(stateOrders);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isEmployee, setisEmployee] = useState(false);
+
+  useEffect(() => {
+    if (user.role == "Employee") {
+      setisEmployee(true);
+    }
+  }, []);
 
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      console.log("Checking user validity...");
       const response = await axios.get(
         `${API_BASE_URL}/api/auth/checkvaliduser`,
         {
@@ -44,37 +50,27 @@ const Adminprofile = () => {
         }
       );
 
-      if (!response.data.user) {
+      const loggedInUser = response.data.user;
+      if (!loggedInUser) {
         navigate("/login");
         return;
       }
 
-      const userId = response.data.user.userId;
+      const isEmp = loggedInUser.role === "Employee";
+      setisEmployee(isEmp);
+
+      const userId = isEmp ? loggedInUser.employeeId : loggedInUser.userId;
+
       const userRes = await axios.get(
-        `${API_BASE_URL}/api/auth/fetch/${userId}`
+        isEmp
+          ? `${API_BASE_URL}/api/employees/fetch/${userId}`
+          : `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
+
       setUser(userRes.data.data);
-     } catch (error) {
+    } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to fetch order data from backend if not available in state
-  const fetchOrderData = async () => {
-    try {
-      setLoading(true);
-      const OrdersRes = await axios.get(
-        `${API_BASE_URL}/api/admin/pendingorders`
-      );
-      setOrders(OrdersRes.data);
-      setUsersPendingOrder(
-        OrdersRes.data.filter((order) => order.OrderStatus === "Pending")
-      );
-    } catch (error) {
-      console.error("Error fetching orders:", error);
     } finally {
       setLoading(false);
     }
@@ -85,12 +81,6 @@ const Adminprofile = () => {
       fetchUserData();
     }
   }, [user]);
-
-  useEffect(() => {
-    if (!orders) {
-      fetchOrderData();
-    }
-  }, [orders]);
 
   const [adminData, setAdminData] = useState({
     username: user?.username || "",
@@ -157,17 +147,20 @@ const Adminprofile = () => {
     if (adminData.password) formData.append("password", adminData.password);
     formData.append("mobile", adminData.mobile);
     formData.append("address", adminData.address);
-    formData.append("pincode", adminData.pincode);
+    if(!isEmployee){
+      formData.append("pincode", adminData.pincode);
+    }
     if (adminData.image instanceof File) {
       formData.append("image", adminData.image);
     }
 
     try {
       setLoading(true);
-      const response = await axios.put(
-        `${API_BASE_URL}/api/auth/update/${user._id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+      console.log(user.employeeId);
+      const userRes = await axios.put(
+        isEmployee
+          ? `${API_BASE_URL}/api/auth/employees/update/${user.employeeId}`
+          : `${API_BASE_URL}/api/auth/update/${user._id}`
       );
       setIsEditing(false);
 
@@ -183,17 +176,27 @@ const Adminprofile = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      console.log(response.data.message);
+      const empId = user._id;
+      console.log(empId)
+      if (isEmployee) {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/employee/logout/${empId}`,
+          {},
+          { withCredentials: true }
+        );
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/logout`,
+          {},
+          { withCredentials: true }
+        );
+      }
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
+
 
   // Handle sidebar collapse state change
   const handleSidebarCollapse = (collapsed) => {
@@ -205,7 +208,11 @@ const Adminprofile = () => {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -243,7 +250,10 @@ const Adminprofile = () => {
 
                   {isEditing && (
                     <div className="image-upload-overlay">
-                      <label htmlFor="profile-image-upload" className="upload-label">
+                      <label
+                        htmlFor="profile-image-upload"
+                        className="upload-label"
+                      >
                         <FiUpload className="upload-icon" />
                         <span>Upload</span>
                       </label>
@@ -259,13 +269,19 @@ const Adminprofile = () => {
                 </div>
 
                 <div className="profile-info">
-                  <h2 className="profile-name">{user?.username || "Admin User"}</h2>
-                  <p className="profile-role">Administrator</p>
+                  <h2 className="profile-name">
+                    {user?.username ||
+                      user?.fullName ||
+                      (isEmployee ? "Employee" : "Admin")}
+                  </h2>
+                  <p className="profile-role">
+                    {isEmployee ? "Employee" : "Administrator"}
+                  </p>
                 </div>
 
                 <button
                   type="button"
-                  className={`edit-profile-btn ${isEditing ? 'cancel' : ''}`}
+                  className={`edit-profile-btn ${isEditing ? "cancel" : ""}`}
                   onClick={() => setIsEditing(!isEditing)}
                 >
                   {isEditing ? (
@@ -281,9 +297,8 @@ const Adminprofile = () => {
               </div>
 
               <div className="profile-content">
-                <h3 className="section-title">Personal Information</h3>
-
                 <form onSubmit={handleUpdate} className="profile-form">
+                  <h3 className="section-title">Personal Information</h3>
                   <div className="form-group">
                     <label htmlFor="username">
                       <FiUser className="field-icon" /> Full Name
@@ -292,10 +307,10 @@ const Adminprofile = () => {
                       id="username"
                       type="text"
                       name="username"
-                      value={adminData.username}
+                      value={adminData.username || user?.fullName}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={isEditing ? 'editable' : ''}
+                      className={isEditing ? "editable" : ""}
                     />
                   </div>
 
@@ -310,7 +325,7 @@ const Adminprofile = () => {
                       value={adminData.email}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={isEditing ? 'editable' : ''}
+                      className={isEditing ? "editable" : ""}
                     />
                   </div>
 
@@ -328,7 +343,9 @@ const Adminprofile = () => {
                         placeholder="Enter new password"
                         className="editable"
                       />
-                      <p className="field-hint">Leave blank to keep current password</p>
+                      <p className="field-hint">
+                        Leave blank to keep current password
+                      </p>
                     </div>
                   )}
 
@@ -347,30 +364,36 @@ const Adminprofile = () => {
                       pattern="\d*"
                       inputMode="numeric"
                       placeholder="Enter 10-digit number"
-                      className={isEditing ? 'editable' : ''}
+                      className={isEditing ? "editable" : ""}
                     />
                   </div>
 
-                  <h3 className="section-title address-title">Address Information</h3>
+                  <h3 className="section-title address-title">
+                    Address Information
+                  </h3>
 
-                  <div className="form-group">
-                    <label htmlFor="pincode">
-                      <FiMapPin className="field-icon" /> Pincode
-                    </label>
-                    <input
-                      id="pincode"
-                      type="text"
-                      name="pincode"
-                      value={adminData.pincode}
-                      onChange={handleChange}
-                      disabled={!isEditing}
-                      maxLength={6}
-                      pattern="\d*"
-                      inputMode="numeric"
-                      placeholder="Enter 6-digit Pincode"
-                      className={isEditing ? 'editable' : ''}
-                    />
-                  </div>
+                  {!isEmployee && (
+                    <div className="form-group">
+                      <label htmlFor="pincode">
+                        <FiMapPin className="field-icon" /> Pincode
+                      </label>
+                      <input
+                        id="pincode"
+                        type="text"
+                        name="pincode"
+                        value={adminData.pincode}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        maxLength={6}
+                        pattern="\d{6}"
+                        inputMode="numeric"
+                        placeholder="Enter 6-digit Pincode"
+                        className={`form-control ${
+                          isEditing ? "editable" : ""
+                        }`}
+                      />
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label htmlFor="address">
@@ -382,7 +405,7 @@ const Adminprofile = () => {
                       value={adminData.address}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={isEditing ? 'editable' : ''}
+                      className={isEditing ? "editable" : ""}
                       rows="3"
                     />
                   </div>
@@ -390,7 +413,8 @@ const Adminprofile = () => {
                   {isEditing && (
                     <div className="form-actions">
                       <button type="submit" className="update-btn">
-                        <FiSave className="btn-icon" /> <span>Save Changes</span>
+                        <FiSave className="btn-icon" />{" "}
+                        <span>Save Changes</span>
                       </button>
                     </div>
                   )}

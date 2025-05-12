@@ -44,22 +44,11 @@ import {
   FiSliders,
   FiGrid,
   FiList,
-  FiPlusCircle,
-  FiActivity,
-  FiTrendingUp,
-  FiTrendingDown,
-  FiBarChart2,
-  FiPieChart,
-  FiShield,
-  FiTag,
-  FiGlobe,
-  FiHeart,
-  FiSettings
 } from "react-icons/fi";
 
 // Helper function to generate consistent colors from strings
 const stringToColor = (str) => {
-  if (!str) return '#3498db'; // Default color
+  if (!str) return "#3498db"; // Default color
 
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -93,6 +82,7 @@ const Customers = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState("grid"); // grid or list view
+  const [isEmployee, setisEmployee] = useState(false);
   const [sortField, setSortField] = useState("username");
   const [sortDirection, setSortDirection] = useState("asc");
   const [filterActive, setFilterActive] = useState(false);
@@ -102,14 +92,14 @@ const Customers = () => {
     email: "",
     password: "",
     mobile: "",
-    address: ""
+    address: "",
   });
 
   // Notification system
   const [notification, setNotification] = useState({
     show: false,
     message: "",
-    type: "" // success, error, warning, info
+    type: "", // success, error, warning, info
   });
 
   // Customer statistics
@@ -117,17 +107,19 @@ const Customers = () => {
     total: 0,
     active: 0,
     new: 0, // new in last 30 days
-    withOrders: 0
+    withOrders: 0,
   });
 
   // Track expanded cards
   const [expandedCards, setExpandedCards] = useState({});
-
   const customersPerPage = 12;
 
   const indexOfLastCustomer = currentPage * customersPerPage;
   const indexOfFirstCustomer = indexOfLastCustomer - customersPerPage;
-  const currentUsers = filteredCustomers.slice(indexOfFirstCustomer, indexOfLastCustomer);
+  const currentUsers = filteredCustomers.slice(
+    indexOfFirstCustomer,
+    indexOfLastCustomer
+  );
   const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
 
   const fetchUserData = async () => {
@@ -140,15 +132,23 @@ const Customers = () => {
         }
       );
 
-      if (!response.data.user) {
+      const loggedInUser = response.data.user;
+      if (!loggedInUser) {
         navigate("/login");
         return;
       }
 
-      const userId = response.data.user.userId;
+      const isEmp = loggedInUser.role === "Employee";
+      setisEmployee(isEmp);
+
+      const userId = isEmp ? loggedInUser.employeeId : loggedInUser.userId;
+
       const userRes = await axios.get(
-        `${API_BASE_URL}/api/auth/fetch/${userId}`
+        isEmp
+          ? `${API_BASE_URL}/api/employees/fetch/${userId}`
+          : `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
+
       setUser(userRes.data.data);
       console.log("User fetched from backend:", userRes.data.data);
     } catch (error) {
@@ -173,10 +173,11 @@ const Customers = () => {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (user?.role == "Employee") {
+      setisEmployee(true);
       fetchUserData();
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (!orders) {
@@ -184,14 +185,11 @@ const Customers = () => {
     }
   }, [orders]);
 
-  // Filter users based on search query
-
-  // Show notification function
   const showNotification = (message, type = "success") => {
     setNotification({
       show: true,
       message,
-      type
+      type,
     });
 
     // Auto hide after 3 seconds
@@ -199,7 +197,7 @@ const Customers = () => {
       setNotification({
         show: false,
         message: "",
-        type: ""
+        type: "",
       });
     }, 3000);
   };
@@ -221,11 +219,13 @@ const Customers = () => {
 
           setStats({
             total: customersData.length,
-            active: customersData.filter(c => c.lastLogin).length,
-            new: customersData.filter(c => {
+            active: customersData.filter((c) => c.lastLogin).length,
+            new: customersData.filter((c) => {
               return c.createdAt && new Date(c.createdAt) >= thirtyDaysAgo;
             }).length,
-            withOrders: customersData.filter(c => c.orders && c.orders.length > 0).length
+            withOrders: customersData.filter(
+              (c) => c.orders && c.orders.length > 0
+            ).length,
           });
 
           showNotification("Customers loaded successfully", "success");
@@ -234,7 +234,11 @@ const Customers = () => {
         }
       } catch (error) {
         console.error("Error fetching customers:", error);
-        showNotification("Error loading customers: " + (error.response?.data?.message || error.message), "error");
+        showNotification(
+          "Error loading customers: " +
+            (error.response?.data?.message || error.message),
+          "error"
+        );
       } finally {
         setLoading(false);
       }
@@ -270,19 +274,25 @@ const Customers = () => {
           u._id === editUser._id ? editUser : u
         );
         setCustomers(updatedCustomers);
-        setFilteredCustomers(sortCustomers(updatedCustomers, sortField, sortDirection));
+        setFilteredCustomers(
+          sortCustomers(updatedCustomers, sortField, sortDirection)
+        );
 
         // Close modal and show success message
         setEditUser(null);
         setShowPassword(false);
         showNotification("Customer updated successfully", "success");
       } else {
-        showNotification(response.data.message || "Failed to update customer", "error");
+        showNotification(
+          response.data.message || "Failed to update customer",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error updating customer:", error);
       showNotification(
-        "Error updating customer: " + (error.response?.data?.message || error.message),
+        "Error updating customer: " +
+          (error.response?.data?.message || error.message),
         "error"
       );
     } finally {
@@ -298,13 +308,19 @@ const Customers = () => {
   const confirmDelete = async () => {
     try {
       setLoading(true);
-      const response = await axios.delete(`${API_BASE_URL}/api/customers/delete/${userToDelete._id}`);
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/customers/delete/${userToDelete._id}`
+      );
 
       if (response.data.success) {
         // Update local state
-        const updatedCustomers = customers.filter((u) => u._id !== userToDelete._id);
+        const updatedCustomers = customers.filter(
+          (u) => u._id !== userToDelete._id
+        );
         setCustomers(updatedCustomers);
-        setFilteredCustomers(sortCustomers(updatedCustomers, sortField, sortDirection));
+        setFilteredCustomers(
+          sortCustomers(updatedCustomers, sortField, sortDirection)
+        );
 
         // Close modal and show success message
         setShowDeletePopup(false);
@@ -313,12 +329,16 @@ const Customers = () => {
         }
         showNotification("Customer deleted successfully", "success");
       } else {
-        showNotification(response.data.message || "Failed to delete customer", "error");
+        showNotification(
+          response.data.message || "Failed to delete customer",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error deleting customer:", error);
       showNotification(
-        "Error deleting customer: " + (error.response?.data?.message || error.message),
+        "Error deleting customer: " +
+          (error.response?.data?.message || error.message),
         "error"
       );
     } finally {
@@ -331,18 +351,16 @@ const Customers = () => {
     return [...data].sort((a, b) => {
       // Handle null or undefined values
       if (!a[field] && !b[field]) return 0;
-      if (!a[field]) return direction === 'asc' ? 1 : -1;
-      if (!b[field]) return direction === 'asc' ? -1 : 1;
+      if (!a[field]) return direction === "asc" ? 1 : -1;
+      if (!b[field]) return direction === "asc" ? -1 : 1;
 
       // Sort based on field type
-      if (typeof a[field] === 'string') {
-        return direction === 'asc'
+      if (typeof a[field] === "string") {
+        return direction === "asc"
           ? a[field].localeCompare(b[field])
           : b[field].localeCompare(a[field]);
       } else {
-        return direction === 'asc'
-          ? a[field] - b[field]
-          : b[field] - a[field];
+        return direction === "asc" ? a[field] - b[field] : b[field] - a[field];
       }
     });
   };
@@ -351,11 +369,11 @@ const Customers = () => {
   const handleSortChange = (field) => {
     if (sortField === field) {
       // Toggle direction if same field
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       // New field, default to ascending
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -384,21 +402,29 @@ const Customers = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      console.log(response.data.message);
+      const empId = user._id;
+      if (isEmployee) {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/employee/logout/${empId}`,
+          {},
+          { withCredentials: true }
+        );
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/logout`,
+          {},
+          { withCredentials: true }
+        );
+      }
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  const handleUserclk = (userdata) => {
+  const handleviewclk = (userdata) => {
     console.log(userdata);
-    navigate("/aduserhis", { state: { user, orders, userdata } });
+    navigate("/viewcustomers", { state: { user, orders, userdata } });
   };
 
   // Handle sidebar collapse state change
@@ -408,11 +434,11 @@ const Customers = () => {
 
   // Toggle card expanded state
   const toggleCardExpanded = (userId) => {
-    setExpandedCards(prev => ({
-      ...prev,
-      [userId]: !prev[userId]
-    }));
-  };
+  setExpandedCards(prev => ({
+    ...prev,
+    [userId]: !prev[userId] // Toggle only the clicked card
+  }));
+};
 
   // Handle adding a new customer
   const handleAddCustomer = () => {
@@ -421,7 +447,7 @@ const Customers = () => {
       email: "",
       password: "",
       mobile: "",
-      address: ""
+      address: "",
     });
     setShowAddCustomer(true);
   };
@@ -429,9 +455,9 @@ const Customers = () => {
   // Handle new customer input change
   const handleNewCustomerChange = (e) => {
     const { name, value } = e.target;
-    setNewCustomer(prev => ({
+    setNewCustomer((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -455,18 +481,24 @@ const Customers = () => {
         const createdCustomer = response.data.customer;
         const updatedCustomers = [...customers, createdCustomer];
         setCustomers(updatedCustomers);
-        setFilteredCustomers(sortCustomers(updatedCustomers, sortField, sortDirection));
+        setFilteredCustomers(
+          sortCustomers(updatedCustomers, sortField, sortDirection)
+        );
 
         // Close modal and show success
         setShowAddCustomer(false);
         showNotification("Customer added successfully", "success");
       } else {
-        showNotification(response.data.message || "Failed to add customer", "error");
+        showNotification(
+          response.data.message || "Failed to add customer",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error adding customer:", error);
       showNotification(
-        "Error adding customer: " + (error.response?.data?.message || error.message),
+        "Error adding customer: " +
+          (error.response?.data?.message || error.message),
         "error"
       );
     } finally {
@@ -488,7 +520,7 @@ const Customers = () => {
           <p>{notification.message}</p>
           <button
             className="close-notification"
-            onClick={() => setNotification({...notification, show: false})}
+            onClick={() => setNotification({ ...notification, show: false })}
           >
             <FiX />
           </button>
@@ -498,7 +530,11 @@ const Customers = () => {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -508,7 +544,9 @@ const Customers = () => {
         <div className="main-content">
           <header className="admin-header">
             <div className="header-greeting">
-              <h1><FiUsers className="header-icon" /> Customers Management</h1>
+              <h1>
+                <FiUsers className="header-icon" /> Customers Management
+              </h1>
               <p className="subtitle">Manage and monitor customer accounts</p>
             </div>
             <div className="admin-info">
@@ -565,7 +603,10 @@ const Customers = () => {
             <div className="user-management-header">
               <div className="user-stats">
                 <h2>Customer Management</h2>
-                <button className="add-customer-btn" onClick={handleAddCustomer}>
+                <button
+                  className="add-customer-btn"
+                  onClick={handleAddCustomer}
+                >
                   <FiUserPlus /> Add New Customer
                 </button>
               </div>
@@ -583,7 +624,7 @@ const Customers = () => {
                   {searchQuery && (
                     <button
                       className="clear-search"
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => setSearchQuery("")}
                     >
                       <FiX />
                     </button>
@@ -592,15 +633,19 @@ const Customers = () => {
 
                 <div className="view-options">
                   <button
-                    className={`view-option ${viewMode === 'grid' ? 'active' : ''}`}
-                    onClick={() => setViewMode('grid')}
+                    className={`view-option ${
+                      viewMode === "grid" ? "active" : ""
+                    }`}
+                    onClick={() => setViewMode("grid")}
                     title="Grid View"
                   >
                     <FiGrid />
                   </button>
                   <button
-                    className={`view-option ${viewMode === 'list' ? 'active' : ''}`}
-                    onClick={() => setViewMode('list')}
+                    className={`view-option ${
+                      viewMode === "list" ? "active" : ""
+                    }`}
+                    onClick={() => setViewMode("list")}
                     title="List View"
                   >
                     <FiList />
@@ -616,38 +661,42 @@ const Customers = () => {
               </div>
               <div className="sort-buttons">
                 <button
-                  className={`sort-button ${sortField === 'username' ? 'active' : ''}`}
-                  onClick={() => handleSortChange('username')}
+                  className={`sort-button ${
+                    sortField === "username" ? "active" : ""
+                  }`}
+                  onClick={() => handleSortChange("username")}
                 >
                   Name
-                  {sortField === 'username' && (
-                    sortDirection === 'asc' ? <FiArrowUp /> : <FiArrowDown />
-                  )}
+                  {sortField === "username" &&
+                    (sortDirection === "asc" ? <FiArrowUp /> : <FiArrowDown />)}
                 </button>
 
                 <button
-                  className={`sort-button ${sortField === 'email' ? 'active' : ''}`}
-                  onClick={() => handleSortChange('email')}
+                  className={`sort-button ${
+                    sortField === "email" ? "active" : ""
+                  }`}
+                  onClick={() => handleSortChange("email")}
                 >
                   Email
-                  {sortField === 'email' && (
-                    sortDirection === 'asc' ? <FiArrowUp /> : <FiArrowDown />
-                  )}
+                  {sortField === "email" &&
+                    (sortDirection === "asc" ? <FiArrowUp /> : <FiArrowDown />)}
                 </button>
 
                 <button
-                  className={`sort-button ${sortField === 'createdAt' ? 'active' : ''}`}
-                  onClick={() => handleSortChange('createdAt')}
+                  className={`sort-button ${
+                    sortField === "createdAt" ? "active" : ""
+                  }`}
+                  onClick={() => handleSortChange("createdAt")}
                 >
                   Date Added
-                  {sortField === 'createdAt' && (
-                    sortDirection === 'asc' ? <FiArrowUp /> : <FiArrowDown />
-                  )}
+                  {sortField === "createdAt" &&
+                    (sortDirection === "asc" ? <FiArrowUp /> : <FiArrowDown />)}
                 </button>
               </div>
 
               <div className="results-count">
-                {filteredCustomers.length} {filteredCustomers.length === 1 ? 'result' : 'results'}
+                {filteredCustomers.length}{" "}
+                {filteredCustomers.length === 1 ? "result" : "results"}
               </div>
             </div>
 
@@ -656,13 +705,20 @@ const Customers = () => {
                 currentUsers.map((u) => (
                   <div
                     key={u._id}
-                    className={`user-card ${viewMode === 'list' ? 'list-view' : ''} ${expandedCards[u._id] ? 'expanded' : ''}`}
+                    className={`user-card ${
+                      viewMode === "list" ? "list-view" : ""
+                    } ${expandedCards[u._id] ? "expanded" : ""}`}
                   >
-                    <div className="user-header" onClick={() => toggleCardExpanded(u._id)}>
+                    <div
+                      className="user-header"
+                      onClick={() => toggleCardExpanded(u._id)}
+                    >
                       <div
                         className="user-avatar"
                         style={{
-                          backgroundColor: `hsl(${u.username?.charCodeAt(0) * 10 % 360}, 70%, 60%)`
+                          backgroundColor: `hsl(${
+                            (u.username?.charCodeAt(0) * 10) % 360
+                          }, 70%, 60%)`,
                         }}
                       >
                         {u.username ? u.username.charAt(0).toUpperCase() : "U"}
@@ -672,7 +728,11 @@ const Customers = () => {
                       </div>
 
                       <button className="expand-toggle">
-                        {expandedCards[u._id] ? <FiChevronUp /> : <FiChevronDown />}
+                        {expandedCards[u._id] ? (
+                          <span>▲ </span>
+                        ) : (
+                          <span>▼</span>
+                        )}
                       </button>
                     </div>
 
@@ -714,28 +774,25 @@ const Customers = () => {
 
                         <div className="user-actions">
                           <button
-                            className="edit-btn"
+                            className="cust-edit-btn"
                             onClick={() => handleEditClick(u)}
                             title="Edit Customer"
-                          >
-                            <FiEdit2 />
-                            <span>Edit</span>
+                          > 
+                            <span><FiEdit2 /></span>
                           </button>
                           <button
-                            className="delete-btn"
+                            className="cust-delete-btn"
                             onClick={() => handleDeleteClick(u)}
                             title="Delete Customer"
                           >
-                            <FiTrash2 />
-                            <span>Delete</span>
+                            <span><FiTrash2 /></span>
                           </button>
                           <button
-                            className="view-btn"
-                            onClick={() => handleUserclk(u)}
+                            className="cust-view-btn"
+                            onClick={() => handleviewclk(u)}
                             title="View Details"
                           >
-                            <FiEye />
-                            <span>View</span>
+                            <span><FiEye /></span>
                           </button>
                         </div>
                       </>
@@ -746,7 +803,10 @@ const Customers = () => {
                 <div className="no-users">
                   <FiAlertCircle className="no-results-icon" />
                   <p>No customers found matching your search criteria.</p>
-                  <button className="reset-search" onClick={() => setSearchQuery('')}>
+                  <button
+                    className="reset-search"
+                    onClick={() => setSearchQuery("")}
+                  >
                     <FiRefreshCw /> Reset Search
                   </button>
                 </div>
@@ -756,7 +816,9 @@ const Customers = () => {
             {totalPages > 1 && (
               <div className="pagination">
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                   disabled={currentPage === 1}
                   className="pagination-btn prev-btn"
                 >
@@ -764,7 +826,8 @@ const Customers = () => {
                 </button>
 
                 <div className="pagination-info">
-                  Page <span className="current-page">{currentPage}</span> of <span className="total-pages">{totalPages}</span>
+                  Page <span className="current-page">{currentPage}</span> of{" "}
+                  <span className="total-pages">{totalPages}</span>
                 </div>
 
                 <button
@@ -786,7 +849,9 @@ const Customers = () => {
         <div className="modal-overlay">
           <div className="edit-user-modal">
             <div className="modal-header">
-              <h2><FiEdit2 className="modal-icon" /> Edit User</h2>
+              <h2>
+                <FiEdit2 className="modal-icon" /> Edit User
+              </h2>
               <button
                 className="close-modal-btn"
                 onClick={() => {
@@ -844,7 +909,7 @@ const Customers = () => {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      value={editUser.password || ''}
+                      value={editUser.password || ""}
                       placeholder="New Password"
                       onChange={handleEditChange}
                     />
@@ -856,7 +921,9 @@ const Customers = () => {
                       {showPassword ? <FiEyeOff /> : <FiEye />}
                     </button>
                   </div>
-                  <p className="field-hint">Leave blank to keep current password</p>
+                  <p className="field-hint">
+                    Leave blank to keep current password
+                  </p>
                 </div>
 
                 <div className="form-group">
@@ -866,7 +933,7 @@ const Customers = () => {
                   <input
                     id="mobile"
                     name="mobile"
-                    value={editUser.mobile || ''}
+                    value={editUser.mobile || ""}
                     onChange={handleEditChange}
                   />
                 </div>
@@ -878,7 +945,7 @@ const Customers = () => {
                   <textarea
                     id="address"
                     name="address"
-                    value={editUser.address || ''}
+                    value={editUser.address || ""}
                     onChange={handleEditChange}
                     rows="3"
                   />
@@ -903,10 +970,7 @@ const Customers = () => {
                 >
                   <FiX /> Cancel
                 </button>
-                <button
-                  className="save-btn"
-                  onClick={handleEditSave}
-                >
+                <button className="save-btn" onClick={handleEditSave}>
                   <FiSave /> Save Changes
                 </button>
               </div>
@@ -922,7 +986,10 @@ const Customers = () => {
               <FiTrash2 />
             </div>
             <h3>Confirm Deletion</h3>
-            <p>Are you sure you want to delete the customer <strong>{userToDelete.username}</strong>?</p>
+            <p>
+              Are you sure you want to delete the customer{" "}
+              <strong>{userToDelete.username}</strong>?
+            </p>
             <p className="delete-warning">This action cannot be undone.</p>
 
             <div className="confirmation-actions">
@@ -937,7 +1004,13 @@ const Customers = () => {
                 onClick={confirmDelete}
                 disabled={loading}
               >
-                {loading ? "Deleting..." : <><FiTrash2 /> Delete Customer</>}
+                {loading ? (
+                  "Deleting..."
+                ) : (
+                  <>
+                    <FiTrash2 /> Delete Customer
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -949,7 +1022,9 @@ const Customers = () => {
         <div className="modal-overlay">
           <div className="add-customer-modal">
             <div className="modal-header">
-              <h2><FiUserPlus className="modal-icon" /> Add New Customer</h2>
+              <h2>
+                <FiUserPlus className="modal-icon" /> Add New Customer
+              </h2>
               <button
                 className="close-modal-btn"
                 onClick={() => setShowAddCustomer(false)}
@@ -1051,9 +1126,20 @@ const Customers = () => {
                 <button
                   className="save-btn"
                   onClick={saveNewCustomer}
-                  disabled={loading || !newCustomer.username || !newCustomer.email || !newCustomer.password}
+                  disabled={
+                    loading ||
+                    !newCustomer.username ||
+                    !newCustomer.email ||
+                    !newCustomer.password
+                  }
                 >
-                  {loading ? "Saving..." : <><FiSave /> Add Customer</>}
+                  {loading ? (
+                    "Saving..."
+                  ) : (
+                    <>
+                      <FiSave /> Add Customer
+                    </>
+                  )}
                 </button>
               </div>
             </div>

@@ -35,7 +35,7 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       offerPrice,
       isFeatured,
       tags,
-      specifications
+      specifications,
     } = req.body;
 
     // Create product data object with proper type conversion
@@ -51,15 +51,22 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       deliveryTime,
       offerPrice: offerPrice ? Number(offerPrice) : undefined,
       isFeatured: isFeatured === "true" || isFeatured === true,
-      tags: Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : []),
-      specifications: typeof specifications === 'string' ? JSON.parse(specifications) : specifications,
-      images: []
+      tags: Array.isArray(tags)
+        ? tags
+        : typeof tags === "string"
+        ? tags.split(",")
+        : [],
+      specifications:
+        typeof specifications === "string"
+          ? JSON.parse(specifications)
+          : specifications,
+      images: [],
     };
 
     // Upload multiple images to Cloudinary if provided
     if (req.files && req.files.length > 0) {
       try {
-        const uploadPromises = req.files.map(file => {
+        const uploadPromises = req.files.map((file) => {
           return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
               { folder: "products" },
@@ -113,13 +120,13 @@ router.get("/fetchAll", async (req, res) => {
     const products = await product.find();
     res.status(200).json({
       success: true,
-      data: products
+      data: products,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch products"
+      error: "Failed to fetch products",
     });
   }
 });
@@ -131,18 +138,18 @@ router.get("/fetch/:id", async (req, res) => {
     if (!productItem) {
       return res.status(404).json({
         success: false,
-        error: "Product not found"
+        error: "Product not found",
       });
     }
     res.status(200).json({
       success: true,
-      data: productItem
+      data: productItem,
     });
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch product"
+      error: "Failed to fetch product",
     });
   }
 });
@@ -164,7 +171,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
       offerPrice,
       isFeatured,
       tags,
-      specifications
+      specifications,
     } = req.body;
 
     // Check if product exists
@@ -172,7 +179,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
     if (!existingProduct) {
       return res.status(404).json({
         success: false,
-        error: "Product not found"
+        error: "Product not found",
       });
     }
 
@@ -189,15 +196,22 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
       deliveryTime,
       offerPrice: offerPrice ? Number(offerPrice) : undefined,
       isFeatured: isFeatured === "true" || isFeatured === true,
-      tags: Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',') : existingProduct.tags),
-      specifications: typeof specifications === 'string' ? JSON.parse(specifications) : specifications
+      tags: Array.isArray(tags)
+        ? tags
+        : typeof tags === "string"
+        ? tags.split(",")
+        : existingProduct.tags,
+      specifications:
+        typeof specifications === "string"
+          ? JSON.parse(specifications)
+          : specifications,
     };
 
     // Handle images for update
     if (req.files && req.files.length > 0) {
       try {
         // Upload new images if provided
-        const uploadPromises = req.files.map(file => {
+        const uploadPromises = req.files.map((file) => {
           return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
               { folder: "products" },
@@ -219,35 +233,35 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
 
         // Add new image URLs to update data
         updateData.images = imageUrls;
-        console.log(`Successfully uploaded ${imageUrls.length} new images for product ${id}`);
+        console.log(
+          `Successfully uploaded ${imageUrls.length} new images for product ${id}`
+        );
       } catch (uploadError) {
         console.error("Error uploading images:", uploadError);
         // Keep existing images if upload fails
       }
-    } else if (req.body.keepExistingImages === 'true') {
+    } else if (req.body.keepExistingImages === "true") {
       // If keepExistingImages flag is set, don't change the images array
       console.log(`Keeping existing images for product ${id}`);
       delete updateData.images; // Remove images from update data to keep existing ones
     }
 
     // Update product
-    const updatedProduct = await product.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    );
+    const updatedProduct = await product.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     res.status(200).json({
       success: true,
       message: "Product updated successfully",
-      data: updatedProduct
+      data: updatedProduct,
     });
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(500).json({
       success: false,
       error: "Failed to update product",
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -262,7 +276,7 @@ router.delete("/delete/:id", async (req, res) => {
     if (!existingProduct) {
       return res.status(404).json({
         success: false,
-        error: "Product not found"
+        error: "Product not found",
       });
     }
 
@@ -271,14 +285,14 @@ router.delete("/delete/:id", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Product deleted successfully"
+      message: "Product deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting product:", error);
     res.status(500).json({
       success: false,
       error: "Failed to delete product",
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -290,7 +304,7 @@ router.get("/search", async (req, res) => {
     if (!query) {
       return res.status(400).json({
         success: false,
-        error: "Search query is required"
+        error: "Search query is required",
       });
     }
 
@@ -300,21 +314,34 @@ router.get("/search", async (req, res) => {
         { brand: { $regex: query, $options: "i" } },
         { category: { $regex: query, $options: "i" } },
         { subCategory: { $regex: query, $options: "i" } },
-        { tags: { $in: [new RegExp(query, "i")] } }
-      ]
+        { tags: { $in: [new RegExp(query, "i")] } },
+      ],
     });
 
     res.status(200).json({
       success: true,
-      data: products
+      data: products,
     });
   } catch (error) {
     console.error("Error searching products:", error);
     res.status(500).json({
       success: false,
       error: "Failed to search products",
-      details: error.message
+      details: error.message,
     });
+  }
+});
+
+router.post("/top-selling", async (req, res) => {
+  const { productIds } = req.body;
+  try {
+    const products = await product.find({
+      _id: { $in: productIds },
+    });
+    
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching top products" });
   }
 });
 

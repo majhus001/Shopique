@@ -7,6 +7,10 @@ const billSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  employeeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true
