@@ -6,12 +6,7 @@ import Adnavbar from "../../Admin/Adnavbar/Adnavbar";
 import Sidebar from "../../Admin/sidebar/Sidebar";
 import API_BASE_URL from "../../api";
 import "./EmpDash.css";
-import {
-  FiClock,
-  FiWatch,
-  FiActivity,
-  FiCalendar,
-} from "react-icons/fi";
+import { FiClock, FiWatch, FiActivity, FiCalendar } from "react-icons/fi";
 
 export default function EmpDash() {
   const location = useLocation();
@@ -22,6 +17,8 @@ export default function EmpDash() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isEmployee, setisEmployee] = useState(false);
   const [bills, setBills] = useState([]);
+  const [productsRes, setProductsRes] = useState([]);
+  const [lowstockitems, setLowstockItems] = useState([]);
   const [todaysbills, setTodaysbills] = useState([]);
   const [popularItems, settopproducts] = useState([]);
   const [todaysoldprods, settodaysoldprods] = useState(0);
@@ -32,6 +29,7 @@ export default function EmpDash() {
     completed: 0,
     percentage: 0,
   });
+  const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -44,12 +42,13 @@ export default function EmpDash() {
   }, []);
 
   useEffect(() => {
-    if (user.role == "Employee") {
+    if (user?.role == "Employee") {
       setisEmployee(true);
     }
     fetchUserData();
     fetchbills();
     fetchEmpActivities();
+    fetchProductData();
   }, [currentTime]); // Re-run when currentTime updates
 
   const calculateWorkingHours = (checkInTime) => {
@@ -187,6 +186,23 @@ export default function EmpDash() {
     }
   };
 
+  const fetchProductData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
+      const allProducts = res.data.data;
+      const lowStockItems = allProducts.filter((item) => item.stock <= 50);
+      setProductsRes(allProducts);
+
+      setLowstockItems(lowStockItems);
+      console.log(lowStockItems.length);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSidebarCollapse = (collapsed) => {
     setSidebarCollapsed(collapsed);
   };
@@ -221,8 +237,12 @@ export default function EmpDash() {
     }
   };
 
+  const handleLowstockClick = () => {
+    navigate("/stockmaintain", { state: { user, orders, productsRes } });
+  };
+
   return (
-    <div>
+    <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
         <Adnavbar user={user} orders={orders} />
       </div>
@@ -376,6 +396,73 @@ export default function EmpDash() {
             <section className="recent-activity-section">
               <div className="section-header">
                 <h2 className="section-title">
+                  <FiActivity className="section-icon" /> Low stocks
+                </h2>
+                <button className="view-all-btn" onClick={handleLowstockClick}>
+                  View All
+                </button>
+              </div>
+
+              <div className="stock-list">
+                {lowstockitems.length > 0 ? (
+                  <ul className="low-stock-ul">
+                    <div className="low-stock-title">
+                      <li>Items</li>
+                      <li>stocks</li>
+                      <li>Category</li>
+                      <li>price</li>
+                      <li>Last Purchased</li>
+                    </div>
+                    {lowstockitems.slice(0, 5).map((item, index) => (
+                      <li
+                        key={index}
+                        className="low-stock-item"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/addproducts", {
+                            state: {
+                              user,
+                              orders,
+                              editProduct: item,
+                            },
+                          });
+                        }}
+                      >
+                        <div className="low-stock-info">
+                          <div className="low-stock-info-header">
+                            <img
+                              className="stock-item-img"
+                              src={item.images[0]}
+                            />
+                            <strong className="item-name">{item.name}</strong>
+                          </div>
+
+                          <span className="item-stock"> {item.stock}</span>
+                          <strong className="item-name">
+                            {item.category} - {item.subCategory}
+                          </strong>
+                          <span className="item-stock-price">
+                            {" "}
+                            {item.price}
+                          </span>
+                          <span>
+                            {new Date(item.updatedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="no-stock-msg">
+                    <p>No low stock items to display</p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="recent-activity-section">
+              <div className="section-header">
+                <h2 className="section-title">
                   <FiActivity className="section-icon" /> Recent Activity
                 </h2>
                 <button
@@ -427,7 +514,6 @@ export default function EmpDash() {
                   </div>
                 )}
               </div>
-
             </section>
           </div>
         </div>

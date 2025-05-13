@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./AdproductsList.css";
-// import "./AddProductButton.css"; 
+// import "./AddProductButton.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
 import Sidebar from "../sidebar/Sidebar";
+
+import { FiUsers, FiLogOut } from "react-icons/fi";
 
 const AdproductsList = () => {
   const location = useLocation();
@@ -28,6 +30,13 @@ const AdproductsList = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [expandedProducts, setExpandedProducts] = useState({});
 
+  const [isEmployee, setisEmployee] = useState(false);
+
+  useEffect(() => {
+    if (user.role == "Employee") {
+      setisEmployee(true);
+    }
+  }, []);
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -275,9 +284,10 @@ const AdproductsList = () => {
         const category = (product.category || "").toLowerCase();
 
         // Get category label if available
-        const categoryLabel = product.category && categoryMetadata[product.category]
-          ? categoryMetadata[product.category].label.toLowerCase()
-          : "";
+        const categoryLabel =
+          product.category && categoryMetadata[product.category]
+            ? categoryMetadata[product.category].label.toLowerCase()
+            : "";
 
         // Check if any field contains the query
         const nameMatch = name.includes(query);
@@ -289,7 +299,10 @@ const AdproductsList = () => {
         return nameMatch || brandMatch || descMatch || catMatch || labelMatch;
       });
 
-      console.log(`Search for "${query}" found ${filteredResults.length} results:`, filteredResults);
+      console.log(
+        `Search for "${query}" found ${filteredResults.length} results:`,
+        filteredResults
+      );
       setSearchResults(filteredResults);
     } catch (error) {
       console.error("Error during search:", error);
@@ -311,6 +324,28 @@ const AdproductsList = () => {
         searchInput.focus();
       }
     }, 100);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const empId = user._id;
+      if (isEmployee) {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/employee/logout/${empId}`,
+          {},
+          { withCredentials: true }
+        );
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/api/auth/logout`,
+          {},
+          { withCredentials: true }
+        );
+      }
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   // Toggle product details expansion
@@ -350,22 +385,30 @@ const AdproductsList = () => {
           orders={orders}
           onCollapsedChange={handleSidebarCollapse}
         />
-        <div className="main-content-box">
+        <div className="main-content">
           <header className="admin-header-box">
-            <h1>
-              <i className="fas fa-boxes"></i> Product Inventory
-            </h1>
-            <button
-              className="ad-add-product-btn"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleaddprodnav();
-              }}
-            >
-              <i className="fas fa-plus-circle"></i>
-              <span>Add New Product</span>
-            </button>
+            <div className="header-greeting">
+              <h1>
+                <FiUsers className="header-icon" /> Product Management
+              </h1>
+              <p className="subtitle">Manage and monitor Inventory Products</p>
+            </div>
+            <div className="admin-info">
+              <button
+                className="ad-add-product-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleaddprodnav();
+                }}
+              >
+                <i className="fas fa-plus-circle"></i>
+                <span>Add New Product</span>
+              </button>
+              <button className="logout-btn" onClick={handleLogout}>
+                <FiLogOut /> Logout
+              </button>
+            </div>
           </header>
 
           <div className="search-container">
@@ -601,7 +644,10 @@ const AdproductsList = () => {
                 ) : (
                   <div className="no-results">
                     <i className="fas fa-search"></i>
-                    <p>No products found matching "<strong>{searchQuery}</strong>"</p>
+                    <p>
+                      No products found matching "<strong>{searchQuery}</strong>
+                      "
+                    </p>
                     <p className="search-tips">
                       Try checking your spelling or using more general terms.
                     </p>

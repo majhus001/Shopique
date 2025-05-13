@@ -22,7 +22,7 @@ import {
   FiPhone,
   FiHome,
   FiLock,
-  FiInfo
+  FiInfo,
 } from "react-icons/fi";
 
 const UserManagement = () => {
@@ -222,7 +222,11 @@ const UserManagement = () => {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -232,12 +236,14 @@ const UserManagement = () => {
         <div className="main-content">
           <header className="admin-header-box">
             <div className="header-greeting">
-              <h1><FiUsers className="header-icon" /> Online Users Management</h1>
+              <h1>
+                <FiUsers className="header-icon" /> Online Users Management
+              </h1>
               <p className="subtitle">Manage and monitor user accounts</p>
             </div>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut  /> Logout
+                <FiLogOut /> Logout
               </button>
             </div>
           </header>
@@ -265,7 +271,7 @@ const UserManagement = () => {
                   {searchQuery && (
                     <button
                       className="clear-search"
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => setSearchQuery("")}
                     >
                       <FiX />
                     </button>
@@ -279,38 +285,38 @@ const UserManagement = () => {
                 currentUsers.map((u) => (
                   <div
                     key={u._id}
-                    className="user-card"
+                    className="user-man-card"
                     onClick={() => handleUserclk(u)}
                   >
-                    <div className="user-avatar">
-                      {u.image ? (
-                        <img src={u.image} alt={u.username} />
-                      ) : (
-                        <div className="avatar-placeholder">
-                          <FiUser />
-                        </div>
-                      )}
+                    <div className="user-card-header">
+                      <div className="user-avatar">
+                        {u.image ? (
+                          <img src={u.image} alt={u.username} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            <FiUser style={{color: '#fff'}}/>
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="user-name">{u.username}</h3>
                     </div>
 
-                    <div className="user-details">
-                      <h3 className="user-name">{u.username}</h3>
-                      <div className="user-info">
+                      <div className="user-card-info">
                         <div className="info-item">
-                          <FiMail className="info-icon" />
+                          <FiMail className="us-info-icon" />
                           <span>{u.email}</span>
                         </div>
                         {u.mobile && (
                           <div className="info-item">
-                            <FiPhone className="info-icon" />
+                            <FiPhone className="us-info-icon" />
                             <span>{u.mobile}</span>
                           </div>
                         )}
-                      </div>
                     </div>
 
-                    <div className="user-actions">
+                    <div className="user-man-actions">
                       <button
-                        className="action-btn edit-btn"
+                        className="us-action-btn us-edit-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditClick(u);
@@ -320,7 +326,7 @@ const UserManagement = () => {
                         <FiEdit2 />
                       </button>
                       <button
-                        className="action-btn view-btn"
+                        className="us-action-btn us-view-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleUserclk(u);
@@ -330,7 +336,7 @@ const UserManagement = () => {
                         <FiInfo />
                       </button>
                       <button
-                        className="action-btn delete-btn"
+                        className="us-action-btn us-delete-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteClick(u);
@@ -349,7 +355,7 @@ const UserManagement = () => {
                   {searchQuery && (
                     <button
                       className="clear-search-btn"
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => setSearchQuery("")}
                     >
                       Clear Search
                     </button>
@@ -361,15 +367,18 @@ const UserManagement = () => {
             {totalPages > 1 && (
               <div className="pagination">
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                   disabled={currentPage === 1}
-                  className="pagination-btn prev-btn"
+                  className="us-pagination-btn prev-btn"
                 >
                   <FiChevronLeft /> Previous
                 </button>
 
                 <div className="pagination-info">
-                  Page <span className="current-page">{currentPage}</span> of <span className="total-pages">{totalPages}</span>
+                  Page <span className="current-page">{currentPage}</span> of{" "}
+                  <span className="total-pages">{totalPages}</span>
                 </div>
 
                 <button
@@ -377,7 +386,7 @@ const UserManagement = () => {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="pagination-btn next-btn"
+                  className="us-pagination-btn next-btn"
                 >
                   Next <FiChevronRight />
                 </button>
@@ -391,7 +400,9 @@ const UserManagement = () => {
         <div className="modal-overlay">
           <div className="edit-user-modal">
             <div className="modal-header">
-              <h2><FiEdit2 className="modal-icon" /> Edit User</h2>
+              <h2>
+                <FiEdit2 className="modal-icon" /> Edit User
+              </h2>
               <button
                 className="close-modal-btn"
                 onClick={() => {
@@ -449,7 +460,7 @@ const UserManagement = () => {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      value={editUser.password || ''}
+                      value={editUser.password || ""}
                       placeholder="New Password"
                       onChange={handleEditChange}
                     />
@@ -461,7 +472,9 @@ const UserManagement = () => {
                       {showPassword ? <FiEyeOff /> : <FiEye />}
                     </button>
                   </div>
-                  <p className="field-hint">Leave blank to keep current password</p>
+                  <p className="field-hint">
+                    Leave blank to keep current password
+                  </p>
                 </div>
 
                 <div className="form-group">
@@ -471,7 +484,7 @@ const UserManagement = () => {
                   <input
                     id="mobile"
                     name="mobile"
-                    value={editUser.mobile || ''}
+                    value={editUser.mobile || ""}
                     onChange={handleEditChange}
                   />
                 </div>
@@ -483,7 +496,7 @@ const UserManagement = () => {
                   <textarea
                     id="address"
                     name="address"
-                    value={editUser.address || ''}
+                    value={editUser.address || ""}
                     onChange={handleEditChange}
                     rows="3"
                   />
@@ -508,10 +521,7 @@ const UserManagement = () => {
                 >
                   <FiX /> Cancel
                 </button>
-                <button
-                  className="save-btn"
-                  onClick={handleEditSave}
-                >
+                <button className="save-btn" onClick={handleEditSave}>
                   <FiSave /> Save Changes
                 </button>
               </div>
@@ -527,7 +537,10 @@ const UserManagement = () => {
               <FiTrash2 />
             </div>
             <h3>Confirm Deletion</h3>
-            <p>Are you sure you want to delete the user <strong>{userToDelete.username}</strong>?</p>
+            <p>
+              Are you sure you want to delete the user{" "}
+              <strong>{userToDelete.username}</strong>?
+            </p>
             <p className="delete-warning">This action cannot be undone.</p>
 
             <div className="confirmation-actions">
@@ -537,10 +550,7 @@ const UserManagement = () => {
               >
                 <FiX /> Cancel
               </button>
-              <button
-                className="confirm-delete-btn"
-                onClick={confirmDelete}
-              >
+              <button className="confirm-delete-btn" onClick={confirmDelete}>
                 <FiTrash2 /> Delete User
               </button>
             </div>

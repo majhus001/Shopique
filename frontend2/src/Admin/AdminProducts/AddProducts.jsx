@@ -597,7 +597,7 @@ const AddProducts = () => {
           orders={orders}
           onCollapsedChange={handleSidebarCollapse}
         />
-        <div className="main-content-box">
+        <div className="main-content">
           <div className="test-add-products-container">
             <div className="header-section">
               <h2>{isEditMode ? "Edit Product" : "Add New Product"}</h2>

@@ -333,369 +333,194 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  /* User List */
-  .user-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-  }
 
-  /* List View */
-  .user-list.list {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
 
-  /* User Card */
-  .user-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.03);
-    position: relative;
-    overflow: hidden;
-    max-width: 100%;
-    cursor: pointer;
-  }
+  /* Base List Container */
+.cs-user-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 8px;
+}
 
-  .user-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 100%;
-    background: linear-gradient(to bottom, #3498db, #2980b9);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
+/* List View Mode */
+.cs-user-list.list-view {
+  display: block;
+}
 
-  .user-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.03) 0%, rgba(255, 255, 255, 0) 50%);
-    pointer-events: none;
-  }
+.cs-user-list.list-view .cs-user-card {
+  display: flex;
+  margin-bottom: 8px;
+}
 
-  .user-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-    border-color: rgba(52, 152, 219, 0.2);
-  }
+.cs-user-list.list-view .cs-user-header {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
 
-  .user-card:hover::before {
-    opacity: 1;
-  }
+/* User Card */
+.cs-user-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid #eee;
+}
 
-  /* Expanded card */
-  .user-card.expanded {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    border-color: rgba(52, 152, 219, 0.3);
-  }
+.cs-user-card:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
 
-  .user-card.expanded::before {
-    opacity: 1;
-  }
+.cs-user-card.expanded {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
 
-  /* Expand toggle button */
-  .expand-toggle {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: #95a5a6;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+/* Header Section */
+.cs-user-header {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background: #f9f9f9;
+}
 
-  .expand-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: #3498db;
-  }
+.cs-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
 
-  /* List View Card */
-  .user-card.list-view {
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 15px;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
+.cs-user-name-email {
+  flex: 1;
+  min-width: 0;
+}
 
-  /* User Header */
-  .user-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    position: relative;
-    padding: 5px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-  }
+.cs-user-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .user-header:hover {
-    background-color: rgba(52, 152, 219, 0.05);
-  }
+.cs-expand-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  margin-left: 8px;
+}
 
-  .list-view .user-header {
-    width: 100%;
-    padding-right: 10px;
-  }
+/* Expanded Details */
+.cs-user-details {
+  padding: 12px;
+  border-top: 1px solid #eee;
+}
 
-  .expanded .user-header {
-    background-color: rgba(52, 152, 219, 0.05);
-    margin-bottom: 5px;
-  }
+.cs-user-detail {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #555;
+}
 
-  /* User Mobile (List View) */
-  .user-mobile {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #7f8c8d;
-    font-size: 0.9rem;
-    margin-left: 20px;
-    white-space: nowrap;
-  }
+.cs-user-detail.address {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  /* User ID (List View) */
-  .user-id {
-    color: #95a5a6;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-left: auto;
-    background-color: #f8f9fa;
-    padding: 5px 10px;
-    border-radius: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-  }
+.cs-detail-icon {
+  margin-right: 8px;
+  color: #777;
+  min-width: 16px;
+}
 
-  /* User Avatar */
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background-color: #3498db;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
+/* Action Buttons */
+.cs-user-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+}
 
-  .user-avatar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 50%);
-    pointer-events: none;
-  }
+.cs-user-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  margin-left: 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
 
-  .expanded .user-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-  }
+.cs-edit-btn {
+  color: #2b8a3e;
+}
 
-  .user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.cs-edit-btn:hover {
+  background: #ebfbee;
+}
 
-  /* User Name and Email */
-  .user-name-email {
-    flex-grow: 1;
-    overflow: hidden;
-  }
+.cs-delete-btn {
+  color: #c92a2a;
+}
 
-  .user-name {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    letter-spacing: 0.01em;
-  }
+.cs-delete-btn:hover {
+  background: #fff5f5;
+}
 
-  .expanded .user-name {
-    margin-bottom: 3px;
-  }
+.cs-view-btn {
+  color: #1971c2;
+}
 
-  .user-email {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    opacity: 0.9;
-  }
+.cs-view-btn:hover {
+  background: #f0f7ff;
+}
 
-  /* User Details */
-  .user-details {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    padding: 5px 0;
-    border-top: 1px dashed rgba(0, 0, 0, 0.05);
-    margin-top: 5px;
-  }
+/* Empty State */
+.cs-no-users {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 30px 20px;
+  color: #666;
+}
 
-  .expanded .user-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 8px;
-    align-items: start;
-  }
+.cs-no-results-icon {
+  font-size: 40px;
+  color: #ddd;
+  margin-bottom: 12px;
+}
 
-  .user-detail {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: #7f8c8d;
-    margin: 0;
-    background-color: #f8f9fa;
-    padding: 4px 8px;
-    border-radius: 4px;
-    max-width: fit-content;
-  }
+.cs-reset-search {
+  background: #f1f3f5;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-top: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
 
-  .user-detail.address {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    background-color: transparent;
-    padding: 0;
-    border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
-    padding-bottom: 3px;
-  }
-
-  .list-view .user-detail {
-    white-space: nowrap;
-    background-color: #f8f9fa;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-  }
-
-  .list-view .user-detail.address {
-    background-color: #f8f9fa;
-    border-bottom: none;
-    padding: 3px 8px;
-  }
-
-  .detail-icon {
-    color: #3498db;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    opacity: 0.8;
-  }
-
-  .detail-icon-inline {
-    color: #3498db;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-    opacity: 0.8;
-  }
-
-  /* User Actions */
-  .user-actions {
-    display: flex;
-    gap: 8px;
-    margin-left: auto;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 5;
-    margin-top: 10px;
-    justify-content: flex-end;
-    border-top: 1px dashed rgba(0, 0, 0, 0.05);
-    padding-top: 10px;
-  }
-
-  .expanded .user-actions {
-    margin-left: 0;
-    margin-top: 10px;
-    width: 100%;
-  }
-
-  /* Action Button Base Styles */
-  .user-actions button {
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.9rem;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    opacity: 0.9;
-  }
-
-  .list-view .user-actions button {
-    width: auto;
-    padding: 0 10px;
-    gap: 6px;
-    height: 28px;
-  }
-
-  .list-view .user-actions button span {
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  /* Button Hover Effects */
-  .user-actions button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    opacity: 1;
-  }
-
-  .user-actions button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  }
+.cs-reset-search:hover {
+  background: #e9ecef;
+}
 
   /* Edit Button Styles */
   .cust-edit-btn {
@@ -1530,7 +1355,7 @@
 
   /* Responsive Styles */
   @media (max-width: 1200px) {
-    .user-list {
+    .cs-user-list {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 

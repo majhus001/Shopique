@@ -46,19 +46,6 @@ import {
   FiList,
 } from "react-icons/fi";
 
-// Helper function to generate consistent colors from strings
-const stringToColor = (str) => {
-  if (!str) return "#3498db"; // Default color
-
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  const hue = hash % 360;
-  return `hsl(${hue}, 70%, 60%)`;
-};
-
 const Customers = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -222,9 +209,9 @@ const Customers = () => {
             active: customersData.filter((c) => c.lastLogin).length,
             new: customersData.filter((c) => {
               return c.createdAt && new Date(c.createdAt) >= thirtyDaysAgo;
-            }).length,
+            }).length,  
             withOrders: customersData.filter(
-              (c) => c.orders && c.orders.length > 0
+              (c) => c.totalPurchases && c.totalPurchases.length > 0
             ).length,
           });
 
@@ -423,7 +410,6 @@ const Customers = () => {
   };
 
   const handleviewclk = (userdata) => {
-    console.log(userdata);
     navigate("/viewcustomers", { state: { user, orders, userdata } });
   };
 
@@ -433,11 +419,12 @@ const Customers = () => {
   };
 
   // Toggle card expanded state
-  const toggleCardExpanded = (userId) => {
-  setExpandedCards(prev => ({
-    ...prev,
-    [userId]: !prev[userId] // Toggle only the clicked card
-  }));
+const toggleCardExpanded = (userId) => {
+  setExpandedCards(prev => {
+    const newState = {...prev};
+    newState[userId] = !newState[userId];
+    return newState;
+  });
 };
 
   // Handle adding a new customer
@@ -551,7 +538,7 @@ const Customers = () => {
             </div>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut  /> Logout
+                <FiLogOut /> Logout
               </button>
             </div>
           </header>
@@ -700,99 +687,104 @@ const Customers = () => {
               </div>
             </div>
 
-            <div className={`user-list ${viewMode}`}>
+            <div className={`cs-user-list ${viewMode}`}>
               {currentUsers.length > 0 ? (
                 currentUsers.map((u) => (
                   <div
                     key={u._id}
-                    className={`user-card ${
-                      viewMode === "list" ? "list-view" : ""
-                    } ${expandedCards[u._id] ? "expanded" : ""}`}
+                    className={`cs-user-card ${
+                      viewMode === "list" ? "cs-list-view" : ""
+                    } ${expandedCards[u._id] ? "cs-expanded" : ""}`}
                   >
                     <div
-                      className="user-header"
+                      className="cs-user-header"
                       onClick={() => toggleCardExpanded(u._id)}
                     >
                       <div
-                        className="user-avatar"
+                        className="cs-user-avatar"
                         style={{
                           backgroundColor: `hsl(${
-                            (u.username?.charCodeAt(0) * 10) % 360
+                            ((u.username?.charCodeAt(0) || 0) * 10) % 360
                           }, 70%, 60%)`,
                         }}
                       >
                         {u.username ? u.username.charAt(0).toUpperCase() : "U"}
                       </div>
-                      <div className="user-name-email">
-                        <h3 className="user-name">{u.username}</h3>
+                      <div className="cs-user-name-email">
+                        <h3 className="cs-user-name">{u.username}</h3>
                       </div>
 
-                      <button className="expand-toggle">
-                        {expandedCards[u._id] ? (
-                          <span>▲ </span>
-                        ) : (
-                          <span>▼</span>
-                        )}
+                      <button className="cs-expand-toggle">
+                        {expandedCards[u._id] ? "▲" : "▼"}
                       </button>
                     </div>
 
                     {expandedCards[u._id] && (
                       <>
-                        <div className="user-details">
-                          <p className="user-detail">
-                            <FiMail className="detail-icon" />
+                        <div className="cs-user-details">
+                          <p className="cs-user-detail">
+                            <FiMail className="cs-detail-icon" />
                             {u.email}
                           </p>
 
-                          <p className="user-detail">
-                            <FiPhone className="detail-icon" />
+                          <p className="cs-user-detail">
+                            <FiPhone className="cs-detail-icon" />
                             {u.mobile || "No mobile"}
                           </p>
 
-                          <p className="user-detail address">
-                            <FiHome className="detail-icon" />
+                          <p className="cs-user-detail cs-address">
+                            <FiHome className="cs-detail-icon" />
                             {u.address || "No address"}
                           </p>
 
-                          <p className="user-detail">
-                            <FiInfo className="detail-icon" />
+                          <p className="cs-user-detail">
+                            <FiInfo className="cs-detail-icon" />
                             ID: {u._id?.substring(0, 8)}...
                           </p>
 
                           {u.createdAt && (
-                            <p className="user-detail">
-                              <FiCalendar className="detail-icon" />
+                            <p className="cs-user-detail">
+                              <FiCalendar className="cs-detail-icon" />
                               {new Date(u.createdAt).toLocaleDateString()}
                             </p>
                           )}
 
-                          <p className="user-detail">
-                            <FiShoppingBag className="detail-icon" />
+                          <p className="cs-user-detail">
+                            <FiShoppingBag className="cs-detail-icon" />
                             {u.orders?.length || 0} orders
                           </p>
                         </div>
 
-                        <div className="user-actions">
+                        <div className="cs-user-actions">
                           <button
-                            className="cust-edit-btn"
-                            onClick={() => handleEditClick(u)}
+                            className="cs-edit-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(u);
+                            }}
                             title="Edit Customer"
-                          > 
-                            <span><FiEdit2 /></span>
+                          >
+                            <FiEdit2 />
                           </button>
                           <button
-                            className="cust-delete-btn"
-                            onClick={() => handleDeleteClick(u)}
+                            className="cs-delete-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(u);
+                            }}
                             title="Delete Customer"
                           >
-                            <span><FiTrash2 /></span>
+                            <FiTrash2 />
                           </button>
                           <button
-                            className="cust-view-btn"
-                            onClick={() => handleviewclk(u)}
+                            className="cs-view-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleviewclk(u);
+                            }}
                             title="View Details"
                           >
-                            <span><FiEye /></span>
+                            <FiEye />
                           </button>
                         </div>
                       </>
@@ -800,11 +792,11 @@ const Customers = () => {
                   </div>
                 ))
               ) : (
-                <div className="no-users">
-                  <FiAlertCircle className="no-results-icon" />
+                <div className="cs-no-users">
+                  <FiAlertCircle className="cs-no-results-icon" />
                   <p>No customers found matching your search criteria.</p>
                   <button
-                    className="reset-search"
+                    className="cs-reset-search"
                     onClick={() => setSearchQuery("")}
                   >
                     <FiRefreshCw /> Reset Search

@@ -304,6 +304,7 @@
   border-bottom: 1px solid #eaeaea;
   transition: all 0.3s ease;
   background-color: white;
+  cursor: pointer;
 }
 
 .low-stock-item:last-child {
@@ -350,16 +351,6 @@
 .item-stock-price {
   font-weight: bold;
   color: #0b8b1e;
-}
-
-.item-description {
-  grid-column: 1 / -1;
-  margin-top: 10px;
-  color: #666;
-  font-size: 0.9em;
-  line-height: 1.4;
-  padding-top: 10px;
-  border-top: 1px dashed #eaeaea;
 }
 
 .no-stock-msg {

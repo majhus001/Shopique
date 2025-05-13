@@ -29,13 +29,11 @@ const AdminHome = () => {
   const [orders, setOrders] = useState(stateOrders);
   const [userData, setUserData] = useState([]);
   const [customersDataRes, setCustomersDataRes] = useState([]);
+  const [employeeDataRes, setEmployeeDataRes] = useState([]);
   const [recactivity, setRecactivity] = useState([]);
   const [pendingOrders, setUsersPendingOrder] = useState([]);
   const [productsRes, setProductsRes] = useState([]);
   const [lowstockitems, setLowstockItems] = useState([]);
-
-  const [clothprod, setClothProducts] = useState([]);
-  const [homeappliprod, setHomeAppliProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -97,10 +95,11 @@ const AdminHome = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [userDataRes, customersDataRes, userRecActRes, productsRes] =
+        const [userDataRes, customersDataRes, employeeDataRes, userRecActRes, productsRes] =
           await Promise.all([
             axios.get(`${API_BASE_URL}/api/admin/userdata`),
             axios.get(`${API_BASE_URL}/api/customers/fetch`),
+            axios.get(`${API_BASE_URL}/api/employees/fetch`),
             axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
             axios.get(`${API_BASE_URL}/api/products/fetchAll`),
           ]);
@@ -110,9 +109,9 @@ const AdminHome = () => {
         const lowStockItems = products.filter((item) => item.stock <= 50);
 
         setLowstockItems(lowStockItems);
-
         setUserData(userDataRes.data);
         setCustomersDataRes(customersDataRes.data.data);
+        setEmployeeDataRes(employeeDataRes.data.data);
         setRecactivity(userRecActRes.data);
         setProductsRes(productsRes.data.data);
       } catch (err) {
@@ -145,12 +144,18 @@ const AdminHome = () => {
     navigate("/userman", { state: { user, orders } });
   const handlecustomersclk = () =>
     navigate("/customers", { state: { user, orders } });
+  const handlemployeesclk = () =>
+    navigate("/employees", { state: { user, orders } });
   const handleOrderclk = () =>
     navigate("/adorders", { state: { user, orders } });
   const handleReportsclk = () =>
     navigate("/adreports", { state: { user, orders } });
   const handleProdclk = () =>
     navigate("/adprodlist", { state: { user, orders } });
+
+  const handleLowstockClick = () => {
+    navigate("/stockmaintain", { state: { user, orders, productsRes } });
+  };
 
   const handleRecentActivityClick = () => {
     navigate("/recentactivity", { state: { user, orders, recactivity } });
@@ -205,7 +210,9 @@ const AdminHome = () => {
           </header>
 
           <div className="dashboard-summary">
-            <h2 className="section-title">Dashboard Overview</h2>
+            <div className="section-title">
+              <h2>Dashboard Overview</h2>
+            </div>
             <p className="section-subtitle">
               Quick summary of your store's performance
             </p>
@@ -230,7 +237,18 @@ const AdminHome = () => {
               <div className="card-content">
                 <h3>Total Customers</h3>
                 <p>{customersDataRes.length}</p>
-                <span className="card-description">Registered accounts</span>
+                <span className="card-description">Regular customers</span>
+              </div>
+            </div>
+
+            <div className="ad-det-card" onClick={handlemployeesclk}>
+              <div className="card-icon-wrapper users-icon">
+                <FiUsers className="card-icon" />
+              </div>
+              <div className="card-content">
+                <h3>Total Employees</h3>
+                <p>{employeeDataRes.length}</p>
+                <span className="card-description">shop workers</span>
               </div>
             </div>
 
@@ -266,7 +284,7 @@ const AdminHome = () => {
                 <span className="card-description">Analytics & statistics</span>
               </div>
             </div>
-            <div className="ad-det-card" onClick={handleReportsclk}>
+            <div className="ad-det-card" onClick={handleLowstockClick}>
               <div className="card-icon-wrapper reports-icon">
                 <FiPieChart className="card-icon" />
               </div>
@@ -285,10 +303,7 @@ const AdminHome = () => {
               <h2 className="section-title">
                 <FiActivity className="section-icon" /> Low stocks
               </h2>
-              <button
-                className="view-all-btn"
-                onClick={handleRecentActivityClick}
-              >
+              <button className="view-all-btn" onClick={handleLowstockClick}>
                 View All
               </button>
             </div>
@@ -304,7 +319,20 @@ const AdminHome = () => {
                     <li>Last Purchased</li>
                   </div>
                   {lowstockitems.slice(0, 5).map((item, index) => (
-                    <li key={index} className="low-stock-item">
+                    <li
+                      key={index}
+                      className="low-stock-item"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/addproducts", {
+                          state: {
+                            user,
+                            orders,
+                            editProduct: item,
+                          },
+                        });
+                      }}
+                    >
                       <div className="low-stock-info">
                         <div className="low-stock-info-header">
                           <img
@@ -315,15 +343,14 @@ const AdminHome = () => {
                         </div>
 
                         <span className="item-stock"> {item.stock}</span>
-                        <strong>
+                        <strong className="item-name">
                           {item.category} - {item.subCategory}
                         </strong>
                         <span className="item-stock-price"> {item.price}</span>
                         <span>
-                          {new Date(item.createdAt).toLocaleDateString()}
+                          {new Date(item.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
-                      
                     </li>
                   ))}
                 </ul>

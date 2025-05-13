@@ -32,7 +32,7 @@ const Sidebar = ({ user, orders, onCollapsedChange }) => {
       onCollapsedChange(collapsed);
     }
 
-    if (user.role == "Employee") {
+    if (user?.role == "Employee") {
       setisEmployee(true);
     }
   }, [collapsed, onCollapsedChange]);

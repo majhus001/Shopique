@@ -23,6 +23,7 @@ import AddEmployee from "./Admin/Employees/AddEmployee";
 import EmpDash from "./Employees/Dashboard/EmpDash";
 import AdminReports from "./Admin/AdminReports/AdminReports";
 import ViewCustormers from "./Admin/Customers/ViewCustormers";
+import ViewStocks from "./Admin/homepage/Stockmaintainance/ViewStocks";
 const App = () => {
   return (
     <Router>
@@ -51,6 +52,7 @@ const App = () => {
          <Route path="/addemployees" element={<AddEmployee />} /> 
          <Route path="/empdash" element={<EmpDash />} /> 
          <Route path="/adreports" element={<AdminReports />} /> 
+         <Route path="/stockmaintain" element={<ViewStocks />} /> 
         
       </Routes>
     </Router>

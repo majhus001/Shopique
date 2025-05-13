@@ -1,0 +1,27 @@
+.filters-container {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0 10px 0;
+  padding: 10px 0;
+}
+
+.filters-container select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filters-container select:hover {
+  border-color: #888;
+  background-color: #f3f3f3;
+}
+
+.section-header-box{
+    display: flex;
+    justify-content: space-around;
+    gap: 200px;
+}

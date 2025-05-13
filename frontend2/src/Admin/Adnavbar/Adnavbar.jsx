@@ -9,7 +9,7 @@ const Adnavbar = ({ user }) => {
   const [isEmployee, setisEmployee] = useState(false);
   
   useEffect(() => {
-    if (user.role == "Employee") {
+    if (user?.role == "Employee") {
       setisEmployee(true);
     }
   });

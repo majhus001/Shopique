@@ -19,7 +19,7 @@ import {
   FiUserCheck,
   FiClock,
   FiAlertCircle,
-  FiFileText
+  FiFileText,
 } from "react-icons/fi";
 
 export default function Employees() {
@@ -36,6 +36,8 @@ export default function Employees() {
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [employeesPerPage] = useState(8);
@@ -46,7 +48,7 @@ export default function Employees() {
     total: 0,
     active: 0,
     onLeave: 0,
-    terminated: 0
+    terminated: 0,
   });
 
   // Handle sidebar collapse
@@ -63,7 +65,9 @@ export default function Employees() {
         if (response.data.success) {
           const employeesData = response.data.data || [];
           setEmployees(employeesData);
-          setFilteredEmployees(sortEmployees(employeesData, sortField, sortDirection));
+          setFilteredEmployees(
+            sortEmployees(employeesData, sortField, sortDirection)
+          );
           calculateStats(employeesData);
         }
       } catch (error) {
@@ -80,9 +84,10 @@ export default function Employees() {
   const calculateStats = (employeeData) => {
     const stats = {
       total: employeeData.length,
-      active: employeeData.filter(emp => emp.status === 'Active').length,
-      onLeave: employeeData.filter(emp => emp.status === 'On Leave').length,
-      terminated: employeeData.filter(emp => emp.status === 'Terminated').length
+      active: employeeData.filter((emp) => emp.status === "Active").length,
+      onLeave: employeeData.filter((emp) => emp.status === "On Leave").length,
+      terminated: employeeData.filter((emp) => emp.status === "Terminated")
+        .length,
     };
     setStats(stats);
   };
@@ -90,15 +95,16 @@ export default function Employees() {
   // Sort employees
   const sortEmployees = (employees, field, direction) => {
     return [...employees].sort((a, b) => {
-      if (a[field] < b[field]) return direction === 'asc' ? -1 : 1;
-      if (a[field] > b[field]) return direction === 'asc' ? 1 : -1;
+      if (a[field] < b[field]) return direction === "asc" ? -1 : 1;
+      if (a[field] > b[field]) return direction === "asc" ? 1 : -1;
       return 0;
     });
   };
 
   // Handle sort change
   const handleSortChange = (field) => {
-    const newDirection = field === sortField && sortDirection === 'asc' ? 'desc' : 'asc';
+    const newDirection =
+      field === sortField && sortDirection === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortDirection(newDirection);
     setFilteredEmployees(sortEmployees(filteredEmployees, field, newDirection));
@@ -110,14 +116,14 @@ export default function Employees() {
 
     // Apply status filter
     if (filterStatus !== "All") {
-      result = result.filter(employee => employee.status === filterStatus);
+      result = result.filter((employee) => employee.status === filterStatus);
     }
 
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        employee =>
+        (employee) =>
           employee.fullName?.toLowerCase().includes(query) ||
           employee.email?.toLowerCase().includes(query) ||
           employee.phone?.includes(query) ||
@@ -134,7 +140,10 @@ export default function Employees() {
   // Pagination logic
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const currentEmployees = filteredEmployees.slice(
+    indexOfFirstEmployee,
+    indexOfLastEmployee
+  );
   const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
   // Change page
@@ -152,34 +161,45 @@ export default function Employees() {
         user,
         orders,
         editMode: true,
-        employeeData: employee
-      }
+        employeeData: employee,
+      },
     });
   };
 
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setShowDeletePopup(true);
+  };
+
   // Handle delete employee
-  const handleDeleteEmployee = async (id) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
-      try {
-        setLoading(true);
-        const response = await axios.delete(`${API_BASE_URL}/api/employees/delete/${id}`);
-        if (response.data.success) {
-          // Remove from state
-          const updatedEmployees = employees.filter(emp => emp._id !== id);
-          setEmployees(updatedEmployees);
-          setFilteredEmployees(sortEmployees(
-            updatedEmployees.filter(emp => filterStatus === "All" || emp.status === filterStatus),
+  const handleDeleteEmployee = async () => {
+    try {
+      setLoading(true);
+      const id = userToDelete._id
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/employees/delete/${id}`
+      );
+      if (response.data.success) {
+        // Remove from state
+        const updatedEmployees = employees.filter((emp) => emp._id !== id);
+        setEmployees(updatedEmployees);
+        setFilteredEmployees(
+          sortEmployees(
+            updatedEmployees.filter(
+              (emp) => filterStatus === "All" || emp.status === filterStatus
+            ),
             sortField,
             sortDirection
-          ));
-          calculateStats(updatedEmployees);
-        }
-      } catch (error) {
-        console.error("Error deleting employee:", error);
-        alert("Failed to delete employee. Please try again.");
-      } finally {
-        setLoading(false);
+          )
+        );
+        calculateStats(updatedEmployees);
+        setShowDeletePopup(false);
       }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      alert("Failed to delete employee. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -202,7 +222,11 @@ export default function Employees() {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -211,7 +235,9 @@ export default function Employees() {
         <div className="main-content">
           <header className="admin-header-box">
             <div className="header-greeting">
-              <h1><FiUsers className="header-icon" /> Employee Management</h1>
+              <h1>
+                <FiUsers className="header-icon" /> Employee Management
+              </h1>
               <p className="subtitle">Manage your organization's workforce</p>
             </div>
             <div className="admin-actions">
@@ -287,7 +313,9 @@ export default function Employees() {
                 </div>
                 <div className="filter-container">
                   <div className="filter-dropdown">
-                    <label><FiFilter /> Status:</label>
+                    <label>
+                      <FiFilter /> Status:
+                    </label>
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
@@ -310,35 +338,61 @@ export default function Employees() {
               {currentEmployees.length > 0 ? (
                 <>
                   <div className="employee-list-header">
-                    <div className="employee-column name" onClick={() => handleSortChange("fullName")}>
-                      Name {sortField === "fullName" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <div
+                      className="employee-column name"
+                      onClick={() => handleSortChange("fullName")}
+                    >
+                      Name{" "}
+                      {sortField === "fullName" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </div>
-                    <div className="employee-column position" onClick={() => handleSortChange("position")}>
-                      Position {sortField === "position" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <div
+                      className="employee-column position"
+                      onClick={() => handleSortChange("position")}
+                    >
+                      Position{" "}
+                      {sortField === "position" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </div>
-                    <div className="employee-column department" onClick={() => handleSortChange("department")}>
-                      Department {sortField === "department" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <div
+                      className="employee-column department"
+                      onClick={() => handleSortChange("department")}
+                    >
+                      Department{" "}
+                      {sortField === "department" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </div>
-                    <div className="employee-column contact">
-                      Contact
+                    <div className="employee-column contact">Contact</div>
+                    <div
+                      className="employee-column status"
+                      onClick={() => handleSortChange("status")}
+                    >
+                      Status{" "}
+                      {sortField === "status" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </div>
-                    <div className="employee-column status" onClick={() => handleSortChange("status")}>
-                      Status {sortField === "status" && (sortDirection === "asc" ? "↑" : "↓")}
-                    </div>
-                    <div className="employee-column actions">
-                      Actions
-                    </div>
+                    <div className="employee-column actions">Actions</div>
                   </div>
                   <div className="employee-list">
                     {currentEmployees.map((employee) => (
-                      <div key={employee._id} className={`employee-item ${employee.status.toLowerCase().replace(' ', '-')}`}>
+                      <div
+                        key={employee._id}
+                        className={`employee-item ${employee.status
+                          .toLowerCase()
+                          .replace(" ", "-")}`}
+                      >
                         <div className="employee-column name">
-                          <div className="employee-name">{employee.fullName}</div>
-                          {employee.documents && employee.documents.length > 0 && (
-                            <div className="document-count">
-                              <FiFileText /> {employee.documents.length} document{employee.documents.length !== 1 ? 's' : ''}
-                            </div>
-                          )}
+                          <div className="employee-name">
+                            {employee.fullName}
+                          </div>
+                          {employee.documents &&
+                            employee.documents.length > 0 && (
+                              <div className="document-count">
+                                <FiFileText /> {employee.documents.length}{" "}
+                                document
+                                {employee.documents.length !== 1 ? "s" : ""}
+                              </div>
+                            )}
                         </div>
                         <div className="employee-column position">
                           {employee.position}
@@ -353,21 +407,25 @@ export default function Employees() {
                           </div>
                         </div>
                         <div className="employee-column status">
-                          <span className={`status-badge ${employee.status.toLowerCase().replace(' ', '-')}`}>
+                          <span
+                            className={`status-badge ${employee.status
+                              .toLowerCase()
+                              .replace(" ", "-")}`}
+                          >
                             {employee.status}
                           </span>
                         </div>
                         <div className="employee-column actions">
                           <button
-                            className="edit-btn"
+                            className="us-edit-btn"
                             onClick={() => handleEditEmployee(employee)}
                             title="Edit employee"
                           >
                             <FiEdit2 />
                           </button>
                           <button
-                            className="delete-btn"
-                            onClick={() => handleDeleteEmployee(employee._id)}
+                            className="us-delete-btn"
+                            onClick={() => handleDeleteClick(employee)}
                             title="Delete employee"
                           >
                             <FiTrash2 />
@@ -380,9 +438,15 @@ export default function Employees() {
               ) : (
                 <div className="no-employees-message">
                   {searchQuery || filterStatus !== "All" ? (
-                    <p>No employees match your search criteria. <button onClick={resetFilters}>Reset filters</button></p>
+                    <p>
+                      No employees match your search criteria.{" "}
+                      <button onClick={resetFilters}>Reset filters</button>
+                    </p>
                   ) : (
-                    <p>No employees found. Add your first employee to get started.</p>
+                    <p>
+                      No employees found. Add your first employee to get
+                      started.
+                    </p>
                   )}
                 </div>
               )}
@@ -413,6 +477,44 @@ export default function Employees() {
           </div>
         </div>
       </div>
+
+      {showDeletePopup && (
+        <div className="modal-overlay">
+          <div className="delete-confirmation-modal">
+            <div className="delete-icon">
+              <FiTrash2 />
+            </div>
+            <h3>Confirm Deletion</h3>
+            <p>
+              Are you sure you want to delete the customer{" "}
+              <strong>{userToDelete.fullName}</strong>?
+            </p>
+            <p className="delete-warning">This action cannot be undone.</p>
+
+            <div className="confirmation-actions">
+              <button
+                className="cancel-delete-btn"
+                onClick={() => setShowDeletePopup(false)}
+              >
+                <FiX /> Cancel
+              </button>
+              <button
+                className="confirm-delete-btn"
+                onClick={handleDeleteEmployee}
+                disabled={loading}
+              >
+                {loading ? (
+                  "Deleting..."
+                ) : (
+                  <>
+                    <FiTrash2 /> Delete Customer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
