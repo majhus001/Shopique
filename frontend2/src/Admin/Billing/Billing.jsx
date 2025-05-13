@@ -714,7 +714,7 @@ const Billing = () => {
         />
 
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>Billing System</h1>
               <p className="date-display">
@@ -727,7 +727,7 @@ const Billing = () => {
               </p>
             </div>
             <div className="admin-info">
-              <button className="logout-btn-billing" onClick={handleLogout}>
+              <button className="logout-btn" onClick={handleLogout}>
                 <FiLogOut /> Logout
               </button>
             </div>

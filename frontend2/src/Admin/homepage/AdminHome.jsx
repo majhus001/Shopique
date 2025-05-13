@@ -32,6 +32,8 @@ const AdminHome = () => {
   const [recactivity, setRecactivity] = useState([]);
   const [pendingOrders, setUsersPendingOrder] = useState([]);
   const [productsRes, setProductsRes] = useState([]);
+  const [lowstockitems, setLowstockItems] = useState([]);
+
   const [clothprod, setClothProducts] = useState([]);
   const [homeappliprod, setHomeAppliProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,12 @@ const AdminHome = () => {
             axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
             axios.get(`${API_BASE_URL}/api/products/fetchAll`),
           ]);
+
+        const products = productsRes.data.data;
+
+        const lowStockItems = products.filter((item) => item.stock <= 50);
+
+        setLowstockItems(lowStockItems);
 
         setUserData(userDataRes.data);
         setCustomersDataRes(customersDataRes.data.data);
@@ -174,7 +182,7 @@ const AdminHome = () => {
         />
 
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>Welcome to the Admin Dashboard</h1>
               <p className="date-display">
@@ -188,10 +196,10 @@ const AdminHome = () => {
             </div>
             <div className="admin-info">
               <button className="billing-btn" onClick={handleBillingClick}>
-                <FiDollarSign className="btn-icon" /> Go to Billing
+                <FiDollarSign /> Go to Billing
               </button>
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut className="btn-icon" /> Logout
+                <FiLogOut /> Logout
               </button>
             </div>
           </header>
@@ -258,7 +266,74 @@ const AdminHome = () => {
                 <span className="card-description">Analytics & statistics</span>
               </div>
             </div>
+            <div className="ad-det-card" onClick={handleReportsclk}>
+              <div className="card-icon-wrapper reports-icon">
+                <FiPieChart className="card-icon" />
+              </div>
+              <div className="card-content">
+                <h3>Low Stocks </h3>
+                <p>{lowstockitems.length}</p>
+                <span className="card-description">
+                  items with Low Stocks in Inventory
+                </span>
+              </div>
+            </div>
           </div>
+
+          <section className="recent-activity-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                <FiActivity className="section-icon" /> Low stocks
+              </h2>
+              <button
+                className="view-all-btn"
+                onClick={handleRecentActivityClick}
+              >
+                View All
+              </button>
+            </div>
+
+            <div className="stock-list">
+              {lowstockitems.length > 0 ? (
+                <ul className="low-stock-ul">
+                  <div className="low-stock-title">
+                    <li>Items</li>
+                    <li>stocks</li>
+                    <li>Category</li>
+                    <li>price</li>
+                    <li>Last Purchased</li>
+                  </div>
+                  {lowstockitems.slice(0, 5).map((item, index) => (
+                    <li key={index} className="low-stock-item">
+                      <div className="low-stock-info">
+                        <div className="low-stock-info-header">
+                          <img
+                            className="stock-item-img"
+                            src={item.images[0]}
+                          />
+                          <strong className="item-name">{item.name}</strong>
+                        </div>
+
+                        <span className="item-stock"> {item.stock}</span>
+                        <strong>
+                          {item.category} - {item.subCategory}
+                        </strong>
+                        <span className="item-stock-price"> {item.price}</span>
+                        <span>
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="no-stock-msg">
+                  <p>No low stock items to display</p>
+                </div>
+              )}
+            </div>
+          </section>
 
           <section className="recent-activity-section">
             <div className="section-header">

@@ -350,8 +350,8 @@ const AdproductsList = () => {
           orders={orders}
           onCollapsedChange={handleSidebarCollapse}
         />
-        <div className="main-content">
-          <header className="admin-header">
+        <div className="main-content-box">
+          <header className="admin-header-box">
             <h1>
               <i className="fas fa-boxes"></i> Product Inventory
             </h1>

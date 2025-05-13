@@ -377,28 +377,6 @@
   gap: 10px;
 }
 
-/* Admin Header - Compact */
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.admin-header h1 {
-  color: #2c3e50;
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.admin-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
 .logout-btn {
   background: #e74c3c;

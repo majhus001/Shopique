@@ -284,7 +284,7 @@ export default function AdminReports() {
         />
 
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>Reports Dashboard</h1>
               <div className="date-time-display">

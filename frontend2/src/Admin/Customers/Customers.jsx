@@ -542,7 +542,7 @@ const Customers = () => {
         />
 
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
                 <FiUsers className="header-icon" /> Customers Management
@@ -551,7 +551,7 @@ const Customers = () => {
             </div>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut className="btn-icon" /> Logout
+                <FiLogOut  /> Logout
               </button>
             </div>
           </header>

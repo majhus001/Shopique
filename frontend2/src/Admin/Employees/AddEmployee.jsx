@@ -293,7 +293,7 @@ export default function AddEmployee() {
           onCollapsedChange={handleSidebarCollapse}
         />
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
                 {isEditMode ? <FiUserCheck className="header-icon" /> : <FiUserPlus className="header-icon" />}

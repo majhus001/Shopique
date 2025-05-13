@@ -5,6 +5,7 @@ import "./Adminorders.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import Sidebar from "../sidebar/Sidebar";
 import API_BASE_URL from "../../api";
+import { FiLogOut } from "react-icons/fi";
 
 const Adminorders = () => {
   const location = useLocation();
@@ -244,16 +245,19 @@ const Adminorders = () => {
     Accepted: "Order Confirmed",
     Completed: "✅Delivered",
     Pending: "Pending",
-    Cancelled: "Cancelled"
+    Cancelled: "Cancelled",
   };
-
 
   return (
     <div>
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -261,11 +265,13 @@ const Adminorders = () => {
         />
 
         <div className="main-content">
-          <header className="admin-header">
-            <h1><i className="fas fa-shopping-cart"></i> Orders</h1>
+          <header className="admin-header-box">
+            <h1>
+              <i className="fas fa-shopping-cart"></i> Orders
+            </h1>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
-                <i className="fas fa-sign-out-alt"></i>
+                <FiLogOut /> Logout
               </button>
             </div>
           </header>
@@ -363,12 +369,22 @@ const Adminorders = () => {
                         {statusMapping[order.OrderStatus] || order.OrderStatus}
                       </span>
                       <span className="toggle-indicator">
-                        <i className={`fas fa-${expandedDetails[order._id] ? 'chevron-up' : 'chevron-down'}`}></i>
+                        <i
+                          className={`fas fa-${
+                            expandedDetails[order._id]
+                              ? "chevron-up"
+                              : "chevron-down"
+                          }`}
+                        ></i>
                       </span>
                     </div>
                   </div>
 
-                  <div className={`order-details ${expandedDetails[order._id] ? 'expanded' : ''}`}>
+                  <div
+                    className={`order-details ${
+                      expandedDetails[order._id] ? "expanded" : ""
+                    }`}
+                  >
                     <p>
                       <strong>Delivery Address:</strong> {order.deliveryAddress}
                     </p>
@@ -385,16 +401,29 @@ const Adminorders = () => {
                       <strong>Total Price:</strong> ₹{order.totalPrice}
                     </p>
 
-                    <div className="toggle-indicator" onClick={(e) => {
-                      e.stopPropagation();
-                      toggleItemsVisibility(order._id);
-                    }}>
+                    <div
+                      className="toggle-indicator"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleItemsVisibility(order._id);
+                      }}
+                    >
                       {visibleItems[order._id] ? "Hide Items" : "View Items"}
-                      <i className={`fas fa-${visibleItems[order._id] ? 'chevron-up' : 'chevron-down'}`}></i>
+                      <i
+                        className={`fas fa-${
+                          visibleItems[order._id]
+                            ? "chevron-up"
+                            : "chevron-down"
+                        }`}
+                      ></i>
                     </div>
                   </div>
 
-                  <div className={`order-items ${visibleItems[order._id] ? 'expanded' : ''}`}>
+                  <div
+                    className={`order-items ${
+                      visibleItems[order._id] ? "expanded" : ""
+                    }`}
+                  >
                     <h4>Ordered Items:</h4>
                     {order.OrderedItems.map((item, index) => (
                       <div key={index} className="order-item">
@@ -430,7 +459,11 @@ const Adminorders = () => {
                     ))}
                   </div>
 
-                  <div className={`order-actions ${expandedDetails[order._id] ? 'expanded' : ''}`}>
+                  <div
+                    className={`order-actions ${
+                      expandedDetails[order._id] ? "expanded" : ""
+                    }`}
+                  >
                     {order.OrderStatus === "Accepted" && (
                       <button
                         className="ad-or-d-btn"
@@ -473,7 +506,14 @@ const Adminorders = () => {
               <i className="fas fa-chevron-left"></i>
             </button>
 
-            <span style={{ padding: "0 10px", fontWeight: "500", color: "#2c3e50", fontSize: "0.85rem" }}>
+            <span
+              style={{
+                padding: "0 10px",
+                fontWeight: "500",
+                color: "#2c3e50",
+                fontSize: "0.85rem",
+              }}
+            >
               {currentPage}/{totalPages}
             </span>
 

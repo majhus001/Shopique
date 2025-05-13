@@ -28,11 +28,15 @@ import {
   FiX,
 } from "react-icons/fi";
 
-const Userhistory = () => {
+const ViewCustomers = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, orders, userdata } = location.state || {};
 
+const stateUser = location.state?.user || null;
+  const stateOrders = location.state?.orders || null;
+
+  // State for user and orders
+  const [user, setUser] = useState(stateUser);
   const [fetchedUserData, setFetchedUserData] = useState(null);
   const [orderHistory, setOrderHistory] = useState(null);
   const [isUserDataVisible, setIsUserDataVisible] = useState(true);
@@ -82,7 +86,7 @@ const Userhistory = () => {
       try {
         setLoading(true);
         const custbillRes = await axios.get(
-          `${API_BASE_URL}/api/orders/fetch/${userdata._id}`
+          `${API_BASE_URL}/api/billing/fetch/${userdata._id}`
         );
       } catch (error) {
         console.error("Error fetching order history:", error);
@@ -639,4 +643,4 @@ const Userhistory = () => {
   );
 };
 
-export default Userhistory;
+export default ViewCustomers;

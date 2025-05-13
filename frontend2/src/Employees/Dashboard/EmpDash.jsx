@@ -9,10 +9,8 @@ import "./EmpDash.css";
 import {
   FiClock,
   FiWatch,
-  FiCheckCircle,
   FiActivity,
   FiCalendar,
-  FiCheckSquare,
 } from "react-icons/fi";
 
 export default function EmpDash() {
@@ -240,7 +238,7 @@ export default function EmpDash() {
         />
 
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>Welcome to the Employee Dashboard</h1>
               <p className="date-display">
@@ -429,6 +427,7 @@ export default function EmpDash() {
                   </div>
                 )}
               </div>
+
             </section>
           </div>
         </div>

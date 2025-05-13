@@ -44,43 +44,6 @@
   margin-left: 60px; /* Adjust based on your collapsed sidebar width */
 }
 
-/* Admin Header */
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-light);
-  position: relative;
-}
-
-.admin-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 80px;
-  height: 3px;
-  background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
-  border-radius: var(--radius-sm);
-}
-
-.admin-header h1 {
-  color: var(--text-primary);
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  letter-spacing: -0.5px;
-}
-
-.admin-header h1 i {
-  color: var(--primary-color);
-  font-size: 1.5rem;
-}
 
 .ad-add-product-btn {
   display: flex;

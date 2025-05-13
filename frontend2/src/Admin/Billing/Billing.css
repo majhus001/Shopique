@@ -29,12 +29,12 @@
   background: linear-gradient(to right, #3498db, #2ecc71);
   border-radius: 16px 16px 0 0;
 }
-.logout-btn-billing{
+.logout-btn{
   background-color: #dc1d1d;
   color: white;
   border: 1px solid #dc1d1d;
 }
-.logout-btn-billing:hover{
+.logout-btn:hover{
   background-color: #fff;
   color: #dc1d1d;
   border: 1px solid #dc1d1d;

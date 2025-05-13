@@ -147,7 +147,7 @@ const Adminprofile = () => {
     if (adminData.password) formData.append("password", adminData.password);
     formData.append("mobile", adminData.mobile);
     formData.append("address", adminData.address);
-    if(!isEmployee){
+    if (!isEmployee) {
       formData.append("pincode", adminData.pincode);
     }
     if (adminData.image instanceof File) {
@@ -156,15 +156,23 @@ const Adminprofile = () => {
 
     try {
       setLoading(true);
-      console.log(user.employeeId);
+      console.log(user._id);
+      
       const userRes = await axios.put(
         isEmployee
-          ? `${API_BASE_URL}/api/auth/employees/update/${user.employeeId}`
-          : `${API_BASE_URL}/api/auth/update/${user._id}`
+          ? `${API_BASE_URL}/api/auth/employees/update/${user._id}`
+          : `${API_BASE_URL}/api/auth/update/${user._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       setIsEditing(false);
 
-      if (response.data.success) {
+      if (userRes.data.success) {
         alert("Profile updated successfully!");
       }
     } catch (error) {
@@ -177,7 +185,6 @@ const Adminprofile = () => {
   const handleLogout = async () => {
     try {
       const empId = user._id;
-      console.log(empId)
       if (isEmployee) {
         await axios.post(
           `${API_BASE_URL}/api/auth/employee/logout/${empId}`,
@@ -196,7 +203,6 @@ const Adminprofile = () => {
       console.error("Error during logout:", error);
     }
   };
-
 
   // Handle sidebar collapse state change
   const handleSidebarCollapse = (collapsed) => {
@@ -220,14 +226,14 @@ const Adminprofile = () => {
         />
 
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1>Admin Profile</h1>
               <p className="subtitle">Manage your personal information</p>
             </div>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut className="btn-icon" /> Logout
+                <FiLogOut /> Logout
               </button>
             </div>
           </header>

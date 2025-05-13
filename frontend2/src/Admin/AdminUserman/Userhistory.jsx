@@ -187,9 +187,8 @@ const Userhistory = () => {
         />
 
         <div className="main-content">
-          <header className="admin-header">
-            <div className="header-content">
-              <div className="user-header-info">
+          <header className="admin-header-box">
+              <div className="header-greeting">
                 <h1><FiUser className="header-icon" /> {userdata?.username}</h1>
                 <p className="user-email"><FiMail className="email-icon" /> {userdata?.email}</p>
               </div>
@@ -203,7 +202,7 @@ const Userhistory = () => {
                   }}
                   type="button"
                 >
-                  <FiArrowLeft className="btn-icon" /> Back
+                   Back
                 </button>
                 <button
                   className="logout-btn"
@@ -214,10 +213,10 @@ const Userhistory = () => {
                   }}
                   type="button"
                 >
-                  <FiLogOut className="btn-icon" /> Logout
+                  <FiLogOut /> Logout
                 </button>
               </div>
-            </div>
+            
           </header>
 
           {/* Toggle tabs for User Data and Order History */}

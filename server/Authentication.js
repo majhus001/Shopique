@@ -377,12 +377,14 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
 
 router.put("/employees/update/:userId", upload.single("image"), async (req, res) => {
   try {
+    console.log(req.params.userId)
+    console.log(req.body)
     const userId = req.params.userId;
-    const { name, email, password, mobile, address, pincode } = req.body;
+    const { name, email, password, mobile, address } = req.body;
 
     const employee = await Employee.findById(userId);
 
-    if (!user) {
+    if (!employee) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -391,40 +393,36 @@ router.put("/employees/update/:userId", upload.single("image"), async (req, res)
     if (password) employee.password = password;
     if (mobile) employee.phone = mobile;
     if (address) employee.address = address;
-    if (pincode) employee.pincode = pincode;
 
     if (req.file) {
       const file = req.file;
-      const result = await cloudinary.uploader
-        .upload_stream({ folder: "Users" }, async (error, cloudResult) => {
-          if (error) {
-            return res.status(500).json({ message: "Image upload failed" });
+
+      const cloudinaryResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "Users" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
           }
-
-          user.image = cloudResult.secure_url;
-          const updatedUser = await user.save();
-          console.log("updated");
-
-          res.status(200).json({
-            message: "User details updated successfully",
-            user: updatedUser,
-          });
-        })
-        .end(file.buffer); // Upload the file to Cloudinary
-    } else {
-      // If no image is provided, save without changing the image
-      const updatedUser = await user.save();
-      res.status(200).json({
-        success: true,
-        message: "User details updated successfully",
-        user: updatedUser,
+        );
+        stream.end(file.buffer);
       });
+
+      employee.image = cloudinaryResult.secure_url;
     }
+
+    const updatedEmployee = await employee.save();
+    res.status(200).json({
+      success: true,
+      message: "User details updated successfully",
+      user: updatedEmployee,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error updating user details" });
   }
 });
+
 
 router.delete("/delete/:userId", async (req, res) => {
   try {

@@ -209,7 +209,7 @@ export default function Employees() {
           onCollapsedChange={handleSidebarCollapse}
         />
         <div className="main-content">
-          <header className="admin-header">
+          <header className="admin-header-box">
             <div className="header-greeting">
               <h1><FiUsers className="header-icon" /> Employee Management</h1>
               <p className="subtitle">Manage your organization's workforce</p>

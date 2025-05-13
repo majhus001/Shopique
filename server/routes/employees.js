@@ -313,7 +313,7 @@ router.get("/activities/fetch/:employeeId", async (req, res) => {
     const employeeId = req.params.employeeId;
 
     const activities = await EmployeeRecentActivity.find({ employeeId })
-      .sort({ createdAt: -1 }); // latest first
+      .sort({ createdAt: -1 }); 
 
     res.status(200).json({
       success: true,
