@@ -24,9 +24,6 @@ const customerSchema = new mongoose.Schema(
     lastPurchaseDate: {
       type: Date,
     },
-    notes: {
-      type: String,
-    },
     status: {
       type: String,
       enum: ["active", "inactive"],

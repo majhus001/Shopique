@@ -409,8 +409,8 @@ const Customers = () => {
     }
   };
 
-  const handleviewclk = (userdata) => {
-    navigate("/viewcustomers", { state: { user, orders, userdata } });
+  const handleviewclk = (custData) => {
+    navigate("/viewcustomers", { state: { user, orders, custData } });
   };
 
   // Handle sidebar collapse state change

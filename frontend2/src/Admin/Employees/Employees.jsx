@@ -124,6 +124,13 @@ export default function Employees() {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (employee) =>
+          employee._id?.toLowerCase().startsWith(query) ||
+          employee.fullName?.toLowerCase().startsWith(query) ||
+          employee.email?.toLowerCase().startsWith(query) ||
+          employee.phone?.startsWith(query) ||
+          employee.position?.toLowerCase().startsWith(query) ||
+          employee.department?.toLowerCase().startsWith(query) ||
+          employee._id?.toLowerCase().includes(query) ||
           employee.fullName?.toLowerCase().includes(query) ||
           employee.email?.toLowerCase().includes(query) ||
           employee.phone?.includes(query) ||
@@ -500,7 +507,7 @@ export default function Employees() {
               </button>
               <button
                 className="confirm-delete-btn"
-                onClick={handleDeleteEmployee}
+                onClick={handleDeleteEmployee }
                 disabled={loading}
               >
                 {loading ? (

@@ -20,6 +20,7 @@ export default function EmpDash() {
   const [productsRes, setProductsRes] = useState([]);
   const [lowstockitems, setLowstockItems] = useState([]);
   const [todaysbills, setTodaysbills] = useState([]);
+  const [dailysales, setdailysales] = useState([]);
   const [popularItems, settopproducts] = useState([]);
   const [todaysoldprods, settodaysoldprods] = useState(0);
   const [topProductSalesMap, setTopProductSalesMap] = useState({});
@@ -192,12 +193,22 @@ export default function EmpDash() {
       const res = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
       const allProducts = res.data.data;
       const lowStockItems = allProducts.filter((item) => item.stock <= 50);
-      setProductsRes(allProducts);
 
+      setProductsRes(allProducts);
       setLowstockItems(lowStockItems);
-      console.log(lowStockItems.length);
     } catch (err) {
       console.error("Error fetching products:", err);
+    }
+
+    try {
+      setLoading(true);
+      const dailysalesres = await axios.get(
+        `${API_BASE_URL}/api/dailysales/fetch`
+      );
+      
+      setdailysales(dailysalesres.data.data);
+    } catch (err) {
+      console.error("Error fetching sales:", err);
     } finally {
       setLoading(false);
     }
@@ -392,6 +403,71 @@ export default function EmpDash() {
                 </ul>
               </div>
             </div>
+
+            <section className="recent-activity-section">
+              <div className="section-header">
+                <h2 className="section-title">
+                  <FiActivity className="section-icon" /> Daily sales Items
+                </h2>
+                <button className="view-all-btn" onClick={handleLowstockClick}>
+                  View All
+                </button>
+              </div>
+
+              <div className="stock-list">
+                {dailysales.length > 0 ? (
+                  <ul className="low-stock-ul">
+                    <div className="low-stock-title">
+                      <li>Items</li>
+                      <li>Quantity</li>
+                      <li>Category</li>
+                      <li>price</li>
+                      <li>Purchased At</li>
+                    </div>
+                    {dailysales.slice(0, 5).map((item, index) => (
+                      <li
+                        key={index}
+                        className="low-stock-item"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/addproducts", {
+                            state: {
+                              user,
+                              orders,
+                              editProduct: item,
+                            },
+                          });
+                        }}
+                      >
+                        <div className="low-stock-info">
+                          <div className="low-stock-info-header">
+                            
+                            <strong className="item-name">{item.productname}</strong>
+                          </div>
+
+                          <span className="item-stock"> {item.quantity}</span>
+                          <strong className="item-name">
+                            {item.category} 
+                          </strong>
+                          <span className="item-stock-price">
+                            {" "}
+                            {item.price}
+                          </span>
+                          <span>
+                            {new Date(item.soldAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="no-stock-msg">
+                    <p>No low stock items to display</p>
+                  </div>
+                )}
+              </div>
+            </section>
+
 
             <section className="recent-activity-section">
               <div className="section-header">

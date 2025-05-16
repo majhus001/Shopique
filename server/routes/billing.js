@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Bill = require("../models/BillSchema");
+const Dailysales = require("../models/DailysalesSchema");
 const { product } = require("../models/products");
 const Customer = require("../models/Customer");
 const EmployeeRecentActivity = require("../models/EmployeeRecentActivity");
@@ -12,10 +13,12 @@ const { authenticateToken } = require("../middleware/auth");
 router.post("/savebill", authenticateToken, async (req, res) => {
   try {
     const billData = req.body;
-    const customerId = billData.customerId;
+    const { items, customerId, employeeId, createdAt, billNumber } = billData;
 
     // Check for duplicate bill number
-    const existingBill = await Bill.findOne({ billNumber: billData.billNumber });
+    const existingBill = await Bill.findOne({
+      billNumber: billNumber,
+    });
     if (existingBill) {
       return res.status(400).json({
         success: false,
@@ -59,7 +62,7 @@ router.post("/savebill", authenticateToken, async (req, res) => {
         billId: newBill._id,
         itemsCount: billData.items.length,
         totalAmount: billData.grandTotal,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       await activity.save();
       console.log("Activity recorded");
@@ -67,14 +70,35 @@ router.post("/savebill", authenticateToken, async (req, res) => {
       console.error("Activity logging failed:", activityError);
     }
 
+    //log the daily sales
+    try {
+      for (const item of items) {
+        const sale = new Dailysales({
+          productId: item.productId,
+          billNumber: billNumber,
+          productname: item.name,
+          price: item.unitPrice,
+          quantity: item.quantity,
+          totalAmount: item.total,
+          category: item.category,
+          soldAt: new Date(),
+          soldBy: employeeId,
+          customerId: customerId,
+        });
+        await sale.save();
+        console.log(item.name, "saved to dailysale");
+      }
+    } catch (error) {
+      console.log("error on saving to daily sales");
+    }
+
     // Final response
     return res.status(201).json({
       success: true,
       message: "Bill saved successfully and all updates applied",
       billId: newBill._id,
-      billNumber: newBill.billNumber
+      billNumber: newBill.billNumber,
     });
-
   } catch (error) {
     console.error("Error saving bill:", error);
     return res.status(500).json({
@@ -84,7 +108,6 @@ router.post("/savebill", authenticateToken, async (req, res) => {
     });
   }
 });
-
 
 // Route to get all bills
 router.get("/fetch", async (req, res) => {
@@ -111,7 +134,7 @@ router.get("/fetchbyemployeeId/:employeeId", async (req, res) => {
 
     const bills = await Bill.find({ employeeId: employeeId });
 
-    if (!bills || bills.length === 0){
+    if (!bills || bills.length === 0) {
       return res.status(404).json({
         success: false,
         message: "No bills found for this employee",
@@ -132,7 +155,6 @@ router.get("/fetchbyemployeeId/:employeeId", async (req, res) => {
   }
 });
 
-
 router.get("/customer/:customerId", authenticateToken, async (req, res) => {
   try {
     const bills = await Bill.find({
@@ -152,6 +174,5 @@ router.get("/customer/:customerId", authenticateToken, async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

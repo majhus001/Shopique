@@ -33,6 +33,7 @@ const AdminHome = () => {
   const [recactivity, setRecactivity] = useState([]);
   const [pendingOrders, setUsersPendingOrder] = useState([]);
   const [productsRes, setProductsRes] = useState([]);
+  const [dailysales, setDailysalesRes] = useState([]);
   const [lowstockitems, setLowstockItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -95,14 +96,21 @@ const AdminHome = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [userDataRes, customersDataRes, employeeDataRes, userRecActRes, productsRes] =
-          await Promise.all([
-            axios.get(`${API_BASE_URL}/api/admin/userdata`),
-            axios.get(`${API_BASE_URL}/api/customers/fetch`),
-            axios.get(`${API_BASE_URL}/api/employees/fetch`),
-            axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
-            axios.get(`${API_BASE_URL}/api/products/fetchAll`),
-          ]);
+        const [
+          userDataRes,
+          customersDataRes,
+          employeeDataRes,
+          userRecActRes,
+          productsRes,
+          dailysalesRes,
+        ] = await Promise.all([
+          axios.get(`${API_BASE_URL}/api/admin/userdata`),
+          axios.get(`${API_BASE_URL}/api/customers/fetch`),
+          axios.get(`${API_BASE_URL}/api/employees/fetch`),
+          axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
+          axios.get(`${API_BASE_URL}/api/products/fetchAll`),
+          axios.get(`${API_BASE_URL}/api/dailysales/fetch`),
+        ]);
 
         const products = productsRes.data.data;
 
@@ -114,6 +122,7 @@ const AdminHome = () => {
         setEmployeeDataRes(employeeDataRes.data.data);
         setRecactivity(userRecActRes.data);
         setProductsRes(productsRes.data.data);
+        setDailysalesRes(dailysalesRes.data.data);
       } catch (err) {
         console.error("Error fetching additional data:", err);
       } finally {
@@ -349,6 +358,66 @@ const AdminHome = () => {
                         <span className="item-stock-price"> {item.price}</span>
                         <span>
                           {new Date(item.updatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="no-stock-msg">
+                  <p>No low stock items to display</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="recent-activity-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                <FiActivity className="section-icon" /> Daily sales Items
+              </h2>
+              <button className="view-all-btn" onClick={handleLowstockClick}>
+                View All
+              </button>
+            </div>
+
+            <div className="stock-list">
+              {dailysales.length > 0 ? (
+                <ul className="low-stock-ul">
+                  <div className="low-stock-title">
+                    <li>Items</li>
+                    <li>Quantity</li>
+                    <li>Category</li>
+                    <li>price</li>
+                    <li>Purchased At</li>
+                  </div>
+                  {dailysales.slice(0, 5).map((item, index) => (
+                    <li
+                      key={index}
+                      className="low-stock-item"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/addproducts", {
+                          state: {
+                            user,
+                            orders,
+                            editProduct: item,
+                          },
+                        });
+                      }}
+                    >
+                      <div className="low-stock-info">
+                        <div className="low-stock-info-header">
+                          <strong className="item-name">
+                            {item.productname}
+                          </strong>
+                        </div>
+
+                        <span className="item-stock"> {item.quantity}</span>
+                        <strong className="item-name">{item.category}</strong>
+                        <span className="item-stock-price"> {item.price}</span>
+                        <span>
+                          {new Date(item.soldAt).toLocaleDateString()}
                         </span>
                       </div>
                     </li>

@@ -595,11 +595,11 @@ const Billing = () => {
       };
 
       // Save bill to database
-      const response = await axios.post(
-        `${API_BASE_URL}/api/billing/savebill`,
-        billData,
-        { withCredentials: true }
-      );
+        const response = await axios.post(
+          `${API_BASE_URL}/api/billing/savebill`,
+          billData,
+          { withCredentials: true }
+        );
 
       if (response.data.success) {
         showNotification("Bill saved successfully", "success");

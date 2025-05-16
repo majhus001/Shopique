@@ -312,7 +312,7 @@ export default function AdminReports() {
             </div>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut className="btn-icon" /> Logout
+                <FiLogOut  /> Logout
               </button>
             </div>
           </header>

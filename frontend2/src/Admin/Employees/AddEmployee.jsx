@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Adnavbar from '../Adnavbar/Adnavbar';
-import API_BASE_URL from '../../api';
-import './AddEmployee.css';
-import Sidebar from '../sidebar/Sidebar';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
+import Adnavbar from "../Adnavbar/Adnavbar";
+import API_BASE_URL from "../../api";
+import "./AddEmployee.css";
+import Sidebar from "../sidebar/Sidebar";
 import {
   FiUser,
   FiMail,
@@ -22,8 +22,8 @@ import {
   FiEye,
   FiAlertCircle,
   FiUserPlus,
-  FiUserCheck
-} from 'react-icons/fi';
+  FiUserCheck,
+} from "react-icons/fi";
 
 export default function AddEmployee() {
   const location = useLocation();
@@ -42,17 +42,18 @@ export default function AddEmployee() {
   const [formErrors, setFormErrors] = useState({});
   const [documents, setDocuments] = useState([]);
   const [formData, setFormData] = useState({
-    fullName: '',
-    password: '',
-    email: '',
-    phone: '',
-    position: '',
-    department: '',
-    salary: '',
-    joiningDate: '',
-    address: '',
-    emergencyContact: '',
-    status: 'Active'
+    fullName: "",
+    password: "",
+    email: "",
+    phone: "",
+    image: "",
+    position: "",
+    department: "",
+    salary: "",
+    joiningDate: "",
+    address: "",
+    emergencyContact: "",
+    status: "Active",
   });
 
   // Handle sidebar collapse
@@ -64,21 +65,22 @@ export default function AddEmployee() {
   useEffect(() => {
     if (isEditMode && employeeData) {
       const formattedDate = employeeData.joiningDate
-        ? new Date(employeeData.joiningDate).toISOString().split('T')[0]
-        : '';
+        ? new Date(employeeData.joiningDate).toISOString().split("T")[0]
+        : "";
 
       setFormData({
-        fullName: employeeData.fullName || '',
-        password: '', // Don't load password for security reasons
-        email: employeeData.email || '',
-        phone: employeeData.phone || '',
-        position: employeeData.position || '',
-        department: employeeData.department || '',
-        salary: employeeData.salary || '',
+        fullName: employeeData.fullName || "",
+        password: "", // Don't load password for security reasons
+        email: employeeData.email || "",
+        phone: employeeData.phone || "",
+        image: employeeData.image || "",
+        position: employeeData.position || "",
+        department: employeeData.department || "",
+        salary: employeeData.salary || "",
         joiningDate: formattedDate,
-        address: employeeData.address || '',
-        emergencyContact: employeeData.emergencyContact || '',
-        status: employeeData.status || 'Active'
+        address: employeeData.address || "",
+        emergencyContact: employeeData.emergencyContact || "",
+        status: employeeData.status || "Active",
       });
 
       if (employeeData.documents && employeeData.documents.length > 0) {
@@ -92,14 +94,14 @@ export default function AddEmployee() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
 
     // Clear error for this field when user types
     if (formErrors[name]) {
       setFormErrors({
         ...formErrors,
-        [name]: ''
+        [name]: "",
       });
     }
   };
@@ -109,44 +111,53 @@ export default function AddEmployee() {
     const errors = {};
     // Define required fields
     const requiredFields = [
-      'fullName', 'email', 'phone', 'position',
-      'department', 'salary', 'joiningDate', 'address'
+      "fullName",
+      "email",
+      "phone",
+      "position",
+      "department",
+      "salary",
+      "joiningDate",
+      "address",
     ];
 
     // Password is only required for new employees
     if (!isEditMode) {
-      requiredFields.push('password');
+      requiredFields.push("password");
     }
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       if (!formData[field]) {
-        errors[field] = 'This field is required';
+        errors[field] = "This field is required";
       }
     });
 
     // Password validation - minimum 6 characters
     if (formData.password && formData.password.length < 6 && !isEditMode) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = "Password must be at least 6 characters";
     }
 
     // Email validation
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = "Please enter a valid email address";
     }
 
     // Phone validation
-    if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/[^0-9]/g, ''))) {
-      errors.phone = 'Please enter a valid 10-digit phone number';
+    if (
+      formData.phone &&
+      !/^\d{10}$/.test(formData.phone.replace(/[^0-9]/g, ""))
+    ) {
+      errors.phone = "Please enter a valid 10-digit phone number";
     }
 
     // Salary validation
     if (formData.salary && isNaN(Number(formData.salary))) {
-      errors.salary = 'Salary must be a number';
+      errors.salary = "Salary must be a number";
     }
 
     // Log validation results for debugging
-    console.log('Form validation errors:', errors);
-    console.log('Form data:', formData);
+    console.log("Form validation errors:", errors);
+    console.log("Form data:", formData);
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -164,7 +175,9 @@ export default function AddEmployee() {
 
     try {
       // Format date for API
-      const formattedDate = formData.joiningDate ? new Date(formData.joiningDate) : new Date();
+      const formattedDate = formData.joiningDate
+        ? new Date(formData.joiningDate)
+        : new Date();
 
       // Create payload with all required fields
       const payload = {
@@ -176,13 +189,13 @@ export default function AddEmployee() {
         salary: Number(formData.salary),
         joiningDate: formattedDate,
         address: formData.address,
-        emergencyContact: formData.emergencyContact || '',
-        status: formData.status || 'Active',
-        documents: documents.map(doc => ({
+        emergencyContact: formData.emergencyContact || "",
+        status: formData.status || "Active",
+        documents: documents.map((doc) => ({
           name: doc.name,
           url: doc.url,
-          uploadDate: doc.uploadDate
-        }))
+          uploadDate: doc.uploadDate,
+        })),
       };
 
       // Add password only if provided (for new employees or password changes)
@@ -190,7 +203,7 @@ export default function AddEmployee() {
         payload.password = formData.password;
       }
 
-      console.log('Submitting payload:', payload);
+      console.log("Submitting payload:", payload);
 
       let response;
 
@@ -206,16 +219,19 @@ export default function AddEmployee() {
         );
       }
 
-      console.log('API response:', response.data);
+      console.log("API response:", response.data);
 
       if (response.data.success) {
-        navigate('/employees', { state: { user, orders } });
+        navigate("/employees", { state: { user, orders } });
       } else {
-        alert(response.data.message || 'Failed to save employee data');
+        alert(response.data.message || "Failed to save employee data");
       }
     } catch (error) {
-      console.error('Error saving employee:', error);
-      alert('Error saving employee: ' + (error.response?.data?.message || error.message));
+      console.error("Error saving employee:", error);
+      alert(
+        "Error saving employee: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -232,22 +248,22 @@ export default function AddEmployee() {
       // Upload each file to the server
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
-        formData.append('document', file);
+        formData.append("document", file);
 
         const response = await axios.post(
           `${API_BASE_URL}/api/employees/upload-document`,
           formData,
           {
             headers: {
-              'Content-Type': 'multipart/form-data'
-            }
+              "Content-Type": "multipart/form-data",
+            },
           }
         );
 
         if (response.data.success) {
           return response.data.document;
         } else {
-          throw new Error(response.data.message || 'Failed to upload document');
+          throw new Error(response.data.message || "Failed to upload document");
         }
       });
 
@@ -257,8 +273,8 @@ export default function AddEmployee() {
       // Add the uploaded documents to the state
       setDocuments([...documents, ...uploadedDocuments]);
     } catch (error) {
-      console.error('Error uploading documents:', error);
-      alert('Error uploading documents: ' + error.message);
+      console.error("Error uploading documents:", error);
+      alert("Error uploading documents: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -273,7 +289,7 @@ export default function AddEmployee() {
 
   // Handle cancel button
   const handleCancel = () => {
-    navigate('/employees', { state: { user, orders } });
+    navigate("/employees", { state: { user, orders } });
   };
 
   return (
@@ -286,7 +302,11 @@ export default function AddEmployee() {
       <div className="ad-nav">
         <Adnavbar user={user} />
       </div>
-      <div className={`admin-container ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <div
+        className={`admin-container ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Sidebar
           user={user}
           orders={orders}
@@ -295,15 +315,27 @@ export default function AddEmployee() {
         <div className="main-content">
           <header className="admin-header-box">
             <div className="header-greeting">
-              <h1>
-                {isEditMode ? <FiUserCheck className="header-icon" /> : <FiUserPlus className="header-icon" />}
-                {isEditMode ? 'Edit Employee' : 'Add New Employee'}
-              </h1>
-              <p className="subtitle">
-                {isEditMode
-                  ? 'Update employee information in your organization'
-                  : 'Add a new employee to your organization'}
-              </p>
+              <div className="add-emp-header">
+                <div>
+                  {isEditMode ? (
+                    formData.image ? (
+                      <img className="ad-emp-img" src={formData.image} />
+                    ) : (
+                      <FiUserCheck className="ad-emp-header-icon" />
+                    )
+                  ) : (
+                    <FiUserPlus className="ad-emp-header-icon" />
+                  )}
+                </div>
+                <div className="add-emp-head-title">
+                  <h1>{isEditMode ? "Edit Employee" : "Add New Employee"}</h1>
+                  <p className="subtitle">
+                    {isEditMode
+                      ? "Update employee information in your organization"
+                      : "Add a new employee to your organization"}
+                  </p>
+                </div>
+              </div>
             </div>
           </header>
 
@@ -311,7 +343,12 @@ export default function AddEmployee() {
             <form className="add-employee-form" onSubmit={handleSubmit}>
               {/* Personal Information Section */}
               <div className="form-section">
-                <h3><FiUser className="form-section-icon" /> Personal Information</h3>
+                {/* <div className="ad-emp-img-cont" >
+                  <img className="ad-emp-img" src={formData.image} />
+                </div> */}
+                <h3>
+                  <FiUser className="form-section-icon" /> Personal Information
+                </h3>
 
                 <div className="form-group">
                   <label className="required-field">
@@ -322,7 +359,7 @@ export default function AddEmployee() {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className={formErrors.fullName ? 'error' : ''}
+                    className={formErrors.fullName ? "error" : ""}
                   />
                   {formErrors.fullName && (
                     <div className="error-message">{formErrors.fullName}</div>
@@ -331,14 +368,15 @@ export default function AddEmployee() {
 
                 <div className="form-group">
                   <label className={!isEditMode ? "required-field" : ""}>
-                    <FiUser className="field-icon" /> Password {isEditMode && "(Leave blank to keep current)"}
+                    <FiUser className="field-icon" /> Password{" "}
+                    {isEditMode && "(Leave blank to keep current)"}
                   </label>
                   <input
                     type="password"
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={formErrors.password ? 'error' : ''}
+                    className={formErrors.password ? "error" : ""}
                   />
                   {formErrors.password && (
                     <div className="error-message">{formErrors.password}</div>
@@ -354,7 +392,7 @@ export default function AddEmployee() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={formErrors.email ? 'error' : ''}
+                    className={formErrors.email ? "error" : ""}
                   />
                   {formErrors.email && (
                     <div className="error-message">{formErrors.email}</div>
@@ -370,7 +408,7 @@ export default function AddEmployee() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className={formErrors.phone ? 'error' : ''}
+                    className={formErrors.phone ? "error" : ""}
                   />
                   {formErrors.phone && (
                     <div className="error-message">{formErrors.phone}</div>
@@ -397,7 +435,7 @@ export default function AddEmployee() {
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className={formErrors.address ? 'error' : ''}
+                    className={formErrors.address ? "error" : ""}
                   />
                   {formErrors.address && (
                     <div className="error-message">{formErrors.address}</div>
@@ -407,7 +445,10 @@ export default function AddEmployee() {
 
               {/* Employment Information Section */}
               <div className="form-section">
-                <h3><FiBriefcase className="form-section-icon" /> Employment Information</h3>
+                <h3>
+                  <FiBriefcase className="form-section-icon" /> Employment
+                  Information
+                </h3>
 
                 <div className="form-group">
                   <label className="required-field">
@@ -418,7 +459,7 @@ export default function AddEmployee() {
                     name="position"
                     value={formData.position}
                     onChange={handleInputChange}
-                    className={formErrors.position ? 'error' : ''}
+                    className={formErrors.position ? "error" : ""}
                   />
                   {formErrors.position && (
                     <div className="error-message">{formErrors.position}</div>
@@ -434,7 +475,7 @@ export default function AddEmployee() {
                     name="department"
                     value={formData.department}
                     onChange={handleInputChange}
-                    className={formErrors.department ? 'error' : ''}
+                    className={formErrors.department ? "error" : ""}
                   />
                   {formErrors.department && (
                     <div className="error-message">{formErrors.department}</div>
@@ -450,7 +491,7 @@ export default function AddEmployee() {
                     name="salary"
                     value={formData.salary}
                     onChange={handleInputChange}
-                    className={formErrors.salary ? 'error' : ''}
+                    className={formErrors.salary ? "error" : ""}
                   />
                   {formErrors.salary && (
                     <div className="error-message">{formErrors.salary}</div>
@@ -466,10 +507,12 @@ export default function AddEmployee() {
                     name="joiningDate"
                     value={formData.joiningDate}
                     onChange={handleInputChange}
-                    className={formErrors.joiningDate ? 'error' : ''}
+                    className={formErrors.joiningDate ? "error" : ""}
                   />
                   {formErrors.joiningDate && (
-                    <div className="error-message">{formErrors.joiningDate}</div>
+                    <div className="error-message">
+                      {formErrors.joiningDate}
+                    </div>
                   )}
                 </div>
 
@@ -491,7 +534,9 @@ export default function AddEmployee() {
 
               {/* Documents Section */}
               <div className="form-section">
-                <h3><FiFileText className="form-section-icon" /> Documents</h3>
+                <h3>
+                  <FiFileText className="form-section-icon" /> Documents
+                </h3>
 
                 <div className="form-group full-width">
                   <label>
@@ -499,17 +544,21 @@ export default function AddEmployee() {
                   </label>
                   <div
                     className="document-upload-container"
-                    onClick={() => document.getElementById('document-upload').click()}
+                    onClick={() =>
+                      document.getElementById("document-upload").click()
+                    }
                   >
                     <FiUpload className="upload-icon" />
                     <p className="upload-text">Click to upload documents</p>
-                    <p className="upload-hint">Supported formats: PDF, DOC, DOCX, JPG, PNG</p>
+                    <p className="upload-hint">
+                      Supported formats: PDF, DOC, DOCX, JPG, PNG
+                    </p>
                     <input
                       type="file"
                       id="document-upload"
                       multiple
                       onChange={handleDocumentUpload}
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                     />
                   </div>
 
@@ -522,8 +571,15 @@ export default function AddEmployee() {
                             <div>
                               <div className="document-name">{doc.name}</div>
                               <div className="document-size">
-                                {doc.size ? `${Math.round(doc.size / 1024)} KB` : 'Unknown size'} •
-                                {doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : 'Unknown date'}
+                                {doc.size
+                                  ? `${Math.round(doc.size / 1024)} KB`
+                                  : "Unknown size"}{" "}
+                                •
+                                {doc.uploadDate
+                                  ? new Date(
+                                      doc.uploadDate
+                                    ).toLocaleDateString()
+                                  : "Unknown date"}
                               </div>
                             </div>
                           </div>
@@ -532,7 +588,7 @@ export default function AddEmployee() {
                               <button
                                 type="button"
                                 className="document-action-btn view"
-                                onClick={() => window.open(doc.url, '_blank')}
+                                onClick={() => window.open(doc.url, "_blank")}
                                 title="View document"
                               >
                                 <FiEye />
@@ -566,12 +622,8 @@ export default function AddEmployee() {
                 >
                   <FiX /> Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={loading}
-                >
-                  <FiSave /> {isEditMode ? 'Update Employee' : 'Add Employee'}
+                <button type="submit" className="submit-btn" disabled={loading}>
+                  <FiSave /> {isEditMode ? "Update Employee" : "Add Employee"}
                 </button>
               </div>
             </form>

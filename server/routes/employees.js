@@ -43,7 +43,6 @@ router.post("/add", async (req, res) => {
       });
     }
 
-    // Check if employee with this email already exists
     const existingEmployee = await Employee.findOne({ email });
     if (existingEmployee) {
       return res.status(400).json({
@@ -52,8 +51,7 @@ router.post("/add", async (req, res) => {
       });
     }
 
-    // Create new employee
-    const newEmployee = new Employee({
+     const newEmployee = new Employee({
       fullName,
       password,
       email,

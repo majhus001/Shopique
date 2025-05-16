@@ -28,6 +28,29 @@
   gap: 1.5rem;
 }
 
+.add-emp-header{
+  display: flex;
+}
+.add-emp-head-title {
+  display: flex;
+  margin-left: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.ad-emp-img{
+  width: 70px;
+  height: 70px;
+  border-radius: 100px;
+  object-fit: cover;
+  border: 2px solid #007AFF;
+}
+
+.ad-emp-header-icon{
+  color: #007AFF;
+  font-size: 2.8rem;
+}
 .form-section {
   grid-column: span 2;
   margin-bottom: 1rem;
