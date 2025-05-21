@@ -155,21 +155,63 @@ router.get("/fetchbyemployeeId/:employeeId", async (req, res) => {
   }
 });
 
-router.get("/customer/:customerId", authenticateToken, async (req, res) => {
+router.get("/customer/fetch/:custId", async (req, res) => {
   try {
     const bills = await Bill.find({
-      customerId: req.params.customerId,
+      customerId: req.params.custId,
     }).sort({ createdAt: -1 });
 
-    return res.status(200).json({
+    if (bills.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No bills found for this customer",
+      });
+    }
+
+    // Step 1: Get all unique productIds
+    const productIds = bills.flatMap((bill) =>
+      Array.isArray(bill.items)
+        ? bill.items.map((item) => item.productId.toString())
+        : []
+    );
+    const uniqueProductIds = [...new Set(productIds)].map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+
+    // Step 2: Fetch all product data
+    const products = await product.find({ _id: { $in: uniqueProductIds } });
+
+    // Step 3: Create a productId → product map
+    const productMap = {};
+    products.forEach((prod) => {
+      productMap[prod._id.toString()] = prod;
+    });
+
+    // Step 4: Attach image to each bill item
+    const billsWithImages = bills.map((bill) => {
+      const updatedItems = bill.items.map((item) => {
+        const product = productMap[item.productId.toString()];
+        return {
+          ...item.toObject(), // convert Mongoose subdoc to plain object
+          image: product?.images[0] || null, // attach image if found
+        };
+      });
+
+      return {
+        ...bill.toObject(),
+        items: updatedItems,
+      };
+    });
+    
+   return res.status(200).json({
       success: true,
-      data: bills,
+      bills: billsWithImages,
     });
   } catch (error) {
-    console.error("Error fetching customer bills:", error);
+    console.error("Error fetching customer bills and product images:", error);
     return res.status(500).json({
       success: false,
-      message: "Error fetching customer bills",
+      message: "Error fetching customer bills and product images",
       error: error.message,
     });
   }

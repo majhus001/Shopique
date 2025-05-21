@@ -344,6 +344,7 @@
   padding: 1rem;
   border-bottom: 1px solid var(--border-light);
   transition: background-color 0.3s ease;
+  cursor: pointer;
 }
 
 .employee-item:hover {

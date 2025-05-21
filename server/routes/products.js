@@ -20,8 +20,6 @@ const upload = multer({ storage });
 // Add a new product
 router.post("/add", upload.array("images", 5), async (req, res) => {
   try {
-    console.log("Received files:", req.files ? req.files.length : 0);
-    console.log("Request body:", req.body);
     const {
       name,
       price,
@@ -36,6 +34,7 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       isFeatured,
       tags,
       specifications,
+      sellerId,
     } = req.body;
 
     // Create product data object with proper type conversion
@@ -61,9 +60,9 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
           ? JSON.parse(specifications)
           : specifications,
       images: [],
+      sellerId: sellerId,
     };
 
-    // Upload multiple images to Cloudinary if provided
     if (req.files && req.files.length > 0) {
       try {
         const uploadPromises = req.files.map((file) => {
@@ -83,20 +82,14 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
           });
         });
 
-        // Wait for all uploads to complete
         const imageUrls = await Promise.all(uploadPromises);
-
-        // Add image URLs to product data
         productData.images = imageUrls;
       } catch (uploadError) {
         console.error("Error uploading images:", uploadError);
-        // Continue with empty images array if upload fails
       }
     }
-
-    // Create and save the product
+    
     const newProduct = new product(productData);
-
     const savedProduct = await newProduct.save();
 
     res.status(201).json({
@@ -338,7 +331,7 @@ router.post("/top-selling", async (req, res) => {
     const products = await product.find({
       _id: { $in: productIds },
     });
-    
+
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: "Error fetching top products" });

@@ -51,34 +51,67 @@ export default function Employees() {
     terminated: 0,
   });
 
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      console.log("Checking user validity...");
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/checkvaliduser`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (!response.data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = response.data.user.userId;
+      const userRes = await axios.get(
+        `${API_BASE_URL}/api/auth/fetch/${userId}`
+      );
+      setUser(userRes.data.data);
+      console.log("User fetched from backend:", userRes.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle sidebar collapse
   const handleSidebarCollapse = (collapsed) => {
     setSidebarCollapsed(collapsed);
   };
 
   // Fetch employees data
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/api/employees/fetch`);
-        if (response.data.success) {
-          const employeesData = response.data.data || [];
-          setEmployees(employeesData);
-          setFilteredEmployees(
-            sortEmployees(employeesData, sortField, sortDirection)
-          );
-          calculateStats(employeesData);
-        }
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-      } finally {
-        setLoading(false);
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/api/employees/fetch`);
+      if (response.data.success) {
+        const employeesData = response.data.data || [];
+        setEmployees(employeesData);
+        setFilteredEmployees(
+          sortEmployees(employeesData, sortField, sortDirection)
+        );
+        calculateStats(employeesData);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (!user) {
+      fetchUserData();
+    }
     fetchEmployees();
-  }, [sortField, sortDirection]);
+  }, []);
 
   // Calculate employee statistics
   const calculateStats = (employeeData) => {
@@ -182,7 +215,7 @@ export default function Employees() {
   const handleDeleteEmployee = async () => {
     try {
       setLoading(true);
-      const id = userToDelete._id
+      const id = userToDelete._id;
       const response = await axios.delete(
         `${API_BASE_URL}/api/employees/delete/${id}`
       );
@@ -217,6 +250,10 @@ export default function Employees() {
     setCurrentPage(1);
     setSortField("fullName");
     setSortDirection("asc");
+  };
+
+  const handleemphistory = (employeeData) => {
+    navigate("/employeehistory", { state: { user, orders, employeeData } });
   };
 
   return (
@@ -265,7 +302,7 @@ export default function Employees() {
                 <p>Total Employees</p>
               </div>
             </div>
-            <div className="stat-card active">
+            <div className="stat-card cust-active">
               <div className="stat-icon">
                 <FiUserCheck />
               </div>
@@ -384,7 +421,11 @@ export default function Employees() {
                     {currentEmployees.map((employee) => (
                       <div
                         key={employee._id}
-                        className={`employee-item ${employee.status
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleemphistory(employee);
+                        }}
+                        className={`employee-item cust-${employee.status
                           .toLowerCase()
                           .replace(" ", "-")}`}
                       >
@@ -425,7 +466,10 @@ export default function Employees() {
                         <div className="employee-column actions">
                           <button
                             className="us-edit-btn"
-                            onClick={() => handleEditEmployee(employee)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditEmployee(employee);
+                            }}
                             title="Edit employee"
                           >
                             <FiEdit2 />
@@ -507,7 +551,7 @@ export default function Employees() {
               </button>
               <button
                 className="confirm-delete-btn"
-                onClick={handleDeleteEmployee }
+                onClick={handleDeleteEmployee}
                 disabled={loading}
               >
                 {loading ? (

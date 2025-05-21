@@ -556,7 +556,7 @@ const toggleCardExpanded = (userId) => {
                 </div>
               </div>
 
-              <div className="stat-card active">
+              <div className="stat-card cust-active">
                 <div className="stat-icon">
                   <FiUserCheck />
                 </div>

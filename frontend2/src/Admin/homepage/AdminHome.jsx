@@ -59,7 +59,6 @@ const AdminHome = () => {
         `${API_BASE_URL}/api/auth/fetch/${userId}`
       );
       setUser(userRes.data.data);
-      console.log("User fetched from backend:", userRes.data.data);
     } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
@@ -177,6 +176,26 @@ const AdminHome = () => {
   // Handle sidebar collapse state change
   const handleSidebarCollapse = (collapsed) => {
     setSidebarCollapsed(collapsed);
+  };
+
+  const handlelowstockview = (item) => {
+    console.log(item);
+    navigate("/viewlowstockproduct", {
+      state: {
+        user,
+        orders,
+        item,
+      },
+    });
+  };
+  const handlelowstockadd = (item) => {
+    navigate("/addproducts", {
+      state: {
+        user,
+        orders,
+        editProduct: item,
+      },
+    });
   };
 
   return (
@@ -326,6 +345,7 @@ const AdminHome = () => {
                     <li>Category</li>
                     <li>price</li>
                     <li>Last Purchased</li>
+                    <li>Action</li>
                   </div>
                   {lowstockitems.slice(0, 5).map((item, index) => (
                     <li
@@ -359,6 +379,27 @@ const AdminHome = () => {
                         <span>
                           {new Date(item.updatedAt).toLocaleDateString()}
                         </span>
+                        <div className="low-stock-action-btn-cont">
+                          <span
+                            className="low-stock-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlelowstockview(item);
+                            }}
+                          >
+                            view
+                          </span>
+
+                          <span
+                            className="low-stock-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlelowstockadd(item);
+                            }}
+                          >
+                            Add
+                          </span>
+                        </div>
                       </div>
                     </li>
                   ))}
@@ -425,7 +466,7 @@ const AdminHome = () => {
                 </ul>
               ) : (
                 <div className="no-stock-msg">
-                  <p>No low stock items to display</p>
+                  <p>No Daily Sales items to display</p>
                 </div>
               )}
             </div>

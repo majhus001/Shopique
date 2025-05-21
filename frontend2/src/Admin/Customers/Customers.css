@@ -73,7 +73,7 @@
     background: linear-gradient(to bottom, #3498db, #2980b9);
   }
 
-  .stat-card.active::before {
+  .stat-card.cust-active::before {
     background: linear-gradient(to bottom, #2ecc71, #27ae60);
   }
 
@@ -101,7 +101,7 @@
     background-color: rgba(52, 152, 219, 0.1);
   }
 
-  .stat-card.active .stat-icon {
+  .stat-card.cust-active .stat-icon {
     color: #2ecc71;
     background-color: rgba(46, 204, 113, 0.1);
   }

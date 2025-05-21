@@ -113,6 +113,19 @@ export default function ViewStocks() {
     return true;
   });
 
+const handlelowstockview = (item) => {
+    navigate("/viewlowstockproduct",user,orders,item);
+  };
+  const handlelowstockadd = (item) => {
+    navigate("/addproducts", {
+      state: {
+        user,
+        orders,
+        editProduct: item,
+      },
+    });
+  };
+
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
@@ -152,7 +165,6 @@ export default function ViewStocks() {
                 <h2 className="section-title">
                   <FiActivity className="section-icon" /> All Product Stocks
                 </h2>
-                
               </div>
             </div>
 
@@ -201,6 +213,7 @@ export default function ViewStocks() {
                     <li>Category</li>
                     <li>Price</li>
                     <li>Last Purchased</li>
+                    <li>Action</li>
                   </div>
                   {filteredProducts.map((item, index) => (
                     <li key={index} className="low-stock-item">
@@ -233,6 +246,27 @@ export default function ViewStocks() {
                         <span>
                           {new Date(item.updatedAt).toLocaleDateString()}
                         </span>
+                        <div className="low-stock-action-btn-cont">
+                          <span
+                            className="low-stock-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlelowstockview(item);
+                            }}
+                          >
+                            view
+                          </span>
+
+                          <span
+                            className="low-stock-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlelowstockadd(item);
+                            }}
+                          >
+                            Add
+                          </span>
+                        </div>
                       </div>
                     </li>
                   ))}

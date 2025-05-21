@@ -25,6 +25,8 @@ import AdminReports from "./Admin/AdminReports/AdminReports";
 import ViewCustormers from "./Admin/Customers/ViewCustormers";
 import ViewStocks from "./Admin/homepage/Stockmaintainance/ViewStocks";
 import ScrollToTop from "./ScrollToTop";
+import EmployeeHistory from "./Admin/Employees/EmployeeHistory";
+import ViewLowStock from "./Admin/homepage/LowStocksProducts/ViewLowStock";
 const App = () => {
   return (
     <Router>
@@ -55,6 +57,8 @@ const App = () => {
         <Route path="/empdash" element={<EmpDash />} />
         <Route path="/adreports" element={<AdminReports />} />
         <Route path="/stockmaintain" element={<ViewStocks />} />
+        <Route path="/employeehistory" element={<EmployeeHistory />} />
+        <Route path="/viewlowstockproduct" element={<ViewLowStock />} />
       </Routes>
     </Router>
   );

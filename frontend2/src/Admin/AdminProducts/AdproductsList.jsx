@@ -2,12 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./AdproductsList.css";
-// import "./AddProductButton.css";
 import Adnavbar from "../Adnavbar/Adnavbar";
 import API_BASE_URL from "../../api";
 import Sidebar from "../sidebar/Sidebar";
-
-import { FiUsers, FiLogOut } from "react-icons/fi";
+import { FiUsers, FiLogOut, FiEdit } from "react-icons/fi";
 
 const AdproductsList = () => {
   const location = useLocation();
@@ -99,13 +97,10 @@ const AdproductsList = () => {
     return Array.from(categorySet);
   };
 
-  // Function to generate category metadata
   const generateCategoryMetadata = (categories) => {
     const metadata = {};
 
-    // Default icon mapping - can be extended as needed
     const iconMap = {
-      // Common product categories
       mobile: "fa-mobile-alt",
       phone: "fa-mobile-alt",
       smartphone: "fa-mobile-alt",
@@ -260,10 +255,7 @@ const AdproductsList = () => {
   // Handle search functionality
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase().trim();
-    setSearchQuery(e.target.value); // Keep the original case for display
-
-    console.log("Search query:", query);
-    console.log("Total products available for search:", products.length);
+    setSearchQuery(e.target.value);
 
     if (query === "") {
       console.log("Empty query, clearing search results");
@@ -275,34 +267,27 @@ const AdproductsList = () => {
     setIsSearching(true);
 
     try {
-      // Search across all products
       const filteredResults = products.filter((product) => {
-        // Safely get string values, defaulting to empty string if undefined/null
         const name = (product.name || "").toLowerCase();
         const brand = (product.brand || "").toLowerCase();
         const description = (product.description || "").toLowerCase();
         const category = (product.category || "").toLowerCase();
 
-        // Get category label if available
         const categoryLabel =
           product.category && categoryMetadata[product.category]
             ? categoryMetadata[product.category].label.toLowerCase()
             : "";
 
-        // Check if any field contains the query
-        const nameMatch = name.includes(query);
-        const brandMatch = brand.includes(query);
-        const descMatch = description.includes(query);
-        const catMatch = category.includes(query);
-        const labelMatch = categoryLabel.includes(query);
+        const nameMatch = name.startsWith(query) || name.includes(query);
+        const brandMatch = brand.startsWith(query) || brand.includes(query);
+        const descMatch =
+          description.startsWith(query) || description.includes(query);
+        const catMatch = category.startsWith(query) || category.includes(query);
+        const labelMatch =
+          categoryLabel.startsWith(query) || categoryLabel.includes(query);
 
         return nameMatch || brandMatch || descMatch || catMatch || labelMatch;
       });
-
-      console.log(
-        `Search for "${query}" found ${filteredResults.length} results:`,
-        filteredResults
-      );
       setSearchResults(filteredResults);
     } catch (error) {
       console.error("Error during search:", error);
@@ -310,7 +295,6 @@ const AdproductsList = () => {
     }
   };
 
-  // Clear search
   const clearSearch = () => {
     console.log("Clearing search");
     setSearchQuery("");
@@ -483,7 +467,7 @@ const AdproductsList = () => {
             </h2>
 
             {isSearching && (
-              <div className="search-results">
+              <div className="ad-search-results">
                 {searchResults.length > 0 ? (
                   <div className="ad-prod-list">
                     {searchResults.map((product, index) => (
@@ -498,42 +482,44 @@ const AdproductsList = () => {
                             toggleProductExpansion(product._id || product.id)
                           }
                         >
-                          <div className="product-thumbnail">
-                            {product.images && product.images.length > 0 ? (
-                              <img
-                                src={product.images[0]}
-                                alt={product.name}
-                                className="thumbnail-image"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src =
-                                    "https://via.placeholder.com/150?text=No+Image";
-                                }}
-                              />
-                            ) : product.image ? (
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="thumbnail-image"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src =
-                                    "https://via.placeholder.com/150?text=No+Image";
-                                }}
-                              />
-                            ) : (
-                              <div className="thumbnail-placeholder">
-                                {/* Use dynamic category icon */}
-                                <i
-                                  className={`fas ${
-                                    product.category &&
-                                    categoryMetadata[product.category]
-                                      ? categoryMetadata[product.category].icon
-                                      : "fa-box"
-                                  }`}
-                                ></i>
-                              </div>
-                            )}
+                          <div className="ad-prodlist-img-cat">
+                            <div className="product-thumbnail">
+                              {product.images && product.images.length > 0 ? (
+                                <img
+                                  src={product.images[0]}
+                                  alt={product.name}
+                                  className="thumbnail-image"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                      "https://via.placeholder.com/150?text=No+Image";
+                                  }}
+                                />
+                              ) : product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="thumbnail-image"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                      "https://via.placeholder.com/150?text=No+Image";
+                                  }}
+                                />
+                              ) : (
+                                <div className="thumbnail-placeholder">
+                                  <i
+                                    className={`fas ${
+                                      product.category &&
+                                      categoryMetadata[product.category]
+                                        ? categoryMetadata[product.category]
+                                            .icon
+                                        : "fa-box"
+                                    }`}
+                                  ></i>
+                                </div>
+                              )}
+                            </div>
                             <div className="category-badge">
                               {product.category
                                 ? categoryMetadata[product.category]
@@ -621,7 +607,7 @@ const AdproductsList = () => {
                             )}
                             <div className="product-actions">
                               <button
-                                className="edit-btn"
+                                className="ad-prodlist-edit"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate("/addproducts", {
@@ -633,7 +619,8 @@ const AdproductsList = () => {
                                   });
                                 }}
                               >
-                                <i className="fas fa-edit"></i> Edit
+                                <FiEdit />
+                                Edit
                               </button>
                             </div>
                           </div>
@@ -651,7 +638,10 @@ const AdproductsList = () => {
                     <p className="search-tips">
                       Try checking your spelling or using more general terms.
                     </p>
-                    <button className="clear-search-btn" onClick={clearSearch}>
+                    <button
+                      className="ad-clear-search-btn"
+                      onClick={clearSearch}
+                    >
                       Clear Search
                     </button>
                   </div>
@@ -661,9 +651,7 @@ const AdproductsList = () => {
 
             {!isSearching && (
               <div className="ad-prod-list">
-                {/* Filter products based on selected category */}
                 {(() => {
-                  // Get filtered products based on selected category
                   const filteredProducts =
                     selectedCategory === "all"
                       ? products
@@ -692,34 +680,36 @@ const AdproductsList = () => {
                             toggleProductExpansion(product._id || product.id)
                           }
                         >
-                          <div className="product-thumbnail">
-                            {product.images && product.images.length > 0 ? (
-                              <img
-                                src={product.images[0]}
-                                alt={product.name}
-                                className="thumbnail-image"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src =
-                                    "https://via.placeholder.com/150?text=No+Image";
-                                }}
-                              />
-                            ) : product.image ? (
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="thumbnail-image"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src =
-                                    "https://via.placeholder.com/150?text=No+Image";
-                                }}
-                              />
-                            ) : (
-                              <div className="thumbnail-placeholder">
-                                <i className={`fas ${categoryIcon}`}></i>
-                              </div>
-                            )}
+                          <div className="ad-prodlist-img-cat">
+                            <div className="product-thumbnail">
+                              {product.images && product.images.length > 0 ? (
+                                <img
+                                  src={product.images[0]}
+                                  alt={product.name}
+                                  className="thumbnail-image"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                      "https://via.placeholder.com/150?text=No+Image";
+                                  }}
+                                />
+                              ) : product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="thumbnail-image"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                      "https://via.placeholder.com/150?text=No+Image";
+                                  }}
+                                />
+                              ) : (
+                                <div className="thumbnail-placeholder">
+                                  <i className={`fas ${categoryIcon}`}></i>
+                                </div>
+                              )}
+                            </div>
                             {selectedCategory === "all" && (
                               <div className="category-badge">
                                 {product.category
@@ -809,7 +799,7 @@ const AdproductsList = () => {
                             )}
                             <div className="product-actions">
                               <button
-                                className="edit-btn"
+                                className="ad-prodlist-edit"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate("/addproducts", {
@@ -821,7 +811,8 @@ const AdproductsList = () => {
                                   });
                                 }}
                               >
-                                <i className="fas fa-edit"></i> Edit
+                                <FiEdit />
+                                Edit
                               </button>
                             </div>
                           </div>

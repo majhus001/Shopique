@@ -30,7 +30,8 @@ const productSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       }],
       default: []
-    }
+    },
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "Seller", required: true },
   },
   { timestamps: true }
 );

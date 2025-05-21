@@ -19,6 +19,7 @@ import {
   FiInfo,
   FiPackage,
   FiTag,
+  FiFilter
 } from "react-icons/fi";
 
 const ViewCustomers = () => {
@@ -31,41 +32,104 @@ const ViewCustomers = () => {
   // State for user and customer data
   const [user, setUser] = useState(stateUser);
   const [custData, setCustdata] = useState(stateCustData);
+  const [purchasedbills, setCustpurchasedata] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isEmployee, setisEmployee] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile"); // 'profile' or 'products'
+  const [activeTab, setActiveTab] = useState("profile");
 
-  // Static product data
-  const staticProducts = [
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      price: 129.99,
-      quantity: 1,
-      purchasedAt: "2023-05-15T10:30:00Z",
-      image: "https://via.placeholder.com/100",
-      category: "Electronics",
-    },
-    {
-      id: 2,
-      name: "Organic Cotton T-Shirt",
-      price: 24.99,
-      quantity: 2,
-      purchasedAt: "2023-06-20T14:45:00Z",
-      image: "https://via.placeholder.com/100",
-      category: "Clothing",
-    },
-    {
-      id: 3,
-      name: "Stainless Steel Water Bottle",
-      price: 19.99,
-      quantity: 1,
-      purchasedAt: "2023-07-10T09:15:00Z",
-      image: "https://via.placeholder.com/100",
-      category: "Accessories",
-    },
-  ];
+  // Filter states
+  const [dateFilter, setDateFilter] = useState("all");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+
+  // Apply filters function
+  const applyFilters = () => {
+    if (!purchasedbills.length) {
+      setFilteredBills([]);
+      return;
+    }
+
+    const now = new Date();
+    let filtered = [...purchasedbills];
+
+    switch (dateFilter) {
+      case "today":
+        filtered = purchasedbills.filter(bill => {
+          const billDate = new Date(bill.createdAt);
+          return (
+            billDate.getDate() === now.getDate() &&
+            billDate.getMonth() === now.getMonth() &&
+            billDate.getFullYear() === now.getFullYear()
+          );
+        });
+        break;
+
+      case "week":
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(now.getDate() - 7);
+        filtered = purchasedbills.filter(bill => {
+          const billDate = new Date(bill.createdAt);
+          return billDate >= oneWeekAgo;
+        });
+        break;
+
+      case "month":
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+        filtered = purchasedbills.filter(bill => {
+          const billDate = new Date(bill.createdAt);
+          return billDate >= oneMonthAgo;
+        });
+        break;
+
+      case "year":
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        filtered = purchasedbills.filter(bill => {
+          const billDate = new Date(bill.createdAt);
+          return billDate >= oneYearAgo;
+        });
+        break;
+
+      case "custom":
+        if (customStartDate && customEndDate) {
+          const startDate = new Date(customStartDate);
+          const endDate = new Date(customEndDate);
+          endDate.setHours(23, 59, 59, 999);
+
+          filtered = purchasedbills.filter(bill => {
+            const billDate = new Date(bill.createdAt);
+            return billDate >= startDate && billDate <= endDate;
+          });
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setFilteredBills(filtered);
+    setShowFilterPanel(false);
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setDateFilter("all");
+    setCustomStartDate("");
+    setCustomEndDate("");
+    setFilteredBills(purchasedbills);
+    setShowFilterPanel(false);
+  };
+
+  // Initialize filtered bills
+  useEffect(() => {
+    if (purchasedbills.length) {
+      setFilteredBills(purchasedbills);
+    }
+  }, [purchasedbills]);
 
   const fetchUserData = async () => {
     try {
@@ -114,10 +178,23 @@ const ViewCustomers = () => {
     }
   };
 
+  const fetchCustpurchaceData = async () => {
+    try {
+      const custId = custData._id;
+      const CustomerbillsRes = await axios.get(
+        `${API_BASE_URL}/api/billing/customer/fetch/${custId}`
+      );
+      setCustpurchasedata(CustomerbillsRes.data.bills);
+    } catch {
+      console.log("error on fetching the customers");
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUserData();
       fetchCustData();
+      fetchCustpurchaceData();
     }
   }, []);
 
@@ -165,6 +242,10 @@ const ViewCustomers = () => {
       minute: "2-digit",
     });
   };
+
+  const handleviewdetails = () => {
+    console.log("kkk")
+  }
 
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
@@ -232,7 +313,7 @@ const ViewCustomers = () => {
             >
               <FiShoppingBag className="tab-icon" /> Purchased Products
               <span className="cust-product-count">
-                ({staticProducts.length})
+                ({purchasedbills.length})
               </span>
             </button>
           </div>
@@ -352,51 +433,133 @@ const ViewCustomers = () => {
                 {activeTab === "products" && (
                   <div className="cust-products-view">
                     <div className="products-header">
-                      <h2>
-                        <FiShoppingBag /> Purchased Products
-                      </h2>
-                      <p className="products-count">
-                        {staticProducts.length} items purchased
-                      </p>
+                      <div className="products-header-top">
+                        <h2>
+                          <FiShoppingBag /> Purchased Products
+                        </h2>
+                        <button 
+                          className="filter-toggle-btn"
+                          onClick={() => setShowFilterPanel(!showFilterPanel)}
+                        >
+                          <FiFilter /> {showFilterPanel ? 'Hide Filters' : 'Filter'}
+                        </button>
+                      </div>
+                      
+                      <div className="products-header-bottom">
+                        <p className="products-count">
+                          Showing {filteredBills.reduce((total, bill) => total + bill.items.length, 0)} of {purchasedbills.reduce((total, bill) => total + bill.items.length, 0)} items
+                        </p>
+                      </div>
+
+                      {showFilterPanel && (
+                        <div className="filter-panel">
+                          <div className="filter-group">
+                            <label>Date Range:</label>
+                            <select 
+                              value={dateFilter} 
+                              onChange={(e) => setDateFilter(e.target.value)}
+                              className="filter-select"
+                            >
+                              <option value="all">All Time</option>
+                              <option value="today">Today</option>
+                              <option value="week">Last 7 Days</option>
+                              <option value="month">Last 30 Days</option>
+                              <option value="year">Last Year</option>
+                              <option value="custom">Custom Range</option>
+                            </select>
+                          </div>
+
+                          {dateFilter === "custom" && (
+                            <div className="filter-group custom-date-range">
+                              <label>Custom Range:</label>
+                              <div className="date-inputs">
+                                <input
+                                  type="date"
+                                  value={customStartDate}
+                                  onChange={(e) => setCustomStartDate(e.target.value)}
+                                  className="date-input"
+                                />
+                                <span>to</span>
+                                <input
+                                  type="date"
+                                  value={customEndDate}
+                                  onChange={(e) => setCustomEndDate(e.target.value)}
+                                  className="date-input"
+                                  min={customStartDate}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="filter-actions">
+                            <button className="apply-filter-btn" onClick={applyFilters}>
+                              Apply Filters
+                            </button>
+                            <button className="reset-filter-btn" onClick={resetFilters}>
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="cust-products-list">
-                      {staticProducts.map((product) => (
-                        <div key={product.id} className="cust-product-card">
-                          <div className="cust-product-header">
-                            <img src={product.image} alt={"img"} />
-                            <h3 className="cust-product-name">
-                              {product.name}
-                            </h3>
+                      {filteredBills.length > 0 ? (
+                        filteredBills.map((bill, billIndex) => (
+                          <div key={bill._id || billIndex}>
+                            <h4 className="bill-heading">
+                              Bill #{billIndex + 1} - {formatDate(bill.createdAt)}
+                            </h4>
+                            {bill.items.map((product, productIndex) => (
+                              <div
+                                key={product.productId || productIndex}
+                                className="cust-product-card"
+                              >
+                                <div className="cust-product-header">
+                                  <img src={product.image} alt="Product" />
+                                  <h3 className="cust-product-name">
+                                    {product.name}
+                                  </h3>
+                                  <span className="cust-view-det-btn" onClick={handleviewdetails}>
+                                    View Details
+                                  </span>
+                                </div>
+                                <div className="cust-product-details">
+                                  <div className="cust-product-container">
+                                    <div className="cust-prod-content">
+                                      <p className="cust-product-category">
+                                        <FiTag /> {product.category}
+                                      </p>
+                                      <p className="cust-product-quantity">
+                                        <FiPackage /> Qty: {product.quantity}
+                                      </p>
+                                    </div>
+                                    <div className="cust-prod-content">
+                                      <p className="cust-product-price">
+                                        <FiDollarSign /> ₹
+                                        {product.unitPrice?.toFixed(2)}
+                                      </p>
+                                      <p className="cust-product-date">
+                                        <FiCalendar />{" "}
+                                        {formatDate(bill.createdAt)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          <div className="cust-product-details">
-                            <div className="cust-product-container">
-                              <div className="cust-prod-content">
-                                <p className="cust-product-category">
-                                  <FiTag /> {product.category}
-                                </p>
-                                <p className="cust-product-quantity">
-                                  <FiPackage /> Qty: {product.quantity}
-                                </p>
-                              </div>
-                              <div className="cust-prod-content">
-                                <p className="cust-product-price">
-                                  <FiDollarSign /> {product.price.toFixed(2)}
-                                </p>
-                                <p className="cust-product-date">
-                                  <FiCalendar />{" "}
-                                  {formatDate(product.purchasedAt)}
-                                </p>
-                              </div>
-                              <div>
-                                <button className="cust-view-det-btn">
-                                  view details
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                        ))
+                      ) : (
+                        <div className="no-products-message">
+                          <p>No purchases found for the selected time period.</p>
+                          {purchasedbills.length > 0 && (
+                            <button className="reset-filter-btn" onClick={resetFilters}>
+                              Reset Filters
+                            </button>
+                          )}
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}
