@@ -237,7 +237,7 @@ const UserManagement = () => {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiUsers className="header-icon" /> Online Users Management
+                <FiUsers /> Online Users Management
               </h1>
               <p className="subtitle">Manage and monitor user accounts</p>
             </div>

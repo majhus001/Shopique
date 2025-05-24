@@ -228,7 +228,7 @@ const Adminprofile = () => {
         <div className="main-content">
           <header className="admin-header-box">
             <div className="header-greeting">
-              <h1>Admin Profile</h1>
+              <h1><FiUser />Admin Profile</h1>
               <p className="subtitle">Manage your personal information</p>
             </div>
             <div className="admin-info">

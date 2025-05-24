@@ -266,9 +266,11 @@ const Adminorders = () => {
 
         <div className="main-content">
           <header className="admin-header-box">
+            <div className="header-greeting">
             <h1>
               <i className="fas fa-shopping-cart"></i> Orders
             </h1>
+            </div>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
                 <FiLogOut /> Logout

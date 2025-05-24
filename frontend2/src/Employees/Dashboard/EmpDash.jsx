@@ -205,7 +205,7 @@ export default function EmpDash() {
       const dailysalesres = await axios.get(
         `${API_BASE_URL}/api/dailysales/fetch`
       );
-      
+
       setdailysales(dailysalesres.data.data);
     } catch (err) {
       console.error("Error fetching sales:", err);
@@ -250,6 +250,26 @@ export default function EmpDash() {
 
   const handleLowstockClick = () => {
     navigate("/stockmaintain", { state: { user, orders, productsRes } });
+  };
+
+  const handlelowstockview = (item) => {
+    console.log(item);
+    navigate("/viewlowstockproduct", {
+      state: {
+        user,
+        orders,
+        item,
+      },
+    });
+  };
+  const handlelowstockadd = (item) => {
+    navigate("/addproducts", {
+      state: {
+        user,
+        orders,
+        editProduct: item,
+      },
+    });
   };
 
   return (
@@ -423,6 +443,7 @@ export default function EmpDash() {
                       <li>Category</li>
                       <li>price</li>
                       <li>Purchased At</li>
+                      <li>Bill No</li>
                     </div>
                     {dailysales.slice(0, 5).map((item, index) => (
                       <li
@@ -441,14 +462,13 @@ export default function EmpDash() {
                       >
                         <div className="low-stock-info">
                           <div className="low-stock-info-header">
-                            
-                            <strong className="item-name">{item.productname}</strong>
+                            <strong className="item-name">
+                              {item.productname}
+                            </strong>
                           </div>
 
                           <span className="item-stock"> {item.quantity}</span>
-                          <strong className="item-name">
-                            {item.category} 
-                          </strong>
+                          <strong className="item-name">{item.category}</strong>
                           <span className="item-stock-price">
                             {" "}
                             {item.price}
@@ -456,18 +476,18 @@ export default function EmpDash() {
                           <span>
                             {new Date(item.soldAt).toLocaleDateString()}
                           </span>
+                          <span>{item.billNumber}</span>
                         </div>
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <div className="no-stock-msg">
-                    <p>No low stock items to display</p>
+                    <p>No product sold today</p>
                   </div>
                 )}
               </div>
             </section>
-
 
             <section className="recent-activity-section">
               <div className="section-header">
@@ -488,6 +508,7 @@ export default function EmpDash() {
                       <li>Category</li>
                       <li>price</li>
                       <li>Last Purchased</li>
+                      <li>Action</li>
                     </div>
                     {lowstockitems.slice(0, 5).map((item, index) => (
                       <li
@@ -524,6 +545,27 @@ export default function EmpDash() {
                           <span>
                             {new Date(item.updatedAt).toLocaleDateString()}
                           </span>
+                          <div className="low-stock-action-btn-cont">
+                            <span
+                              className="low-stock-action-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlelowstockview(item);
+                              }}
+                            >
+                              view
+                            </span>
+
+                            <span
+                              className="low-stock-action-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlelowstockadd(item);
+                              }}
+                            >
+                              Add
+                            </span>
+                          </div>
                         </div>
                       </li>
                     ))}

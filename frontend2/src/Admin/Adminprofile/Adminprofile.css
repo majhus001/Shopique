@@ -325,28 +325,8 @@
   justify-content: flex-end;
 }
 
-.logout-btn {
-  padding: 8px 15px;
-  background-color: #f8f9fa;
-  color: #6c757d;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
 
-.logout-btn:hover {
-  background-color: #e9ecef;
-  color: #dc3545;
-}
 
-.logout-btn .btn-icon {
-  color: #dc3545;
-}
 
 /* Responsive Styles */
 @media (max-width: 992px) {

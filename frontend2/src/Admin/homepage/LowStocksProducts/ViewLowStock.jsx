@@ -43,6 +43,7 @@ export default function ViewLowStock() {
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const categoryIcons = {
     clothing: <FaTshirt />,
@@ -129,6 +130,10 @@ export default function ViewLowStock() {
     }
   };
 
+  const handleAlternateImg = (index) => {
+    setCurrentImageIndex(index);
+  };
+
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
       <div className="ad-nav">
@@ -150,7 +155,7 @@ export default function ViewLowStock() {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiActivity className="header-icon" /> Product Stock Details
+                <FiActivity /> Product Stock Details
               </h1>
               <p className="subtitle">Detailed view of product inventory</p>
             </div>
@@ -190,7 +195,7 @@ export default function ViewLowStock() {
                   <div className="image-gallery">
                     <div className="main-image">
                       <img
-                        src={product.images[0]}
+                        src={product.images[currentImageIndex]}
                         alt={product.name}
                         onError={(e) => {
                           e.target.onerror = null;
@@ -201,7 +206,13 @@ export default function ViewLowStock() {
                     </div>
                     <div className="thumbnail-container">
                       {product.images.map((img, index) => (
-                        <div key={index} className="thumbnail">
+                        <div
+                          key={index}
+                          className={`thumbnail ${
+                            currentImageIndex === index ? "active" : ""
+                          }`}
+                          onClick={() => handleAlternateImg(index)}
+                        >
                           <img
                             src={img}
                             alt={`${product.name} ${index + 1}`}

@@ -532,7 +532,7 @@ const toggleCardExpanded = (userId) => {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiUsers className="header-icon" /> Customers Management
+                <FiUsers /> Customers Management
               </h1>
               <p className="subtitle">Manage and monitor customer accounts</p>
             </div>

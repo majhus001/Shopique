@@ -373,7 +373,7 @@ const AdproductsList = () => {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiUsers className="header-icon" /> Product Management
+                 Product Management
               </h1>
               <p className="subtitle">Manage and monitor Inventory Products</p>
             </div>

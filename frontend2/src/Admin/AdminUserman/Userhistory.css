@@ -75,35 +75,6 @@
   transform: translateX(-2px);
 }
 
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background-color: #e74c3c;
-  border: none;
-  color: white;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(231, 76, 60, 0.2);
-  position: relative;
-  z-index: 10;
-  outline: none;
-}
-
-.logout-btn:hover {
-  background-color: #c0392b;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
-}
-
-.logout-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
-}
-
 .btn-icon {
   font-size: 1.1rem;
 }

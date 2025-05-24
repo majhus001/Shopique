@@ -280,7 +280,7 @@ export default function Employees() {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiUsers className="header-icon" /> Employee Management
+                <FiUsers  /> Employee Management
               </h1>
               <p className="subtitle">Manage your organization's workforce</p>
             </div>

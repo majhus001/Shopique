@@ -431,6 +431,7 @@ const AdminHome = () => {
                     <li>Category</li>
                     <li>price</li>
                     <li>Purchased At</li>
+                    <li>Bill No</li>
                   </div>
                   {dailysales.slice(0, 5).map((item, index) => (
                     <li
@@ -459,6 +460,9 @@ const AdminHome = () => {
                         <span className="item-stock-price"> {item.price}</span>
                         <span>
                           {new Date(item.soldAt).toLocaleDateString()}
+                        </span>
+                        <span>
+                          {item.billNumber}
                         </span>
                       </div>
                     </li>
