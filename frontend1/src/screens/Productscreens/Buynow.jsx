@@ -16,7 +16,7 @@ const Buynow = () => {
     brand,
     quantity,
     description,
-    image,
+    images,
     category,
     deliverytime,
     rating,
@@ -33,14 +33,13 @@ const Buynow = () => {
       brand,
       quantity,
       description,
-      image,
+      image: images[0],
       category,
       deliverytime,
       rating,
       stock,
     },
   ]);
-  console.log(stock)
 
   const calculateTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);

@@ -4,6 +4,7 @@ import Navbar from "../navbar/Navbar";
 import "./Searchproducts.css";
 import axios from "axios";
 import API_BASE_URL from "../../api";
+import { FiShoppingCart, FiShoppingBag, FiChevronLeft, FiChevronRight, FiStar } from "react-icons/fi";
 
 export default function Searchproducts() {
   const location = useLocation();
@@ -12,13 +13,14 @@ export default function Searchproducts() {
 
   const userId = user?._id;
   const [categoryProducts, setCategoryProducts] = useState([]);
+  const [groupedProducts, setGroupedProducts] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [cartStatus, setCartStatus] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
-  const [loading, setLoading] = useState(true); // ✅ Loader state
+  const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch products of the clicked category
+  // Fetch products of the clicked category and organize by subCategory
   useEffect(() => {
     if (!clickedProduct || !clickedProduct.category) return;
 
@@ -26,22 +28,53 @@ export default function Searchproducts() {
       setLoading(true);
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/api/${clickedProduct.category}/fetch/searchprod`
+          `${API_BASE_URL}/api/products/fetchbycategory/${clickedProduct.category}`
         );
         if (response) {
           const products = response.data.products || [];
-
-          // Combine all products
           const allProducts = [clickedProduct, ...categoryData, ...products];
-
-          // Remove duplicates by _id
+          
+          // Remove duplicates
           const uniqueProductsMap = new Map();
           allProducts.forEach((prod) => {
             uniqueProductsMap.set(prod._id, prod);
           });
+          
+          // Convert to array
+          let productsArray = Array.from(uniqueProductsMap.values());
+          setCategoryProducts(productsArray);
 
-          const reorderedProducts = Array.from(uniqueProductsMap.values());
-          setCategoryProducts(reorderedProducts);
+          // Group by subCategory
+          const grouped = {};
+          productsArray.forEach(product => {
+            const subCat = product.subCategory || 'Other';
+            if (!grouped[subCat]) {
+              grouped[subCat] = [];
+            }
+            grouped[subCat].push(product);
+          });
+
+          // Get the clicked subCategory (if exists)
+          const clickedSubCategory = clickedProduct.subCategory || 'Other';
+          
+          // Create ordered array of subCategories with clicked first
+          const subCategories = Object.keys(grouped);
+          const orderedSubCategories = [clickedSubCategory];
+          
+          // Add other subCategories in order (excluding the clicked one if already added)
+          subCategories.forEach(subCat => {
+            if (subCat !== clickedSubCategory) {
+              orderedSubCategories.push(subCat);
+            }
+          });
+
+          // Create final grouped products array in the desired order
+          const orderedGroupedProducts = orderedSubCategories.map(subCat => ({
+            subCategory: subCat,
+            products: grouped[subCat]
+          }));
+
+          setGroupedProducts(orderedGroupedProducts);
         } else {
           console.log(response.data.message);
         }
@@ -55,7 +88,7 @@ export default function Searchproducts() {
     fetchCategoryProducts();
   }, [clickedProduct]);
 
-  // ✅ Fetch cart status
+  // Fetch cart status
   useEffect(() => {
     if (!userId || categoryProducts.length === 0) return;
 
@@ -83,13 +116,11 @@ export default function Searchproducts() {
     fetchCartStatus();
   }, [userId, categoryProducts]);
 
-  // ✅ Price range filter handler
   const handlePriceChange = (event) => {
     setPriceRange([0, Number(event.target.value)]);
     setCurrentPage(1);
   };
 
-  // ✅ Add to Cart handler
   const handleAddToCart = async (item) => {
     if (!userId) {
       alert("Please log in to add products to Cart.");
@@ -138,21 +169,20 @@ export default function Searchproducts() {
       alert("Please log in to Add products to Cart.");
       return;
     }
-console.log("hiiii")
     navigate("/buynow", {
       state: {
         user,
-        itemId:item._id,
-        name:item.name,
-        price:item.price,
-        brand:item.brand,
+        itemId: item._id,
+        name: item.name,
+        price: item.price,
+        brand: item.brand,
         quantity: 1,
-        description:item.description,
-        image:item.image,
-        category:item.category,
-        deliverytime:item.deliverytime,
-        rating:item.rating,
-        stock:item.stock,
+        description: item.description,
+        image: item.image,
+        category: item.category,
+        deliverytime: item.deliverytime,
+        rating: item.rating,
+        stock: item.stock,
       },
     });
   };
@@ -175,20 +205,34 @@ console.log("hiiii")
     });
   };
 
-  // ✅ Filtered & Paginated Products
-  const filteredProducts = categoryProducts.filter(
-    (item) => item.price >= priceRange[0] && item.price <= priceRange[1]
-  );
+  // Filter products by price range
+  const filterProductsByPrice = (products) => {
+    return products.filter(
+      (item) => item.price >= priceRange[0] && item.price <= priceRange[1]
+    );
+  };
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  // Get paginated products from all groups
+  const getPaginatedProducts = () => {
+    let allFilteredProducts = [];
+    groupedProducts.forEach(group => {
+      const filtered = filterProductsByPrice(group.products);
+      if (filtered.length > 0) {
+        allFilteredProducts = [...allFilteredProducts, ...filtered];
+      }
+    });
 
-  // ✅ Pagination handlers
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    return {
+      paginatedProducts: allFilteredProducts.slice(indexOfFirstProduct, indexOfLastProduct),
+      totalPages: Math.ceil(allFilteredProducts.length / productsPerPage),
+      allFilteredProducts
+    };
+  };
+
+  const { paginatedProducts, totalPages, allFilteredProducts } = getPaginatedProducts();
+
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
@@ -197,102 +241,156 @@ console.log("hiiii")
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  return (
-    <div className="search-prod-cont">
-      <div className="se-nav-bar">
-        <Navbar user={user} />
-      </div>
+  // Truncate description to 2 lines
+  const truncateDescription = (text) => {
+    const words = text.split(' ');
+    if (words.length > 10) {
+      return words.slice(0, 10).join(' ') + '...';
+    }
+    return text;
+  };
 
-      <div className="se-pg-cont">
+  return (
+    <div className="sp-search-page-container">
+      <Navbar user={user} />
+
+      <div className="sp-search-content-container">
         {/* Filter Section */}
-        <div className="se-filter-cont">
-          <div className="se-fil-btns">
-            <h4>Filter</h4>
-            <div className="price-filter-bar">
-              <label>
-                Price: ₹{priceRange[0]} - ₹{priceRange[1]}
-              </label>
+        <div className="sp-filter-sidebar">
+          <div className="sp-filter-card">
+            <h3 className="sp-filter-title">Filters</h3>
+            <div className="sp-price-filter-section">
+              <h4>Price Range</h4>
+              <div className="sp-price-range-display">
+                ₹{priceRange[0]} - ₹{priceRange[1]}
+              </div>
               <input
                 type="range"
                 min="0"
                 max="100000"
+                step="1000"
                 value={priceRange[1]}
                 onChange={handlePriceChange}
+                className="sp-price-slider"
               />
+              <div className="sp-price-limits">
+                <span>₹0</span>
+                <span>₹100,000</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Product Listing */}
-        <div className="se-re-cont">
-          {loading ? ( // ✅ Loader condition
-            <div className="loader-container">
-              <div className="loader-big"></div>
+        <div className="sp-product-results-container">
+          {loading ? (
+            <div className="sp-loading-overlay">
+              <div className="sp-spinner"></div>
+              <p>Loading products...</p>
             </div>
-          ) : currentProducts.length > 0 ? (
+          ) : paginatedProducts.length > 0 ? (
             <>
-              {currentProducts.map((item) => (
-                <div key={item._id} className="se-prod-item">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    onClick={() => handleOnclknav(item)}
-                    style={{ cursor: "pointer" }}
-                  />
-                  <div className="se-item-det">
-                    <h3 onClick={() => handleOnclknav(item)}>{item.name}</h3>
-                    <p>{item.description}</p>
-                    <h4>Price: ₹ {item.price}</h4>
-                    <div className="se-item-btn-cont">
-                      {cartStatus[item._id] ? (
-                        <button
-                          className="se-item-ac-btn"
-                          onClick={handleGoToCart}
-                        >
-                          <i className="fas fa-shopping-cart"></i> Go to Cart
-                        </button>
-                      ) : (
-                        <button
-                          className="se-item-ac-btn"
-                          onClick={() => handleAddToCart(item)}
-                        >
-                          <i className="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
+              <div className="sp-product-grid">
+                {paginatedProducts.map((item) => (
+                  <div key={item._id} className="sp-product-card">
+                    <div className="sp-product-image-container" onClick={() => handleOnclknav(item)}>
+                      <img
+                        src={item.images[0] || '/placeholder-product.jpg'}
+                        alt={item.name}
+                        onError={(e) => {
+                          e.target.src = '/placeholder-product.jpg';
+                        }}
+                      />
+                      {item.offerPrice && (
+                        <div className="sp-discount-badge">
+                          {Math.round((item.price - item.offerPrice) / item.price * 100)}% OFF
+                        </div>
                       )}
-                      <button
-                        className="se-item-ac-btn"
-                        onClick={() => handleBuyNow(item)}
-                      >
-                        <i className="fas fa-shopping-bag"></i> Buy Now
-                      </button>
+                    </div>
+                    <div className="sp-product-details">
+                      <h3 onClick={() => handleOnclknav(item)}>{item.name}</h3>
+                      <div className="sp-product-description" title={item.description}>
+                        {truncateDescription(item.description)}
+                      </div>
+                      <div className="sp-price-rating-container">
+                        <div className="sp-price-container">
+                          {item.offerPrice ? (
+                            <>
+                              <span className="sp-offer-price">₹{item.offerPrice}</span>
+                              <span className="sp-original-price">₹{item.price}</span>
+                            </>
+                          ) : (
+                            <span className="sp-price">₹{item.price}</span>
+                          )}
+                        </div>
+                        {item.rating > 0 && (
+                          <div className="sp-rating">
+                            <FiStar className="sp-star-icon" />
+                            <span>{item.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="sp-product-actions">
+                        {cartStatus[item._id] ? (
+                          <button
+                            className="sp-cart-btn sp-added-to-cart"
+                            onClick={handleGoToCart}
+                          >
+                            <FiShoppingCart /> Go to Cart
+                          </button>
+                        ) : (
+                          <button
+                            className="sp-cart-btn"
+                            onClick={() => handleAddToCart(item)}
+                          >
+                            <FiShoppingCart /> Add to Cart
+                          </button>
+                        )}
+                        <button
+                          className="sp-buy-now-btn"
+                          onClick={() => handleBuyNow(item)}
+                        >
+                          <FiShoppingBag /> Buy Now
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
 
-              {/* ✅ Pagination Buttons (Placed outside map) */}
-              <div className="pagination-buttons">
+              {/* Pagination */}
+              <div className="sp-pagination-container">
                 <button
-                  className="ad-or-d-btn"
+                  className="sp-pagination-btn"
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
                 >
-                  Previous
+                  <FiChevronLeft /> Previous
                 </button>
-                <span style={{ padding: "0 10px" }}>
+                <span className="sp-page-indicator">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
-                  className="ad-or-d-btn"
+                  className="sp-pagination-btn"
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
                 >
-                  Next
+                  Next <FiChevronRight />
                 </button>
               </div>
             </>
           ) : (
-            <h3>No products available in this price range</h3>
+            <div className="sp-no-products-found">
+              <img src="/no-products.svg" alt="No products" />
+              <h3>No products available in this price range</h3>
+              <p>Try adjusting your price filter</p>
+              <button 
+                className="sp-reset-filter-btn"
+                onClick={() => setPriceRange([0, 100000])}
+              >
+                Reset Filters
+              </button>
+            </div>
           )}
         </div>
       </div>

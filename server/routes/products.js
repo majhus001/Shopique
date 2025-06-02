@@ -147,6 +147,30 @@ router.get("/fetch/:id", async (req, res) => {
   }
 });
 
+router.get("/fetchbycategory/:category", async (req, res) => {
+  try {
+    const {category} = req.params;
+    
+    const products = await product.find({category: category});
+    if (!products) {
+      return res.status(404).json({
+        success: false,
+        error: "Product not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch product",
+    });
+  }
+});
+
 // Update product
 router.put("/update/:id", upload.array("images", 5), async (req, res) => {
   try {

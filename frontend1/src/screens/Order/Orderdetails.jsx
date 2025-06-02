@@ -206,7 +206,6 @@ const Orderdetails = () => {
           </div>
 
           {/* Mobile Number Section */}
-          {/* Mobile Number Section */}
           <div className="input-group">
             <h4>2. Mobile Number</h4>
             {isLoggedIn ? (
@@ -217,7 +216,6 @@ const Orderdetails = () => {
                   placeholder="Enter your mobile number"
                   value={mobileNumber}
                   onChange={handleMobileChange}
-                  // disabled={isMobileDone}
                 />
                 {!isMobileDone && mobileNumber.length === 10 && (
                   <button
