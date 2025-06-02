@@ -30,20 +30,7 @@ const allowedOrigins = [
 
 // Middleware
 app.use(bodyParser.json());
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       console.log("Incoming origin:", origin);
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     methods: "GET,POST,PUT,DELETE",
-//     credentials: true,
-//   })
-// );
+
 app.use(
   cors({
     origin: true, // Allow all origins

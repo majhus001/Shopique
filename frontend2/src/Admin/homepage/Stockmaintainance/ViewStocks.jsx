@@ -13,10 +13,11 @@ export default function ViewStocks() {
 
   const initialUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
+  const stateproducts = location.state?.productsRes || null;
 
   const [user, setUser] = useState(initialUser);
   const [orders, setOrders] = useState(stateOrders);
-  const [productsRes, setProductsRes] = useState([]);
+  const [productsRes, setProductsRes] = useState(stateproducts);
   const [lowstock, setLowstock] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -30,7 +31,11 @@ export default function ViewStocks() {
   useEffect(() => {
     fetchUserData();
     fetchOrderData();
-    fetchProductData();
+    if (productsRes.length <= 0) {
+      fetchProductData();
+    } else {
+      filterlowstockitems(productsRes);
+    }
   }, []);
 
   const fetchUserData = async () => {
@@ -60,21 +65,6 @@ export default function ViewStocks() {
     }
   };
 
-  const fetchProductData = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
-      const allProducts = res.data.data;
-      const lowStockItems = allProducts.filter((item) => item.stock <= 50);
-      setProductsRes(allProducts);
-      setLowstock(lowStockItems.length);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchOrderData = async () => {
     try {
       setLoading(true);
@@ -85,6 +75,25 @@ export default function ViewStocks() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchProductData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
+      const allProducts = res.data.data;
+      setProductsRes(allProducts);
+      filterlowstockitems(allProducts);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterlowstockitems = (allProducts) => {
+    const lowStockItems = allProducts.filter((item) => item.stock <= 50);
+    setLowstock(lowStockItems.length);
   };
 
   const handleSidebarCollapse = (collapsed) => {
@@ -113,8 +122,15 @@ export default function ViewStocks() {
     return true;
   });
 
-const handlelowstockview = (item) => {
-    navigate("/viewlowstockproduct",user,orders,item);
+  const handlelowstockview = (item) => {
+    console.log(item);
+    navigate("/viewlowstockproduct", {
+      state: {
+        user,
+        orders,
+        item,
+      },
+    });
   };
   const handlelowstockadd = (item) => {
     navigate("/addproducts", {
@@ -147,7 +163,7 @@ const handlelowstockview = (item) => {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiUsers className="header-icon" /> Stock Management
+                <FiUsers /> Stock Management
               </h1>
               <p className="subtitle">Manage and monitor product stocks</p>
             </div>
@@ -162,9 +178,7 @@ const handlelowstockview = (item) => {
           <section className="recent-activity-section">
             <div className="section-header-box">
               <div className="section-header">
-                <h2 className="section-title">
-                  <FiActivity className="section-icon" /> All Product Stocks
-                </h2>
+                <h2 className="section-title">All Product Stocks</h2>
               </div>
             </div>
 

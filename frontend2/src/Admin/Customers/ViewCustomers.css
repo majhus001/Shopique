@@ -65,6 +65,9 @@
     display: inline-block;
 }
 
+.cust-email{
+  color: #fff;
+}
 /* Product Cards */
 .cust-product-card {
     margin-bottom: 20px;

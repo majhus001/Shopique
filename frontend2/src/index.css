@@ -523,23 +523,6 @@ tbody tr:hover {
   100% { transform: rotate(360deg); }
 }
 
-/* Admin Dashboard Specific Styles */
-.admin-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: var(--gray-100);
-}
-
-.main-content {
-  flex: 1;
-  padding: var(--spacing-xl);
-  transition: all var(--transition-normal);
-}
-
-.sidebar-collapsed .main-content {
-  margin-left: 60px;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 992px) {
   html {

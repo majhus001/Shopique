@@ -205,7 +205,6 @@ export default function EmpDash() {
       const dailysalesres = await axios.get(
         `${API_BASE_URL}/api/dailysales/fetch`
       );
-
       setdailysales(dailysalesres.data.data);
     } catch (err) {
       console.error("Error fetching sales:", err);
@@ -253,8 +252,7 @@ export default function EmpDash() {
   };
 
   const handlelowstockview = (item) => {
-    console.log(item);
-    navigate("/viewlowstockproduct", {
+    navigate("/viewproductdetails", {
       state: {
         user,
         orders,
@@ -271,6 +269,16 @@ export default function EmpDash() {
       },
     });
   };
+
+  const handleDailySalesClick = () => {
+    navigate("/viewdailysales", {
+      state: {
+        user,
+        orders,
+        dailysales,
+      },
+    });
+  }
 
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
@@ -306,7 +314,7 @@ export default function EmpDash() {
                 <FiDollarSign className="btn-icon" /> Go to Billing
               </button>
               <button className="logout-btn" onClick={handleLogout}>
-                <FiLogOut className="btn-icon" /> Logout
+                <FiLogOut /> Logout
               </button>
             </div>
           </header>
@@ -429,7 +437,7 @@ export default function EmpDash() {
                 <h2 className="section-title">
                   <FiActivity className="section-icon" /> Daily sales Items
                 </h2>
-                <button className="view-all-btn" onClick={handleLowstockClick}>
+                <button className="view-all-btn" onClick={handleDailySalesClick}>
                   View All
                 </button>
               </div>
@@ -451,13 +459,7 @@ export default function EmpDash() {
                         className="low-stock-item"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate("/addproducts", {
-                            state: {
-                              user,
-                              orders,
-                              editProduct: item,
-                            },
-                          });
+                          handlelowstockview(item);
                         }}
                       >
                         <div className="low-stock-info">

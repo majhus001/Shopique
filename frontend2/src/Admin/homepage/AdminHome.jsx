@@ -37,7 +37,7 @@ const AdminHome = () => {
   const [lowstockitems, setLowstockItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
+ 
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -149,7 +149,7 @@ const AdminHome = () => {
   };
 
   const handleUsemanclk = () =>
-    navigate("/userman", { state: { user, orders } });
+    navigate("/userman", { state: { user, orders} });
   const handlecustomersclk = () =>
     navigate("/customers", { state: { user, orders } });
   const handlemployeesclk = () =>
@@ -179,8 +179,7 @@ const AdminHome = () => {
   };
 
   const handlelowstockview = (item) => {
-    console.log(item);
-    navigate("/viewlowstockproduct", {
+    navigate("/viewproductdetails", {
       state: {
         user,
         orders,
@@ -197,6 +196,16 @@ const AdminHome = () => {
       },
     });
   };
+
+  const handleDailySalesClick = () => {
+    navigate("/viewdailysales", {
+      state: {
+        user,
+        orders,
+        dailysales,
+      },
+    });
+  }
 
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
@@ -417,7 +426,7 @@ const AdminHome = () => {
               <h2 className="section-title">
                 <FiActivity className="section-icon" /> Daily sales Items
               </h2>
-              <button className="view-all-btn" onClick={handleLowstockClick}>
+              <button className="view-all-btn" onClick={handleDailySalesClick}>
                 View All
               </button>
             </div>
@@ -439,13 +448,7 @@ const AdminHome = () => {
                       className="low-stock-item"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate("/addproducts", {
-                          state: {
-                            user,
-                            orders,
-                            editProduct: item,
-                          },
-                        });
+                        handlelowstockview(item);
                       }}
                     >
                       <div className="low-stock-info">
@@ -492,7 +495,7 @@ const AdminHome = () => {
             <div className="recent-activity">
               {recactivity.length > 0 ? (
                 <ul>
-                  {recactivity.slice(0, 3).map((item, index) => (
+                  {recactivity.slice(0, 5).map((item, index) => (
                     <li key={index}>
                       <div className="activity-icon">
                         <FiClock />

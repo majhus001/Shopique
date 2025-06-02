@@ -30,13 +30,14 @@ const UserManagement = () => {
   const navigate = useNavigate();
   const stateUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
-
+  const statesd = location.state?.sd || null;
+console.log(statesd)
   // State for user and orders
   const [user, setUser] = useState(stateUser);
   const [orders, setOrders] = useState(stateOrders);
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(statesd);
 
   const [filteredUsers, setfilteredUsers] = useState(users);
   const [editUser, setEditUser] = useState(null);

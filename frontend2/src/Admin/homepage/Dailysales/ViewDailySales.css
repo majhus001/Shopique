@@ -1,0 +1,395 @@
+/* ViewDailySales.css */
+
+/* Summary Cards */
+.vds-sales-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.vds-summary-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vds-summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.vds-summary-icon {
+  background: #4e73df;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  font-size: 1.5rem;
+}
+
+.vds-summary-icon svg {
+  stroke-width: 2;
+}
+
+.vds-summary-content h3 {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.vds-summary-content p {
+  font-size: 1.25rem;
+  color: #5a5c69;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* Table Styles */
+.vds-table-container {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.vds-sales-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vds-sales-table thead {
+  background-color: #f8f9fc;
+}
+
+.vds-sales-table th {
+  padding: 15px 20px;
+  text-align: left;
+  color: #6c757d;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.vds-sales-table td {
+  padding: 15px 20px;
+  color: #5a5c69;
+  border-bottom: 1px solid #e3e6f0;
+  vertical-align: middle;
+}
+
+.vds-sales-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.vds-sales-table tbody tr:hover {
+  background-color: #f8f9fc;
+}
+
+.vds-no-data {
+  text-align: center;
+  padding: 30px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Section Header */
+.vds-section-header-box {
+  margin-bottom: 20px;
+}
+
+.vds-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vds-section-title {
+  font-size: 1.5rem;
+  color: #4e73df;
+  margin: 0;
+}
+
+/* Date Filter Section */
+.vds-filter-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.vds-date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.vds-date-range-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-picker-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.vds-quick-filters {
+  display: flex;
+  gap: 10px;
+}
+
+.vds-quick-filters button {
+  padding: 6px 12px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.vds-quick-filters button:hover {
+  background: #e0e0e0;
+}
+
+.clear-filter-btn {
+  padding: 6px 12px;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 10px;
+}
+
+.clear-filter-btn:hover {
+  background: #ffcdd2;
+}
+
+.vds-btn-cont{
+  display: flex;
+  justify-content: space-between;
+}
+.vds-download-btn{
+  background-color: #007AFF; 
+}
+
+.filter-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #2e7d32;
+  margin-left: 15px;
+}
+
+/* Status Messages */
+.status-message {
+  padding: 12px 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-message svg {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+.status-message.info {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.status-message.success {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.status-message.error {
+  background-color: #fff2f0;
+  color: #f5222d;
+  border: 1px solid #ffccc7;
+}
+
+/* Success Checkmark Animation */
+.success-checkmark {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.check-icon {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  border-radius: 50%;
+  box-sizing: content-box;
+  border: 4px solid #4CAF50;
+}
+
+.check-icon::before {
+  top: 3px;
+  left: -2px;
+  width: 30px;
+  transform-origin: 100% 50%;
+  border-radius: 100px 0 0 100px;
+}
+
+.check-icon::after {
+  top: 0;
+  left: 30px;
+  width: 60px;
+  transform-origin: 0 50%;
+  border-radius: 0 100px 100px 0;
+  animation: rotate-circle 4.25s ease-in;
+}
+
+.check-icon::before, .check-icon::after {
+  content: '';
+  height: 100px;
+  position: absolute;
+  background: #FFFFFF;
+  transform: rotate(-45deg);
+}
+
+.icon-line {
+  height: 5px;
+  background-color: #4CAF50;
+  display: block;
+  border-radius: 2px;
+  position: absolute;
+  z-index: 10;
+}
+
+.icon-line.line-tip {
+  top: 46px;
+  left: 14px;
+  width: 25px;
+  transform: rotate(45deg);
+  animation: icon-line-tip 0.75s;
+}
+
+.icon-line.line-long {
+  top: 38px;
+  right: 8px;
+  width: 47px;
+  transform: rotate(-45deg);
+  animation: icon-line-long 0.75s;
+}
+
+.icon-circle {
+  top: -4px;
+  left: -4px;
+  z-index: 10;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  position: absolute;
+  box-sizing: content-box;
+  border: 4px solid rgba(76, 175, 80, 0.5);
+}
+
+@keyframes rotate-circle {
+  0% {
+    transform: rotate(-45deg);
+  }
+  5% {
+    transform: rotate(-45deg);
+  }
+  12% {
+    transform: rotate(-405deg);
+  }
+  100% {
+    transform: rotate(-405deg);
+  }
+}
+
+@keyframes icon-line-tip {
+  0% {
+    width: 0;
+    left: 1px;
+    top: 19px;
+  }
+  54% {
+    width: 0;
+    left: 1px;
+    top: 19px;
+  }
+  70% {
+    width: 50px;
+    left: -8px;
+    top: 37px;
+  }
+  84% {
+    width: 17px;
+    left: 21px;
+    top: 48px;
+  }
+  100% {
+    width: 25px;
+    left: 14px;
+    top: 45px;
+  }
+}
+
+@keyframes icon-line-long {
+  0% {
+    width: 0;
+    right: 46px;
+    top: 54px;
+  }
+  65% {
+    width: 0;
+    right: 46px;
+    top: 54px;
+  }
+  84% {
+    width: 55px;
+    right: 0px;
+    top: 35px;
+  }
+  100% {
+    width: 47px;
+    right: 8px;
+    top: 38px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .vds-sales-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .vds-sales-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .vds-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

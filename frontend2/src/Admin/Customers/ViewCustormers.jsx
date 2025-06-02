@@ -263,10 +263,10 @@ const ViewCustomers = () => {
           <header className="admin-header-box">
             <div className="header-greeting">
               <h1>
-                <FiUser className="header-icon" /> {custData?.username}
+                <FiUser /> {custData?.username}
               </h1>
-              <p className="user-email">
-                <FiMail className="email-icon" />{" "}
+              <p className="cust-email">
+                <FiMail />{" "}
                 {custData?.email || "No email provided"}
               </p>
             </div>

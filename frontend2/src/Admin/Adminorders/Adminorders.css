@@ -377,23 +377,6 @@
   gap: 10px;
 }
 
-
-/* Admin Container and Sidebar Collapsed State */
-.admin-container {
-  display: flex;
-  transition: all 0.3s ease;
-}
-
-.main-content {
-  flex: 1;
-  padding: 10px;
-  transition: all 0.3s ease;
-}
-
-.sidebar-collapsed .main-content {
-  margin-left: 60px; /* Adjust based on your collapsed sidebar width */
-}
-
 /* Responsive Design */
 @media (max-width: 992px) {
   .search-container {

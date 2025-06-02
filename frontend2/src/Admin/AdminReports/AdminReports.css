@@ -7,22 +7,6 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.admin-container {
-  display: flex;
-  flex: 1;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px;
-  transition: margin-left 0.3s ease;
-  background-color: #f5f7fa;
-}
-
-.sidebar-collapsed + .main-content {
-  margin-left: 80px;
-}
-
 /* Header Styles */
 .admin-header {
   display: flex;

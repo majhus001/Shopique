@@ -4,20 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Adnavbar from "../../Adnavbar/Adnavbar";
 import Sidebar from "../../sidebar/Sidebar";
 import API_BASE_URL from "../../../api";
-import "./ViewLowStock.css";
-import {
-  FiUsers,
-  FiLogOut,
-  FiActivity,
-  FiStar,
-  FiShoppingCart,
-  FiTruck,
-  FiTag,
-  FiInfo,
-  FiBox,
-  FiLayers,
-  FiGift,
-} from "react-icons/fi";
+import "./ViewProductDetails.css";
+import { FiLogOut, FiActivity, FiStar, FiInfo, FiBox } from "react-icons/fi";
 import {
   FaTshirt,
   FaMobileAlt,
@@ -30,15 +18,16 @@ import {
   FaBaby,
 } from "react-icons/fa";
 
-export default function ViewLowStock() {
+export default function ViewProductsDetails() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const initialUser = location.state?.user || null;
   const stateOrders = location.state?.orders || null;
-  const product = location.state?.item || null;
+  const initialproduct = location.state?.item || null;
 
   const [user, setUser] = useState(initialUser);
+  const [product, setProduct] = useState(initialproduct);
   const [orders, setOrders] = useState(stateOrders);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -61,7 +50,11 @@ export default function ViewLowStock() {
   useEffect(() => {
     fetchUserData();
     fetchOrderData();
+    if (!product.images) {
+      fetchproductData();
+    }
   }, []);
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -101,6 +94,19 @@ export default function ViewLowStock() {
     }
   };
 
+  const fetchproductData = async () => {
+    try {
+      setLoading(true);
+      const id = product.productId;
+      const prodres = await axios.get(`${API_BASE_URL}/api/products/fetch/${id}`);
+      setProduct(prodres.data.data);
+    } catch {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSidebarCollapse = (collapsed) => {
     setSidebarCollapsed(collapsed);
   };
@@ -113,7 +119,6 @@ export default function ViewLowStock() {
     );
   }
 
-  // Calculate stock percentage (assuming max stock for visualization is 100)
   const stockPercentage = Math.min(100, (product.stock / 100) * 100);
 
   const handleLogout = async () => {
@@ -240,7 +245,11 @@ export default function ViewLowStock() {
                   <h3>
                     <FiInfo /> Product Information
                   </h3>
-                  <div className="info-grid">{/* Info items... */}</div>
+                  <div className="info-grid">
+                    <h5>{product.name}</h5>
+                    <span> ₹ {product.price}</span>
+                    <span>{product.category}</span>
+                  </div>
                 </div>
                 <div className="description-card">
                   <h3>

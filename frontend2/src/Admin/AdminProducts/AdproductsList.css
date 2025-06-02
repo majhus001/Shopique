@@ -25,26 +25,6 @@
   --transition-normal: 0.3s ease;
 }
 
-.admin-container {
-  display: flex;
-  transition: var(--transition-normal);
-  min-height: 100vh;
-  background-color: var(--bg-light);
-}
-
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  transition: var(--transition-normal);
-  background-color: var(--bg-light);
-  position: relative;
-}
-
-.sidebar-collapsed .main-content {
-  margin-left: 60px; /* Adjust based on your collapsed sidebar width */
-}
-
-
 .ad-add-product-btn {
   display: flex;
   align-items: center;

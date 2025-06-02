@@ -14,6 +14,7 @@ import Reports from "./Admin/GenUserReport/Reports";
 import Billing from "./Admin/Billing/Billing";
 import RecentBills from "./Admin/Billing/RecentBills";
 
+
 import Login from "./LogSin/Login";
 import SignUp from "./LogSin/SignUp";
 import AddProducts from "./Admin/AdminProducts/AddProducts";
@@ -26,7 +27,8 @@ import ViewCustormers from "./Admin/Customers/ViewCustormers";
 import ViewStocks from "./Admin/homepage/Stockmaintainance/ViewStocks";
 import ScrollToTop from "./ScrollToTop";
 import EmployeeHistory from "./Admin/Employees/EmployeeHistory";
-import ViewLowStock from "./Admin/homepage/LowStocksProducts/ViewLowStock";
+import ViewProductsDetails from "./Admin/homepage/ProductDetails/ViewProductsDetails";
+import ViewDailySales from "./Admin/homepage/Dailysales/ViewDailySales";
 const App = () => {
   return (
     <Router>
@@ -35,7 +37,6 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-
         <Route path="/adnavbar" element={<Adnavbar />} />
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/adhome" element={<AdminHome />} />
@@ -58,7 +59,8 @@ const App = () => {
         <Route path="/adreports" element={<AdminReports />} />
         <Route path="/stockmaintain" element={<ViewStocks />} />
         <Route path="/employeehistory" element={<EmployeeHistory />} />
-        <Route path="/viewlowstockproduct" element={<ViewLowStock />} />
+        <Route path="/viewproductdetails" element={<ViewProductsDetails />} />
+        <Route path="/viewdailysales" element={<ViewDailySales />} />
       </Routes>
     </Router>
   );
