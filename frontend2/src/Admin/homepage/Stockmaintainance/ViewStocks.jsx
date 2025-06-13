@@ -124,7 +124,7 @@ export default function ViewStocks() {
 
   const handlelowstockview = (item) => {
     console.log(item);
-    navigate("/viewlowstockproduct", {
+    navigate("/viewproductdetails", {
       state: {
         user,
         orders,
@@ -167,7 +167,7 @@ export default function ViewStocks() {
               </h1>
               <p className="subtitle">Manage and monitor product stocks</p>
             </div>
-            <h2>Low Products Stock - {lowstock}</h2>
+            <h2 className="vs-low-stock-header">Low Products Stock - {lowstock}</h2>
             <div className="admin-info">
               <button className="logout-btn" onClick={handleLogout}>
                 <FiLogOut /> Logout

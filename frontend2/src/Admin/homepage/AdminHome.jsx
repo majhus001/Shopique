@@ -37,7 +37,7 @@ const AdminHome = () => {
   const [lowstockitems, setLowstockItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
- 
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -56,9 +56,13 @@ const AdminHome = () => {
 
       const userId = response.data.user.userId;
       const userRes = await axios.get(
-        `${API_BASE_URL}/api/auth/fetch/${userId}`
+        `${API_BASE_URL}/api/auth/fetch/${userId}`,
+        {
+          withCredentials: true,
+        }
       );
       setUser(userRes.data.data);
+      await fetchOrderData();
     } catch (error) {
       console.error("Error fetching user:", error);
       navigate("/login");
@@ -72,7 +76,10 @@ const AdminHome = () => {
     try {
       setLoading(true);
       const OrdersRes = await axios.get(
-        `${API_BASE_URL}/api/admin/pendingorders`
+        `${API_BASE_URL}/api/admin/pendingorders`,
+        {
+          withCredentials: true,
+        }
       );
       setOrders(OrdersRes.data);
       setUsersPendingOrder(
@@ -87,7 +94,6 @@ const AdminHome = () => {
 
   useEffect(() => {
     fetchUserData();
-    fetchOrderData();
   }, []);
 
   // Fetch other required data
@@ -103,16 +109,27 @@ const AdminHome = () => {
           productsRes,
           dailysalesRes,
         ] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/admin/userdata`),
-          axios.get(`${API_BASE_URL}/api/customers/fetch`),
-          axios.get(`${API_BASE_URL}/api/employees/fetch`),
-          axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`),
-          axios.get(`${API_BASE_URL}/api/products/fetchAll`),
-          axios.get(`${API_BASE_URL}/api/dailysales/fetch`),
+          axios.get(`${API_BASE_URL}/api/admin/userdata`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/customers/fetch`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/employees/fetch`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/user/reactivity/fetch`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/products/fetchAll`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/dailysales/fetch`, {
+            withCredentials: true,
+          }),
         ]);
 
         const products = productsRes.data.data;
-
         const lowStockItems = products.filter((item) => item.stock <= 50);
 
         setLowstockItems(lowStockItems);
@@ -124,6 +141,7 @@ const AdminHome = () => {
         setDailysalesRes(dailysalesRes.data.data);
       } catch (err) {
         console.error("Error fetching additional data:", err);
+        // Consider adding error state handling here
       } finally {
         setLoading(false);
       }
@@ -149,7 +167,7 @@ const AdminHome = () => {
   };
 
   const handleUsemanclk = () =>
-    navigate("/userman", { state: { user, orders} });
+    navigate("/userman", { state: { user, orders } });
   const handlecustomersclk = () =>
     navigate("/customers", { state: { user, orders } });
   const handlemployeesclk = () =>
@@ -205,7 +223,7 @@ const AdminHome = () => {
         dailysales,
       },
     });
-  }
+  };
 
   return (
     <div style={{ cursor: loading ? "wait" : "default" }}>
@@ -464,9 +482,7 @@ const AdminHome = () => {
                         <span>
                           {new Date(item.soldAt).toLocaleDateString()}
                         </span>
-                        <span>
-                          {item.billNumber}
-                        </span>
+                        <span>{item.billNumber}</span>
                       </div>
                     </li>
                   ))}

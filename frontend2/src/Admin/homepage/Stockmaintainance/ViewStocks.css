@@ -20,6 +20,10 @@
   background-color: #f3f3f3;
 }
 
+.vs-low-stock-header{
+  color: #fff;
+}
+
 .section-header-box{
     display: flex;
     justify-content: space-around;
