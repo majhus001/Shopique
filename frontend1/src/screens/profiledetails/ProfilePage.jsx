@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
-import Sidebar from "../sidebar/sidebar";
+import Sidebar from "../sidebar/Sidebar";
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -24,6 +24,22 @@ const ProfilePage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
 
+  useEffect(() => {
+  const fetchUpdatedUser = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/auth/fetch/${user._id}`);
+      if (response.data.success) {
+        console.log(response.data.data)
+        setUserDetails(response.data.data); 
+      }
+    } catch (error) {
+      console.log("Error fetching updated user:", error);
+    }
+  };
+
+  fetchUpdatedUser();
+}, [user._id]); 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -36,7 +52,7 @@ const ProfilePage = () => {
       const digitsOnly = value.replace(/\D/g, "");
       if (digitsOnly.length <= 6) {
         setUserDetails((prev) => {
-          const updatedDetails = { ...prev, [name]: digitsOnly };
+          const updatedDetails = { ...prev, [name]: digitsOnly || null }; // Send null if empty
 
           if (digitsOnly.length === 6) {
             getCoordinates(digitsOnly).then((coordinates) => {
@@ -64,7 +80,7 @@ const ProfilePage = () => {
   };
 
   const toggleEdit = () => {
-    console.log("edit")
+    console.log("edit");
     setIsEditing(!isEditing);
   };
 
@@ -104,7 +120,7 @@ const ProfilePage = () => {
       <div className="usprof-nav">
         <Navbar user={user} />
       </div>
-      
+
       <div className="usprof-main">
         {/* Sidebar */}
         <Sidebar user={user} />
@@ -112,9 +128,12 @@ const ProfilePage = () => {
         {/* Profile Content */}
         <div className="usprof-content">
           <div className="usprof-header">
-            <h2 className="usprof-title">{isEditing ? "Edit Profile" : "My Profile"}</h2>
-            <button 
-              className={`usprof-edit-btn ${isEditing ? 'usprof-cancel' : ''}`} 
+            <h2 className="usprof-title">
+              {isEditing ? "Edit Profile" : "My Profile"}
+            </h2>
+            
+            <button
+              className={`usprof-edit-btn ${isEditing ? "usprof-cancel" : ""}`}
               onClick={toggleEdit}
             >
               {isEditing ? (
@@ -132,12 +151,20 @@ const ProfilePage = () => {
           <div className="usprof-details-container">
             <div className="usprof-image-section">
               <div className="usprof-image-wrapper">
-                <img src={userDetails.image} alt="Profile" className="usprof-profile-img" />
+                <img
+                  src={userDetails.image}
+                  alt="Profile"
+                  className="usprof-profile-img"
+                />
+              </div>
                 {isEditing && (
                   <div className="usprof-image-upload">
-                    <label htmlFor="profile-image" className="usprof-upload-label">
+                    <label
+                      htmlFor="profile-image"
+                      className="usprof-upload-label"
+                    >
                       <i className="fas fa-camera"></i> Change Photo
-                    </label>
+                    </label>  
                     <input
                       id="profile-image"
                       type="file"
@@ -147,7 +174,6 @@ const ProfilePage = () => {
                     />
                   </div>
                 )}
-              </div>
             </div>
 
             <div className="usprof-form-section">

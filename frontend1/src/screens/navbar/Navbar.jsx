@@ -11,7 +11,6 @@ export default function Navbar({ user, pageno = null }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [cartlength, setCartLength] = useState(0);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
 
   const debounceTimeout = useRef(null);
@@ -28,10 +27,11 @@ export default function Navbar({ user, pageno = null }) {
   }, [user, pageno]);
 
   useEffect(() => {
-    // Fetch all products once when component mounts
     const fetchAllProducts = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/products/fetchAll`
+        );
         if (response.data.success) {
           setAllProducts(response.data.data || []);
         }
@@ -98,36 +98,33 @@ export default function Navbar({ user, pageno = null }) {
     }
 
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = allProducts.filter(product => 
-      product.name.toLowerCase().includes(lowerCaseQuery) ||
-      (product.description && product.description.toLowerCase().includes(lowerCaseQuery)) ||
-      (product.category && product.category.toLowerCase().includes(lowerCaseQuery)) ||
-      (product.subCategory && product.subCategory.toLowerCase().includes(lowerCaseQuery))
+    const filtered = allProducts.filter(
+      (product) =>
+        product.name.toLowerCase().includes(lowerCaseQuery) ||
+        (product.description &&
+          product.description.toLowerCase().includes(lowerCaseQuery)) ||
+        (product.category &&
+          product.category.toLowerCase().includes(lowerCaseQuery)) ||
+        (product.subCategory &&
+          product.subCategory.toLowerCase().includes(lowerCaseQuery))
     );
 
-    setSearchResults(filtered.slice(0, 5)); // Show top 5 results
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setSearchResults(filtered.slice(0, 5));
   };
 
   const handleProductClick = (product) => {
-    // Find all products in the same category as the clicked product
     const categoryProducts = allProducts.filter(
-      p => p.category === product.category
+      (p) => p.category === product.category
     );
 
-    console.log(product.category)
     navigate("/seprodlist", {
-      state: { 
-        user, 
+      state: {
+        user,
         categoryData: categoryProducts,
-        clickedProduct: product 
-      }
+        clickedProduct: product,
+      },
     });
-    
-    // Reset search
+
     setSearchQuery("");
     setSearchResults([]);
   };
@@ -135,15 +132,112 @@ export default function Navbar({ user, pageno = null }) {
   return (
     <>
       <nav className="hm-navbar">
-        <div className="nav-logo" onClick={() => navigate("/home", { state: { user } })}>
-          <h2>ShopiQue</h2>
-        </div>
+        {/* Mobile header row */}
+        <div className="mobile-header-row">
+          <button
+            className="mobile-menu-toggle"
+            onClick={() => {
+              /* Your other menu functionality here */
+            }}
+            aria-label="Menu"
+          >
+            <i className="fas fa-bars"></i>
+          </button>
+          <div className="nav-logo-nav-actions">
+            <div
+              className="nav-logo"
+              onClick={() => navigate("/home", { state: { user } })}
+            >
+              <h2>ShopiQue</h2>
+            </div>
 
-        <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
-          <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
-        </div>
+            <div className="mobile-nav-actions">
+              {!isOrderPage && (
+                <button
+                  className="nav-btns cart-btn"
+                  onClick={() => navigate("/cart", { state: { user } })}
+                  aria-label="Cart"
+                >
+                  <i className="fas fa-shopping-cart"></i>
+                  {cartlength > 0 && (
+                    <span className="cart-pro-num">{cartlength}</span>
+                  )}
+                </button>
+              )}
 
-        <div className={`nav-content ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+              {isLoggedIn ? (
+                <button
+                  className="nav-btns profile-btn"
+                  onClick={() => navigate("/profilepage", { state: { user } })}
+                  aria-label="Profile"
+                >
+                  <i className="fas fa-user"></i>
+                  <span>{user.username}</span>
+                </button>
+              ) : (
+                <button
+                  className="nav-btns login-btn"
+                  onClick={() => navigate("/login")}
+                  aria-label="Login"
+                >
+                  <i className="fas fa-user"></i>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* Search bar - always visible in mobile */}
+        {!isOrderPage && (
+          <div className="mobile-search-container">
+            <div className="nav-search-bar" ref={searchRef}>
+              <input
+                type="text"
+                placeholder="Search for products..."
+                className="nav-searchbar"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+
+              {searchResults.length > 0 && (
+                <div className="search-results-dropdown">
+                  {searchResults.map((product) => (
+                    <div
+                      key={product._id}
+                      className="search-result-item"
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <img
+                        src={product.images?.[0] || ""}
+                        alt={product.name}
+                        onError={(e) => {
+                          e.target.src = "";
+                          e.target.alt = "Image not available";
+                        }}
+                      />
+                      <div>
+                        <p>{product.name}</p>
+                        <span>
+                          {product.offerPrice
+                            ? `₹${product.offerPrice}`
+                            : `₹${product.price}`}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Desktop layout */}
+        <div className="desktop-content">
+          <div
+            className="nav-logo"
+            onClick={() => navigate("/home", { state: { user } })}
+          >
+            <h2>ShopiQue</h2>
+          </div>
           {!isOrderPage && (
             <div className="nav-search-bar" ref={searchRef}>
               <input
@@ -153,7 +247,7 @@ export default function Navbar({ user, pageno = null }) {
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
-              
+
               {searchResults.length > 0 && (
                 <div className="search-results-dropdown">
                   {searchResults.map((product) => (
@@ -162,20 +256,20 @@ export default function Navbar({ user, pageno = null }) {
                       className="search-result-item"
                       onClick={() => handleProductClick(product)}
                     >
-                      <img 
-                        src={product.images?.[0] || ''} 
+                      <img
+                        src={product.images?.[0] || ""}
                         alt={product.name}
                         onError={(e) => {
-                          e.target.src = '';
-                          e.target.alt = 'Image not available';
+                          e.target.src = "";
+                          e.target.alt = "Image not available";
                         }}
                       />
                       <div>
                         <p>{product.name}</p>
                         <span>
-                          {product.offerPrice ? 
-                            `₹${product.offerPrice}` : 
-                            `₹${product.price}`}
+                          {product.offerPrice
+                            ? `₹${product.offerPrice}`
+                            : `₹${product.price}`}
                         </span>
                       </div>
                     </div>
@@ -208,8 +302,8 @@ export default function Navbar({ user, pageno = null }) {
                 <span className="btn-text">{user.username}</span>
               </button>
             ) : (
-              <button 
-                className="nav-btns login-btn" 
+              <button
+                className="nav-btns login-btn"
                 onClick={() => navigate("/login")}
               >
                 <i className="fas fa-user"></i>
@@ -219,9 +313,6 @@ export default function Navbar({ user, pageno = null }) {
           </div>
         </div>
       </nav>
-      {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={toggleMobileMenu}></div>
-      )}
     </>
   );
 }

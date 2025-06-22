@@ -6,19 +6,21 @@ require("dotenv").config();
 const User = require("./models/userschema");
 const Employee = require("./models/EmployeeSchema");
 const jwt = require("jsonwebtoken");
-const AdminEmail = require("./Admin/AdminEmail")
+const AdminEmail = require("./Admin/AdminEmail");
 
 const router = express.Router();
 
 SECRET_KEY = process.env.JWT_SECRET;
 
 const verifyToken = (req, res, next) => {
-  const token = req.cookies.token; 
+  const token = req.cookies.token;
   if (!token) {
     console.log("false");
-    return res.status(401).json({ success: false, message: "Access denied. No token provided." });
+    return res
+      .status(401)
+      .json({ success: false, message: "Access denied. No token provided." });
   }
-  
+
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     req.user = decoded;
@@ -29,7 +31,7 @@ const verifyToken = (req, res, next) => {
 };
 
 router.get("/checkvaliduser", verifyToken, (req, res) => {
-  res.json({ success:true, message: "User is valid", user: req.user });
+  res.json({ success: true, message: "User is valid", user: req.user });
 });
 
 router.post("/signup", async (req, res) => {
@@ -128,9 +130,9 @@ router.post("/login", async (req, res) => {
     const role = user.email === AdminEmail ? "Admin" : "User";
 
     res.cookie("token", token, {
-      httpOnly: true, 
-      secure: true, 
-      sameSite: "none", 
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
     });
 
     res.status(200).json({
@@ -154,7 +156,7 @@ router.post("/employee/login", async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: "Email and password are required"
+      message: "Email and password are required",
     });
   }
 
@@ -164,22 +166,22 @@ router.post("/employee/login", async (req, res) => {
     if (!employee || employee.password !== password) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid email or password",
       });
     }
 
     // Check if employee is active
-    if (employee.status !== 'Active') {
+    if (employee.status !== "Active") {
       return res.status(403).json({
         success: false,
-        message: `Your account is currently ${employee.status.toLowerCase()}. Please contact the administrator.`
+        message: `Your account is currently ${employee.status.toLowerCase()}. Please contact the administrator.`,
       });
     }
 
     employee.attendance.push({
-      date: new Date(), 
-      status: 'Present', 
-      checkIn: new Date()
+      date: new Date(),
+      status: "Present",
+      checkIn: new Date(),
     });
     await employee.save();
 
@@ -191,7 +193,7 @@ router.post("/employee/login", async (req, res) => {
         email: employee.email,
         position: employee.position,
         department: employee.department,
-        role: "Employee"
+        role: "Employee",
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
@@ -203,7 +205,7 @@ router.post("/employee/login", async (req, res) => {
       secure: true,
       sameSite: "none",
     });
-     
+
     // Return success response
     res.status(200).json({
       success: true,
@@ -214,21 +216,25 @@ router.post("/employee/login", async (req, res) => {
         email: employee.email,
         position: employee.position,
         department: employee.department,
-        role: "Employee"
-      }
+        role: "Employee",
+      },
     });
   } catch (error) {
     console.error("Error during employee login:", error);
     res.status(500).json({
       success: false,
-      message: "An error occurred. Please try again."
+      message: "An error occurred. Please try again.",
     });
   }
 });
 
 router.post("/logout", (req, res) => {
-  console.log("logingg out")
-  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
+  console.log("logingg out");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Strict",
+  });
   res.json({ success: true, message: "Logged out successfully!" });
 });
 
@@ -240,11 +246,13 @@ router.post("/employee/logout/:empId", async (req, res) => {
 
     const employee = await Employee.findById(employeeId);
     if (!employee) {
-      return res.status(404).json({ success: false, message: "Employee not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employee not found" });
     }
 
-    console.log("before ",employee);
-    const attendanceToday = employee.attendance.find(att => {
+    console.log("before ", employee);
+    const attendanceToday = employee.attendance.find((att) => {
       const attDate = new Date(att.date);
       attDate.setHours(0, 0, 0, 0);
       return attDate.getTime() === today.getTime();
@@ -255,10 +263,11 @@ router.post("/employee/logout/:empId", async (req, res) => {
 
       // Optional: Calculate working hours if checkIn is available
       if (attendanceToday.checkIn) {
-        const hours = (attendanceToday.checkOut - attendanceToday.checkIn) / (1000 * 60 * 60);
+        const hours =
+          (attendanceToday.checkOut - attendanceToday.checkIn) /
+          (1000 * 60 * 60);
         attendanceToday.workingHours = Math.round(hours * 100) / 100;
       }
-
     } else {
       // If no attendance exists for today, create a new record (optional)
       employee.attendance.push({
@@ -268,14 +277,23 @@ router.post("/employee/logout/:empId", async (req, res) => {
         workingHours: 0,
       });
     }
-    console.log(employee)
+    console.log(employee);
     await employee.save();
-    res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
-    console.log("log")
-    res.json({ success: true, message: "Logged out successfully and attendance updated!" });
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+    });
+    console.log("log");
+    res.json({
+      success: true,
+      message: "Logged out successfully and attendance updated!",
+    });
   } catch (error) {
     console.error("Logout error:", error);
-    res.status(500).json({ success: false, message: "Server error during logout" });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error during logout" });
   }
 });
 
@@ -289,7 +307,11 @@ router.get("/fetch/:userId", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ success:true, message: "User fetched successfully", data: user });
+    res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      data: user,
+    });
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Server error", error });
@@ -326,6 +348,7 @@ const upload = multer({ storage });
 
 router.put("/update/:userId", upload.single("image"), async (req, res) => {
   try {
+    console.log("llll");
     const userId = req.params.userId;
     const { name, email, password, mobile, address, pincode } = req.body;
 
@@ -335,12 +358,17 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (name) user.username = name;
-    if (email) user.email = email;
-    if (password) user.password = password;
-    if (mobile) user.mobile = mobile;
-    if (address) user.address = address;
-    if (pincode) user.pincode = pincode;
+    // Update fields only if they exist in req.body
+    if (name !== undefined) user.username = name;
+    if (email !== undefined) user.email = email;
+    if (password !== undefined) user.password = password;
+    if (mobile !== undefined) user.mobile = mobile;
+    if (address !== undefined) user.address = address;
+    if (pincode !== undefined) {
+      // Convert empty string to null for pincode
+      user.pincode =
+        pincode === "" || pincode === "null" ? null : Number(pincode);
+    }
 
     if (req.file) {
       const file = req.file;
@@ -352,17 +380,17 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
 
           user.image = cloudResult.secure_url;
           const updatedUser = await user.save();
-          console.log("updated");
 
+          console.log("profile updated....");
           res.status(200).json({
             message: "User details updated successfully",
             user: updatedUser,
           });
         })
-        .end(file.buffer); // Upload the file to Cloudinary
+        .end(file.buffer);
     } else {
-      // If no image is provided, save without changing the image
       const updatedUser = await user.save();
+      console.log("profile updated....");
       res.status(200).json({
         success: true,
         message: "User details updated successfully",
@@ -375,54 +403,57 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
   }
 });
 
-router.put("/employees/update/:userId", upload.single("image"), async (req, res) => {
-  try {
-    console.log(req.params.userId)
-    console.log(req.body)
-    const userId = req.params.userId;
-    const { name, email, password, mobile, address } = req.body;
+router.put(
+  "/employees/update/:userId",
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      console.log(req.params.userId);
+      console.log(req.body);
+      const userId = req.params.userId;
+      const { name, email, password, mobile, address } = req.body;
 
-    const employee = await Employee.findById(userId);
+      const employee = await Employee.findById(userId);
 
-    if (!employee) {
-      return res.status(404).json({ message: "User not found" });
-    }
+      if (!employee) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-    if (name) employee.fullName = name;
-    if (email) employee.email = email;
-    if (password) employee.password = password;
-    if (mobile) employee.phone = mobile;
-    if (address) employee.address = address;
+      if (name) employee.fullName = name;
+      if (email) employee.email = email;
+      if (password) employee.password = password;
+      if (mobile) employee.phone = mobile;
+      if (address) employee.address = address;
 
-    if (req.file) {
-      const file = req.file;
+      if (req.file) {
+        const file = req.file;
 
-      const cloudinaryResult = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "Users" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(file.buffer);
+        const cloudinaryResult = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "Users" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+
+        employee.image = cloudinaryResult.secure_url;
+      }
+
+      const updatedEmployee = await employee.save();
+      res.status(200).json({
+        success: true,
+        message: "User details updated successfully",
+        user: updatedEmployee,
       });
-
-      employee.image = cloudinaryResult.secure_url;
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error updating user details" });
     }
-
-    const updatedEmployee = await employee.save();
-    res.status(200).json({
-      success: true,
-      message: "User details updated successfully",
-      user: updatedEmployee,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating user details" });
   }
-});
-
+);
 
 router.delete("/delete/:userId", async (req, res) => {
   try {

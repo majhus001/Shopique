@@ -100,7 +100,9 @@ const HomePage = () => {
 
   return (
     <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
-      <Navbar user={user} />
+      <div className="usprof-nav">
+        <Navbar user={user} />
+      </div>
 
       <div className="main-container">
         <div className="content">
