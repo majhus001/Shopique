@@ -6,39 +6,39 @@ import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
 import Sidebar from "../sidebar/Sidebar";
+import ValidUserData from "../../utils/ValidUserData";
 
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = location.state || {};
-
+  const { user } = location.state || " ";
   const [userDetails, setUserDetails] = useState({
-    image: user.image,
-    username: user.username,
-    email: user.email,
-    password: user.password,
-    mobile: user.mobile,
-    address: user.address,
-    pincode: user.pincode,
+    image: user?.image || " ",
+    username: user?.username || " ",
+    email: user?.email || " ",
+    password: user?.password || " ",
+    mobile: user?.mobile || " ",
+    address: user?.address || " ",
+    pincode: user?.pincode || " ",
   });
-
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-  const fetchUpdatedUser = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/auth/fetch/${user._id}`);
-      if (response.data.success) {
-        console.log(response.data.data)
-        setUserDetails(response.data.data); 
+    console.log("prof")
+    const checkUser = async () => {
+      try {
+        const userData = await ValidUserData();
+        if (userData) {
+          setUserDetails(userData);
+        }
+      } catch (error) {
+        console.error("Error validating user:", error);
+        
       }
-    } catch (error) {
-      console.log("Error fetching updated user:", error);
-    }
-  };
+    };
 
-  fetchUpdatedUser();
-}, [user._id]); 
+    checkUser();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -131,7 +131,7 @@ const ProfilePage = () => {
             <h2 className="usprof-title">
               {isEditing ? "Edit Profile" : "My Profile"}
             </h2>
-            
+
             <button
               className={`usprof-edit-btn ${isEditing ? "usprof-cancel" : ""}`}
               onClick={toggleEdit}
@@ -157,23 +157,23 @@ const ProfilePage = () => {
                   className="usprof-profile-img"
                 />
               </div>
-                {isEditing && (
-                  <div className="usprof-image-upload">
-                    <label
-                      htmlFor="profile-image"
-                      className="usprof-upload-label"
-                    >
-                      <i className="fas fa-camera"></i> Change Photo
-                    </label>  
-                    <input
-                      id="profile-image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="usprof-file-input"
-                    />
-                  </div>
-                )}
+              {isEditing && (
+                <div className="usprof-image-upload">
+                  <label
+                    htmlFor="profile-image"
+                    className="usprof-upload-label"
+                  >
+                    <i className="fas fa-camera"></i> Change Photo
+                  </label>
+                  <input
+                    id="profile-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="usprof-file-input"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="usprof-form-section">

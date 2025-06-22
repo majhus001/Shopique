@@ -6,8 +6,7 @@ import API_BASE_URL from "../../api";
 
 const Sidebar = ({ user }) => {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState(user);
-  const [isActive, setIsActive] = useState(false);
+  const [userDetails, setUserDetails] = useState(user || " ");
 
   useEffect(() => {
     const fetchUpdatedUser = async () => {
@@ -16,7 +15,7 @@ const Sidebar = ({ user }) => {
           `${API_BASE_URL}/api/auth/fetch/${user._id}`
         );
         if (response.data.success) {
-          setUserDetails(response.data.data); 
+          setUserDetails(response.data.data);
         }
       } catch (error) {
         console.log("Error fetching updated user:", error);
@@ -24,31 +23,39 @@ const Sidebar = ({ user }) => {
     };
 
     fetchUpdatedUser();
-  }, [user._id]); // Added user._id as dependency
-
-  const toggleSidebar = () => {
-    setIsActive(!isActive);
-  };
+  }, [user._id]); 
 
   const handleNavigation = (path) => {
     navigate(path, { state: { user: userDetails } });
     setIsActive(false); // Close sidebar after navigation
   };
 
+  const handlelogout = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+      if(response.data.success){
+        console.log(response.data.message)
+        navigate('/home')
+      }
+    } catch {
+      console.log("error on logout")
+    }
+  };
+
   return (
     <>
-      <button className="usprof-sidebar-toggle" onClick={toggleSidebar}>
-        <i className="fas fa-bars"></i>
-      </button>
-
-      <div className={`usprof-sidebar ${isActive ? "active" : ""}`}>
+      <div className="usprof-sidebar">
         <div className="usprof-user-card">
-          <img 
-            src={userDetails.image} 
-            alt="profile" 
-            className="usprof-user-img" 
+          <img
+            src={userDetails.image}
+            alt="profile"
+            className="usprof-user-img"
             onError={(e) => {
-              e.target.onerror = null; 
+              e.target.onerror = null;
               e.target.src = "default-profile-image.png";
             }}
           />
@@ -56,38 +63,35 @@ const Sidebar = ({ user }) => {
         </div>
 
         <nav className="usprof-nav-menu">
-          <button 
-            className="usprof-nav-btn" 
+          <button
+            className="usprof-nav-btn"
             onClick={() => handleNavigation("/profilepage")}
           >
             <i className="usprof-icon fas fa-user"></i>
             <span>Profile</span>
           </button>
-          <button 
-            className="usprof-nav-btn" 
+          <button
+            className="usprof-nav-btn"
             onClick={() => handleNavigation("/wishlist")}
           >
             <i className="usprof-icon fas fa-heart"></i>
             <span>Wishlist</span>
           </button>
-          <button 
-            className="usprof-nav-btn" 
+          <button
+            className="usprof-nav-btn"
             onClick={() => handleNavigation("/myorders")}
           >
             <i className="usprof-icon fas fa-box"></i>
             <span>My Orders</span>
           </button>
-          <button 
-            className="usprof-nav-btn" 
+          <button
+            className="usprof-nav-btn"
             onClick={() => handleNavigation("/settings")}
           >
             <i className="usprof-icon fas fa-cog"></i>
             <span>Settings</span>
           </button>
-          <button 
-            className="usprof-nav-btn" 
-            onClick={() => handleNavigation("/home")}
-          >
+          <button className="usprof-nav-btn" onClick={handlelogout}>
             <i className="usprof-icon fas fa-sign-out-alt"></i>
             <span>Logout</span>
           </button>

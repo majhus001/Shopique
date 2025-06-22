@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./HomeStyle.css";
@@ -8,8 +8,8 @@ import bannerImage2 from "../../assets/banner3.jpeg";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import { FiClock, FiShoppingBag, FiStar, FiChevronRight } from "react-icons/fi";
+import ValidUserData from "../../utils/ValidUserData";
 
-// Utility function to capitalize first letter of each word
 const capitalizeWords = (string) => {
   if (!string) return "";
   return string
@@ -21,7 +21,7 @@ const capitalizeWords = (string) => {
 const HomePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = location.state || {};
+  const [UserData, setUserData] = useState(location.state?.user || null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,39 +35,52 @@ const HomePage = () => {
     seconds: 0,
   });
 
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/products/fetchAll`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.success && Array.isArray(responseData.data)) {
+        setProducts(responseData.data);
+      } else {
+        throw new Error("Invalid data format received from server");
+      }
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError("Failed to load data. Please try again later.");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
+    const initializeUser = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/products/fetchAll`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const responseData = await response.json();
-
-        if (responseData.success && Array.isArray(responseData.data)) {
-          setProducts(responseData.data);
-        } else {
-          throw new Error("Invalid data format received from server");
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load data. Please try again later.");
-        setProducts([]);
-      } finally {
-        setLoading(false);
+        const userData = await ValidUserData();
+        setUserData(prev => JSON.stringify(prev) !== JSON.stringify(userData) ? userData : prev);
+      } catch (error) {
+        console.error("User validation error:", error);
       }
     };
 
-    fetchData();
+    initializeUser();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % bannerImages.length);
-    }, 5000); // Increased interval for better UX
+    }, 5000);
     return () => clearInterval(interval);
   }, [bannerImages.length]);
 
@@ -93,20 +106,16 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Get unique subCategories from products (filter out undefined/null)
-  const subCategories = [
-    ...new Set(products.map((product) => product.subCategory)),
-  ].filter(Boolean);
+  const subCategories = [...new Set(products.map((product) => product.subCategory))].filter(Boolean);
 
   return (
     <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
       <div className="usprof-nav">
-        <Navbar user={user} />
+        <Navbar user={UserData} />
       </div>
 
       <div className="main-container">
         <div className="content">
-          {/* Hero Section */}
           <section className="hero-section">
             <div className="hero-banner">
               <AnimatePresence mode="wait">
@@ -147,6 +156,7 @@ const HomePage = () => {
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.6 }}
                       className="shop-now-btn"
+                      onClick={() => navigate('/products')}
                     >
                       Shop Now
                     </motion.button>
@@ -158,9 +168,7 @@ const HomePage = () => {
                 {bannerImages.map((_, index) => (
                   <button
                     key={index}
-                    className={`indicator ${
-                      index === currentImage ? "active" : ""
-                    }`}
+                    className={`indicator ${index === currentImage ? "active" : ""}`}
                     onClick={() => setCurrentImage(index)}
                   />
                 ))}
@@ -190,25 +198,23 @@ const HomePage = () => {
                   <span className="timer-label">Seconds</span>
                 </div>
               </div>
-              <button className="deal-btn">
+              <button className="deal-btn" onClick={() => navigate('/products')}>
                 <FiShoppingBag className="deal-icon" />
                 Grab the Deal
               </button>
             </div>
           </section>
 
-          {/* Featured Categories */}
           <section className="featured-section">
             <h2 className="section-title">Shop by Category</h2>
             <div className="category-grid">
-              {subCategories.slice(0, 4).map((subCategory, index) => (
+              {subCategories.slice(0, 4).map((subCategory) => (
                 <motion.div
                   key={subCategory}
                   whileHover={{ y: -5 }}
                   className="category-card"
                 >
                   <div className="category-image">
-                    {/* Placeholder for category image - you might want to add actual images */}
                     <div className="category-image-placeholder">
                       {subCategory.charAt(0).toUpperCase()}
                     </div>
@@ -225,12 +231,11 @@ const HomePage = () => {
             </div>
           </section>
 
-          {/* Product Categories by subCategory */}
           <section className="products-section">
             {error && (
               <div className="error-message">
                 <p>{error}</p>
-                <button onClick={() => window.location.reload()}>Retry</button>
+                <button onClick={fetchData}>Retry</button>
               </div>
             )}
 
@@ -271,10 +276,9 @@ const HomePage = () => {
                           transition={{ duration: 0.3 }}
                         >
                           <Link
-                            to={`/prodlist`}
+                            to={`/prodlist/${item._id}`}
                             state={{
-                              user: user,
-                              itemId: item._id,
+                              user: UserData,
                               name: item.name,
                               price: item.price,
                               brand: item.brand,
@@ -300,9 +304,7 @@ const HomePage = () => {
                               {item.offerPrice && (
                                 <div className="discount-badge">
                                   {Math.round(
-                                    ((item.price - item.offerPrice) /
-                                      item.price) *
-                                      100
+                                    ((item.price - item.offerPrice) / item.price) * 100
                                   )}
                                   % OFF
                                 </div>
@@ -347,7 +349,6 @@ const HomePage = () => {
             )}
           </section>
 
-          {/* Newsletter Section */}
           <section className="newsletter-section">
             <div className="newsletter-container">
               <div className="newsletter-content">
@@ -373,69 +374,37 @@ const HomePage = () => {
             <div className="footer-column">
               <h4>Shop</h4>
               <ul>
-                <li>
-                  <Link to="/">All Products</Link>
-                </li>
-                <li>
-                  <Link to="/">Featured</Link>
-                </li>
-                <li>
-                  <Link to="/">New Arrivals</Link>
-                </li>
-                <li>
-                  <Link to="/">Sale Items</Link>
-                </li>
+                <li><Link to="/products">All Products</Link></li>
+                <li><Link to="/products?filter=featured">Featured</Link></li>
+                <li><Link to="/products?filter=new">New Arrivals</Link></li>
+                <li><Link to="/products?filter=sale">Sale Items</Link></li>
               </ul>
             </div>
             <div className="footer-column">
               <h4>Customer Service</h4>
               <ul>
-                <li>
-                  <Link to="/contact">Contact Us</Link>
-                </li>
-                <li>
-                  <Link to="/faq">FAQs</Link>
-                </li>
-                <li>
-                  <Link to="/shipping">Shipping Policy</Link>
-                </li>
-                <li>
-                  <Link to="/returns">Returns & Exchanges</Link>
-                </li>
+                <li><Link to="/contact">Contact Us</Link></li>
+                <li><Link to="/faq">FAQs</Link></li>
+                <li><Link to="/shipping">Shipping Policy</Link></li>
+                <li><Link to="/returns">Returns & Exchanges</Link></li>
               </ul>
             </div>
             <div className="footer-column">
               <h4>About Us</h4>
               <ul>
-                <li>
-                  <Link to="/about">Our Story</Link>
-                </li>
-                <li>
-                  <Link to="/careers">Careers</Link>
-                </li>
-                <li>
-                  <Link to="/blog">Blog</Link>
-                </li>
-                <li>
-                  <Link to="/press">Press</Link>
-                </li>
+                <li><Link to="/about">Our Story</Link></li>
+                <li><Link to="/careers">Careers</Link></li>
+                <li><Link to="/blog">Blog</Link></li>
+                <li><Link to="/press">Press</Link></li>
               </ul>
             </div>
             <div className="footer-column">
               <h4>Connect With Us</h4>
               <div className="social-links">
-                <a href="#">
-                  <i className="fab fa-facebook"></i>
-                </a>
-                <a href="#">
-                  <i className="fab fa-instagram"></i>
-                </a>
-                <a href="#">
-                  <i className="fab fa-twitter"></i>
-                </a>
-                <a href="#">
-                  <i className="fab fa-pinterest"></i>
-                </a>
+                <a href="#"><i className="fab fa-facebook"></i></a>
+                <a href="#"><i className="fab fa-instagram"></i></a>
+                <a href="#"><i className="fab fa-twitter"></i></a>
+                <a href="#"><i className="fab fa-pinterest"></i></a>
               </div>
               <div className="payment-methods">
                 <i className="fab fa-cc-visa"></i>

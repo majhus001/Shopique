@@ -1,7 +1,7 @@
 /* Sidebar Styles */
 .usprof-sidebar {
   width: 280px;
-  background: linear-gradient(135deg, #0082de 0%, #007AFF 100%);
+  background: linear-gradient(135deg, #007AFF 0%, #007AFF 100%);
   color: white;
   padding: 2rem 1rem;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);

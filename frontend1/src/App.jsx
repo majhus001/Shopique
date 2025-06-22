@@ -25,15 +25,17 @@ import Orderdetails from "./screens/Order/Orderdetails";
 import ProfilePage from "./screens/profiledetails/ProfilePage";
 import Orderhistory from "./screens/Order/Orderhistory";
 import Buynow from "./screens/Productscreens/Buynow";
+import ScrollToTop from "./ScrollToTop";
 
 const App = () => {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/navbar" element={<Navbar />} />
-        <Route path="/prodlist" element={<ProductList />} />
+        <Route path="/prodlist/:id" element={<ProductList />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/cart" element={<Cart />} />

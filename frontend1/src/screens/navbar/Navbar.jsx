@@ -1,90 +1,102 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Navbar.css";
 import API_BASE_URL from "../../api";
+import Sidebar from "../sidebar/Sidebar";
+import ValidUserData from "../../utils/ValidUserData";
 
-export default function Navbar({ user, pageno = null }) {
+export default function Navbar({ user: propUser, pageno = null }) {
   const navigate = useNavigate();
+  const [UserData, setUserData] = useState(propUser || null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrderPage, setIsOrderPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [cartlength, setCartLength] = useState(0);
   const [allProducts, setAllProducts] = useState([]);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const debounceTimeout = useRef(null);
   const searchRef = useRef(null);
 
-  useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-
-    setIsOrderPage(pageno === "123");
-  }, [user, pageno]);
-
-  useEffect(() => {
-    const fetchAllProducts = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/products/fetchAll`
-        );
-        if (response.data.success) {
-          setAllProducts(response.data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching all products:", error);
+  // Memoized fetch functions to prevent unnecessary recreations
+  const fetchAllProducts = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
+      if (response.data.success) {
+        setAllProducts(response.data.data || []);
       }
-    };
-
-    fetchAllProducts();
+    } catch (error) {
+      console.error("Error fetching all products:", error);
+    }
   }, []);
 
+  const fetchCartData = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
+        params: { userId: UserData?._id },
+      });
+      if (response.data.success) {
+        setCartLength(response.data.cartItems.length);
+      }
+    } catch (error) {
+      console.error("Error fetching cart data:", error);
+    }
+  }, [UserData?._id]);
+
+  // Check user authentication and fetch data
   useEffect(() => {
-    const fetchCartData = async () => {
+    let isMounted = true;
+
+    const checkUser = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
-          params: { userId: user?._id },
-        });
-        if (response.data.success) {
-          setCartLength(response.data.cartItems.length);
+        const userData = await ValidUserData();
+        if (isMounted) {
+          setUserData(prevUser => {
+            // Only update if the user data has actually changed
+            return JSON.stringify(prevUser) !== JSON.stringify(userData) ? userData : prevUser;
+          });
+          setIsLoggedIn(!!userData);
         }
       } catch (error) {
-        console.error("Error fetching cart data:", error);
+        if (isMounted) {
+          setIsLoggedIn(false);
+        }
+        console.error("Error validating user:", error);
       }
     };
 
-    if (user) {
+    if (!propUser) {
+      checkUser();
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [propUser]);
+
+  // Fetch products and cart data
+  useEffect(() => {
+    fetchAllProducts();
+    if (UserData) {
       fetchCartData();
     }
-  }, [user]);
+  }, [UserData, fetchAllProducts, fetchCartData]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setSearchResults([]);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
+  // Debounced search handler
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
+    const value = e.target.value;
+    setSearchQuery(value);
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
     debounceTimeout.current = setTimeout(() => {
-      if (e.target.value.trim().length > 0) {
-        filterProducts(e.target.value.trim());
+      if (value.trim().length > 0) {
+        filterProducts(value.trim());
       } else {
         setSearchResults([]);
       }
@@ -113,13 +125,14 @@ export default function Navbar({ user, pageno = null }) {
   };
 
   const handleProductClick = (product) => {
+    console.log(product)
     const categoryProducts = allProducts.filter(
       (p) => p.category === product.category
     );
 
     navigate("/seprodlist", {
       state: {
-        user,
+        user: UserData,
         categoryData: categoryProducts,
         clickedProduct: product,
       },
@@ -129,24 +142,34 @@ export default function Navbar({ user, pageno = null }) {
     setSearchResults([]);
   };
 
+  const handlesidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
-    <>
+    <div>
       <nav className="hm-navbar">
         {/* Mobile header row */}
         <div className="mobile-header-row">
           <button
             className="mobile-menu-toggle"
-            onClick={() => {
-              /* Your other menu functionality here */
-            }}
+            onClick={handlesidebar}
             aria-label="Menu"
           >
-            <i className="fas fa-bars"></i>
+            {sidebarOpen ? (
+              <i className="fas fa-times"></i>
+            ) : (
+              <i className="fas fa-bars"></i>
+            )}
           </button>
           <div className="nav-logo-nav-actions">
             <div
               className="nav-logo"
-              onClick={() => navigate("/home", { state: { user } })}
+              onClick={() => navigate("/home", { state: { user: UserData } })}
             >
               <h2>ShopiQue</h2>
             </div>
@@ -155,7 +178,9 @@ export default function Navbar({ user, pageno = null }) {
               {!isOrderPage && (
                 <button
                   className="nav-btns cart-btn"
-                  onClick={() => navigate("/cart", { state: { user } })}
+                  onClick={() =>
+                    navigate("/cart", { state: { user: UserData } })
+                  }
                   aria-label="Cart"
                 >
                   <i className="fas fa-shopping-cart"></i>
@@ -168,19 +193,22 @@ export default function Navbar({ user, pageno = null }) {
               {isLoggedIn ? (
                 <button
                   className="nav-btns profile-btn"
-                  onClick={() => navigate("/profilepage", { state: { user } })}
+                  onClick={() =>
+                    navigate("/profilepage", { state: { user: UserData } })
+                  }
                   aria-label="Profile"
                 >
                   <i className="fas fa-user"></i>
-                  <span>{user.username}</span>
+                  <span>{UserData?.username || " "}</span>
                 </button>
               ) : (
                 <button
-                  className="nav-btns login-btn"
+                  className="nav-btns profile-btn"
                   onClick={() => navigate("/login")}
                   aria-label="Login"
                 >
                   <i className="fas fa-user"></i>
+                  <span>Login</span>
                 </button>
               )}
             </div>
@@ -234,7 +262,7 @@ export default function Navbar({ user, pageno = null }) {
         <div className="desktop-content">
           <div
             className="nav-logo"
-            onClick={() => navigate("/home", { state: { user } })}
+            onClick={() => navigate("/home", { state: { user: UserData } })}
           >
             <h2>ShopiQue</h2>
           </div>
@@ -283,7 +311,7 @@ export default function Navbar({ user, pageno = null }) {
             {!isOrderPage && (
               <button
                 className="nav-btns cart-btn"
-                onClick={() => navigate("/cart", { state: { user } })}
+                onClick={() => navigate("/cart", { state: { user: UserData } })}
               >
                 <i className="fas fa-shopping-cart"></i>
                 <span className="btn-text">Cart</span>
@@ -296,10 +324,12 @@ export default function Navbar({ user, pageno = null }) {
             {isLoggedIn ? (
               <button
                 className="nav-btns profile-btn"
-                onClick={() => navigate("/profilepage", { state: { user } })}
+                onClick={() =>
+                  navigate("/profilepage", { state: { user: UserData } })
+                }
               >
                 <i className="fas fa-user"></i>
-                <span className="btn-text">{user.username}</span>
+                <span className="btn-text">{UserData?.username}</span>
               </button>
             ) : (
               <button
@@ -313,6 +343,14 @@ export default function Navbar({ user, pageno = null }) {
           </div>
         </div>
       </nav>
-    </>
+      {sidebarOpen && (
+        <div
+          className={`nav-sidebar-cont ${sidebarOpen ? "sidebar-open" : ""}`}
+          onClick={closeSidebar}
+        >
+          <Sidebar user={UserData} />
+        </div>
+      )}
+    </div>
   );
 }
