@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
+import Sidebar from "../sidebar/sidebar";
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -23,17 +24,16 @@ const ProfilePage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "mobile") {
-      const digitsOnly = value.replace(/\D/g, ""); // Only digits
+      const digitsOnly = value.replace(/\D/g, "");
       if (digitsOnly.length <= 10) {
         setUserDetails((prev) => ({ ...prev, [name]: digitsOnly }));
       }
     } else if (name === "pincode") {
-      const digitsOnly = value.replace(/\D/g, ""); // Only digits
+      const digitsOnly = value.replace(/\D/g, "");
       if (digitsOnly.length <= 6) {
         setUserDetails((prev) => {
           const updatedDetails = { ...prev, [name]: digitsOnly };
@@ -56,7 +56,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Handle image change
   const handleImageChange = (e) => {
     setUserDetails({
       ...userDetails,
@@ -64,16 +63,14 @@ const ProfilePage = () => {
     });
   };
 
-  // Toggle edit/save mode
   const toggleEdit = () => {
+    console.log("edit")
     setIsEditing(!isEditing);
   };
 
-  // Save user details
   const saveDetails = async () => {
     try {
       const formData = new FormData();
-
       formData.append("name", userDetails.username);
       formData.append("email", userDetails.email);
       formData.append("password", userDetails.password);
@@ -81,20 +78,17 @@ const ProfilePage = () => {
       formData.append("address", userDetails.address);
       formData.append("pincode", userDetails.pincode);
 
-      // If the user has selected a new image, append it to the FormData
       const imageFile = document.querySelector('input[type="file"]')?.files[0];
       if (imageFile) {
         formData.append("image", imageFile);
       }
 
-      // Send the form data to the server using Axios PUT request
       const response = await axios.put(
         `${API_BASE_URL}/api/auth/update/${user._id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      // Handle response from the server
       if (response.status === 200) {
         alert("Profile updated successfully");
         console.log("User details updated successfully:", response.data);
@@ -105,168 +99,148 @@ const ProfilePage = () => {
     }
   };
 
-  const handleOnClickprofile = () => {
-    navigate("/profilepage", { state: { user } });
-  };
-  const handleOnClickwhishlist = () => {
-    navigate("/profilepage", { state: { user } });
-  };
-  const handleOnClickorders = () => {
-    navigate("/myorders", { state: { user } });
-  };
-  const handleOnClicksettings = () => {
-    navigate("/myorders", { state: { user } });
-  };
-  const handleOnClicklogout = () => {
-    navigate("/home");
-  };
-
   return (
-    <div>
-      <div className="prof-nav">
+    <div className="usprof-container">
+      <div className="usprof-nav">
         <Navbar user={user} />
       </div>
-      {/* Sidebar */}
-      <div className="prof-cont">
-        <div className="user-prof-sidebar">
-          <div className="ad-sb-img-cont">
-            <img src={userDetails.image} alt="admin" className="ad-sb-img" />
-            <h4 className="ad-sb-username">{userDetails.username}</h4>
-          </div>
-          <div className="ad-sb-list-cont">
-            <ul className="ad-sb-list-items">
-              <li>
-                <button className="ad-sb-btns" onClick={handleOnClickprofile}>
-                  Profile
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOnClickwhishlist}>
-                  Whislist
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOnClickorders}>
-                  My Orders
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOnClicksettings}>
-                  Settings
-                </button>
-              </li>
-              <li>
-                <button className="ad-sb-btns" onClick={handleOnClicklogout}>
-                  Logout
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
+      
+      <div className="usprof-main">
+        {/* Sidebar */}
+        <Sidebar user={user} />
 
-        {/* Profile Page Content */}
-        <div className="profile-page">
-          <div className="profile-header">
-            <h2>{isEditing ? "Edit Profile" : "View Profile"}</h2>
-            <button className="edit-button" onClick={toggleEdit}>
-              {isEditing ? "Cancel" : "Edit"}
+        {/* Profile Content */}
+        <div className="usprof-content">
+          <div className="usprof-header">
+            <h2 className="usprof-title">{isEditing ? "Edit Profile" : "My Profile"}</h2>
+            <button 
+              className={`usprof-edit-btn ${isEditing ? 'usprof-cancel' : ''}`} 
+              onClick={toggleEdit}
+            >
+              {isEditing ? (
+                <>
+                  <i className="fas fa-times"></i> Cancel
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-edit"></i> Edit
+                </>
+              )}
             </button>
           </div>
 
-          <div className="profile-content">
-            <div className="profile-image">
-              <img src={userDetails.image} alt="Profile" />
+          <div className="usprof-details-container">
+            <div className="usprof-image-section">
+              <div className="usprof-image-wrapper">
+                <img src={userDetails.image} alt="Profile" className="usprof-profile-img" />
+                {isEditing && (
+                  <div className="usprof-image-upload">
+                    <label htmlFor="profile-image" className="usprof-upload-label">
+                      <i className="fas fa-camera"></i> Change Photo
+                    </label>
+                    <input
+                      id="profile-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="usprof-file-input"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="usprof-form-section">
+              <div className="usprof-form-grid">
+                <div className="usprof-form-group">
+                  <label className="usprof-form-label">Full Name</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={userDetails.username}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="usprof-form-input"
+                  />
+                </div>
+
+                <div className="usprof-form-group">
+                  <label className="usprof-form-label">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={userDetails.email}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="usprof-form-input"
+                  />
+                </div>
+
+                <div className="usprof-form-group">
+                  <label className="usprof-form-label">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={userDetails.password}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="usprof-form-input"
+                  />
+                </div>
+
+                <div className="usprof-form-group">
+                  <label className="usprof-form-label">Mobile Number</label>
+                  <input
+                    type="text"
+                    name="mobile"
+                    value={userDetails.mobile}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    maxLength={10}
+                    pattern="\d*"
+                    inputMode="numeric"
+                    placeholder="Enter 10-digit number"
+                    className="usprof-form-input"
+                  />
+                </div>
+
+                <div className="usprof-form-group">
+                  <label className="usprof-form-label">Pincode</label>
+                  <input
+                    type="text"
+                    name="pincode"
+                    value={userDetails.pincode}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    maxLength={6}
+                    pattern="\d*"
+                    inputMode="numeric"
+                    placeholder="Enter 6-digit Pincode"
+                    className="usprof-form-input"
+                  />
+                </div>
+
+                <div className="usprof-form-group usprof-full-width">
+                  <label className="usprof-form-label">Delivery Address</label>
+                  <textarea
+                    name="address"
+                    value={userDetails.address}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="usprof-form-textarea"
+                    rows="4"
+                  />
+                </div>
+              </div>
+
               {isEditing && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
+                <div className="usprof-action-btns">
+                  <button onClick={saveDetails} className="usprof-save-btn">
+                    <i className="fas fa-save"></i> Save Changes
+                  </button>
+                </div>
               )}
             </div>
-
-            <div className="profile-details">
-              <div className="profile-field">
-                <label>Name:</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={userDetails.username}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                />
-              </div>
-
-              <div className="profile-field">
-                <label>Email:</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={userDetails.email}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                />
-              </div>
-
-              <div className="profile-field">
-                <label>Password:</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={userDetails.password}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                />
-              </div>
-
-              <div className="profile-field">
-                <label>Mobile Number:</label>
-                <input
-                  type="text"
-                  name="mobile"
-                  value={userDetails.mobile}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  maxLength={10}
-                  pattern="\d*"
-                  inputMode="numeric"
-                  placeholder="Enter 10-digit number"
-                />
-              </div>
-
-              <div className="profile-field">
-                <label>Pincode:</label>
-                <input
-                  type="text"
-                  name="pincode"
-                  value={userDetails.pincode}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  maxLength={6}
-                  pattern="\d*"
-                  inputMode="numeric"
-                  placeholder="Enter 6-digit Pincode"
-                />
-              </div>
-
-              <div className="profile-field">
-                <label>Delivery Address:</label>
-                <textarea
-                  name="address"
-                  value={userDetails.address}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                />
-              </div>
-            </div>
-
-            {isEditing && (
-              <div>
-                <button onClick={saveDetails} className="update-btn">
-                  Update Profile
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>

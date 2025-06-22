@@ -1,162 +1,254 @@
-/* Login.css */
-
-/* Outer container for centering */
-.outer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f8f9fc; /* Same clean background */
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
+/* ===== Base Styles ===== */
+.ecom-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #fff;
+  font-family: 'Inter', sans-serif;
+  padding: 20px;
 }
 
-/* Login container styling */
-.lg-container {
-    width: 100%;
-    max-width: 380px;
-    padding: 40px;
-    background: #fff;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    text-align: center;
+/* ===== Glass Card Effect ===== */
+.ecom-login-glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  width: 100%;
+  max-width: 450px;
+  padding: 50px 40px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Heading style */
-.lg-container h2 {
-    font-size: 28px;
-    color: #333;
-    margin-bottom: 30px;
-    font-weight: 600;
+.ecom-login-glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 12px 40px rgba(31, 38, 135, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* Form group styling */
-.lg-input-group {
-    margin-bottom: 20px;
-    text-align: left;
-    width: 100%;
+/* ===== Branding ===== */
+.ecom-login-brand {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.label {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 8px;
-    display: block;
-    font-weight: 500;
+.ecom-login-logo {
+  font-size: 36px;
+  font-weight: 800;
+  color: #2d3748;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
 }
 
-/* Input field styling */
-.input {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    outline: none;
-    transition: all 0.3s ease;
+.ecom-login-logo span {
+  color: #007AFF;
 }
 
-.input:focus {
-    border-color: #6a11cb;
-    box-shadow: 0 0 8px rgba(106, 17, 203, 0.2);
+.ecom-login-tagline {
+  color: #718096;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin: 0;
 }
 
-/* Button styling */
-.lg-button {
-    width: 385px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* ===== Form Styles ===== */
+.ecom-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
-.lg-button:hover {
-    background: linear-gradient(135deg, #2575fc, #6a11cb);
-    box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
+.ecom-form-group {
+  position: relative;
 }
 
-/* Message styling */
-.message {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #dc3545; /* Red color for error messages */
+.ecom-form-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 15px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.3s ease;
 }
 
-/* Signup link styling */
-.signup-link {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #555;
+.ecom-form-input:focus {
+  border-color: #007AFF;
+  outline: none;
 }
 
-.signup-link a {
-    color: #2575fc;
-    text-decoration: none;
-    font-weight: bold;
+.ecom-form-input:focus + .ecom-form-label,
+.ecom-form-input:not(:placeholder-shown) + .ecom-form-label {
+  transform: translateY(-24px) scale(0.9);
+  background: white;
+  padding: 0 6px;
+  color: #007AFF;
 }
 
-.signup-link a:hover {
-    text-decoration: underline;
+.ecom-form-label {
+  position: absolute;
+  left: 15px;
+  top: 16px;
+  color: #a0aec0;
+  font-size: 15px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all 0.3s ease;
 }
 
-/* Spinner styles */
-.loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .spinner {
-    border: 3px solid rgba(255, 255, 255, 0.3); /* Light border */
-    border-top: 3px solid #fff; /* White color for the animated part */
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite;
-  }
-  
-  .loading-text {
-    margin-left: 8px;
-    font-size: 14px;
-  }
-  
-  /* Keyframes for spinner animation */
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* You may already have these, but here’s a basic idea for the login button */
-  .lg-button {
-    background-color: #007BFF;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .lg-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
+.ecom-input-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #007AFF;
+  transition: width 0.3s ease;
+}
 
-/* Responsive Design */
+.ecom-form-input:focus ~ .ecom-input-border {
+  width: 97%;
+  left: 6px;
+  right: 10px;
+}
+
+/* ===== Button Styles ===== */
+.ecom-login-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #079ded 0%, #007AFF 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(107, 70, 193, 0.3);
+}
+
+.ecom-login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 70, 193, 0.4);
+}
+
+.ecom-login-button:active {
+  transform: translateY(0);
+}
+
+.ecom-button-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.ecom-button-hover:hover::before {
+  left: 100%;
+}
+
+/* ===== Loading Animation ===== */
+.ecom-loading-circle {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: ecom-spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes ecom-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Messages ===== */
+.ecom-message {
+  padding: 14px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  animation: ecom-fadeIn 0.3s ease;
+}
+
+.ecom-message-success {
+  background: rgba(72, 187, 120, 0.1);
+  color: #48bb78;
+  border: 1px solid rgba(72, 187, 120, 0.3);
+}
+
+.ecom-message-error {
+  background: rgba(245, 101, 101, 0.1);
+  color: #f56565;
+  border: 1px solid rgba(245, 101, 101, 0.3);
+}
+
+@keyframes ecom-fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Footer Links ===== */
+.ecom-login-footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 14px;
+}
+
+.ecom-footer-text {
+  color: #718096;
+  margin-top: 15px;
+}
+
+.ecom-footer-link {
+  color: #007AFF;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ecom-footer-link:hover {
+  color: #805ad5;
+}
+
+.ecom-footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #6b46c1;
+  transition: width 0.3s ease;
+}
+
+.ecom-footer-link:hover::after {
+  width: 100%;
+}
+
+/* ===== Responsive Design ===== */
 @media (max-width: 480px) {
-    .lg-container {
-        padding: 30px;
-    }
-
-    .lg-container h2 {
-        font-size: 24px;
-    }
-
-    .button {
-        font-size: 14px;
-    }
+  .ecom-login-glass-card {
+    padding: 40px 25px;
+    border-radius: 15px;
+  }
+  
+  .ecom-login-logo {
+    font-size: 30px;
+  }
 }

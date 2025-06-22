@@ -12,6 +12,7 @@ const Login = () => {
   });
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,7 +22,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log(formData)
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/auth/login/`,
@@ -29,82 +29,90 @@ const Login = () => {
         { withCredentials: true }
       );
       if (response.data.success) {
-        const user = response.data.user;
-
-        setMessage("Login successful!");
+        setMessage("Login successful! Redirecting...");
         setTimeout(() => {
-          if (response.data.role === "Admin") {
-            const adminData = user;
-            navigate("/adhome", { state: { user } });
-          } else {
-            navigate("/home", { state: { user } });
-          }
-        }, 1000);
+          navigate(response.data.role === "Admin" ? "/adhome" : "/home", {
+            state: { user: response.data.user },
+          });
+        }, 1500);
       } else {
-        setMessage(response.data.message || "Login failed. Try again.");
-        setTimeout(() => {
-          setMessage("");
-        }, 3000);
+        setMessage(response.data.message || "Login failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error logging in:", error);
-      if (error.response && error.response.data) {
-        setMessage(
-          error.response.data.message || "An error occurred. Please try again."
-        );
-      } else {
-        setMessage("Network error. Please try again.");
-      }
-      setTimeout(() => {
-        setMessage("");
-      }, 3000);
+      setMessage(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="outer">
-      <div className="lg-container">
-        <h2>Login</h2>
-        <form onSubmit={handleSubmit} className="form">
-          <div className="lg-input-group">
-            <label className="label">Email:</label>
+    <div className="ecom-login-container">
+      <div className="ecom-login-glass-card">
+        <div className="ecom-login-brand">
+          <h1 className="ecom-login-logo">SHOP<span>IQUE</span></h1>
+          <p className="ecom-login-tagline">Premium E-Commerce Experience</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="ecom-login-form">
+          <div className="ecom-form-group">
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="input"
+              className="ecom-form-input"
+              placeholder=" "
             />
+            <label className="ecom-form-label">Email</label>
+            <span className="ecom-input-border"></span>
           </div>
-          <div className="lg-input-group">
-            <label className="label">Password:</label>
+
+          <div className="ecom-form-group">
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
-              className="input"
+              className="ecom-form-input"
+              placeholder=" "
             />
+            <label className="ecom-form-label">Password</label>
+            <span className="ecom-input-border"></span>
           </div>
-          <button type="submit" className="sg-button" disabled={isLoading}>
+
+          <button
+            type="submit"
+            className={`ecom-login-button ${isHovered ? "ecom-button-hover" : ""}`}
+            disabled={isLoading}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             {isLoading ? (
-              <div className="loading-container">
-                <div className="spinner"></div>
-                <span className="loading-text">Logging in...</span>
-              </div>
+              <div className="ecom-loading-circle"></div>
             ) : (
-              "Login"
+              "SIGN IN"
             )}
           </button>
         </form>
-        {message && <p className="message">{message}</p>}
-        <p className="login-link">
-          Don't have an account? <Link to="/signup">Signup here</Link>
-        </p>
+
+        {message && (
+          <div className={`ecom-message ${message.includes("success") ? "ecom-message-success" : "ecom-message-error"}`}>
+            {message}
+          </div>
+        )}
+
+        <div className="ecom-login-footer">
+          <Link to="/forgot-password" className="ecom-footer-link">
+            Forgot Password?
+          </Link>
+          <p className="ecom-footer-text">
+            New to SHOPIQUE? <Link to="/signup" className="ecom-footer-link">Create Account</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

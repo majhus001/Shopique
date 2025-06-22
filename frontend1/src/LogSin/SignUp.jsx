@@ -12,7 +12,7 @@ const SignUp = () => {
     password: "",
     mobile: "",
     address: "",
-    image: "",
+    image: ""
   });
 
   const [otp, setOtp] = useState("");
@@ -20,19 +20,17 @@ const SignUp = () => {
   const [step, setStep] = useState("signup");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle OTP input change
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
   };
 
-  // Handle signup request
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -50,7 +48,6 @@ const SignUp = () => {
         return;
       }
 
-      // Send OTP to the user's email
       const response = await axios.post(
         `${API_BASE_URL}/api/auth/send-verify-otp/`,
         { email: formData.email }
@@ -59,127 +56,161 @@ const SignUp = () => {
       if (response.data.success) {
         setGeneratedOtp(String(response.data.code)); 
         setStep("otp");
-        setMessage("OTP sent successfully! Enter OTP to verify.");
+        setMessage("OTP sent successfully! Check your email.");
       } else {
         setMessage(response.data.message || "Failed to send OTP.");
-        setTimeout(() => setMessage(""), 4000);
       }
     } catch (error) {
-      console.error("Signup Error:", error);
       setMessage(
         error.response?.data?.message || "An error occurred. Try again."
       );
-      setTimeout(() => setMessage(""), 4000);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle OTP verification
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     setMessage("Verifying OTP...");
 
-    console.log("Generated OTP:", generatedOtp); 
-    console.log("User Entered OTP:", otp); 
-
     if (otp.trim() === String(generatedOtp).trim()) {
       try {
-        // Complete signup after OTP verification
         await axios.post(`${API_BASE_URL}/api/auth/signup/`, formData);
-        setMessage("Signup successful! Redirecting to login...");
-        const recentActivity = await axios.post(`${API_BASE_URL}/api/user/reactivity/add`,
-           {name: formData.username, activity: " has created his account"});
-        setTimeout(() => navigate("/login"), 2000);
+        setMessage("Account created successfully! Redirecting...");
+        await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
+          name: formData.username, 
+          activity: "has created an account"
+        });
+        setTimeout(() => navigate("/login"), 1500);
       } catch (error) {
-        console.error("Signup Error:", error);
         setMessage(
-          error.response?.data?.message || "Failed to complete signup. Try again."
+          error.response?.data?.message || "Failed to complete signup."
         );
       }
     } else {
-      setMessage("Invalid OTP. Please enter the correct OTP.");
+      setMessage("Invalid OTP. Please try again.");
     }
-
     setIsLoading(false);
   };
 
   return (
-    <div className="outer">
-      <div className="su-container">
-        <h2>Signup</h2>
+    <div className="ecom-signup-container">
+      <div className="ecom-signup-glass-card">
+        <div className="ecom-signup-brand">
+          <h1 className="ecom-signup-logo">SHOP<span>LYST</span></h1>
+          <p className="ecom-signup-tagline">
+            {step === "signup" ? "Create Your Account" : "Verify Your Email"}
+          </p>
+        </div>
 
-        {step === "signup" && (
-          <form onSubmit={handleSignup} className="form">
-            <div className="lg-input-group">
-              <label className="label">Username:</label>
+        {message && (
+          <div className={`ecom-message ${
+            message.includes("success") ? "ecom-message-success" : 
+            message.includes("OTP") ? "ecom-message-info" : "ecom-message-error"
+          }`}>
+            {message}
+          </div>
+        )}
+
+        {step === "signup" ? (
+          <form onSubmit={handleSignup} className="ecom-signup-form">
+            <div className="ecom-form-group">
               <input
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
                 required
-                className="input"
+                className="ecom-form-input"
+                placeholder=" "
               />
+              <label className="ecom-form-label">Username</label>
+              <span className="ecom-input-border"></span>
             </div>
-            <div className="lg-input-group">
-              <label className="label">Email:</label>
+
+            <div className="ecom-form-group">
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="input"
+                className="ecom-form-input"
+                placeholder=" "
               />
+              <label className="ecom-form-label">Email</label>
+              <span className="ecom-input-border"></span>
             </div>
-            <div className="lg-input-group">
-              <label className="label">Password:</label>
+
+            <div className="ecom-form-group">
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="input"
+                className="ecom-form-input"
+                placeholder=" "
               />
+              <label className="ecom-form-label">Password</label>
+              <span className="ecom-input-border"></span>
             </div>
-            <button type="submit" className="sg-button" disabled={isLoading}>
-              {isLoading ? <span className="loading-text">Sending OTP...</span> : "Signup"}
+
+            <button
+              type="submit"
+              className={`ecom-signup-button ${isHovered ? "ecom-button-hover" : ""}`}
+              disabled={isLoading}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              {isLoading ? (
+                <div className="ecom-loading-circle"></div>
+              ) : (
+                "SEND OTP"
+              )}
             </button>
           </form>
-        )}
-
-        {step === "otp" && (
-          <div className="lg-input-group">
-            <label className="label">Enter OTP:</label>
-            <input
-              type="text"
-              name="otp"
-              value={otp}
-              onChange={handleOtpChange}
-              required
-              className="input"
-              style={{width: "350px", marginTop: "10px"}}
-           
-            />
+        ) : (
+          <div className="ecom-otp-verification">
+            <div className="ecom-form-group">
+              <input
+                type="text"
+                name="otp"
+                value={otp}
+                onChange={handleOtpChange}
+                required
+                className="ecom-form-input"
+                placeholder=" "
+                maxLength="6"
+              />
+              <label className="ecom-form-label">Enter 6-digit OTP</label>
+              <span className="ecom-input-border"></span>
+            </div>
 
             <button
               onClick={handleVerifyOtp}
-              className="sg-button"
+              className={`ecom-signup-button ${isHovered ? "ecom-button-hover" : ""}`}
               disabled={isLoading}
-              style={{width: "382px", marginTop: "10px"}}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
-              {isLoading ? <span className="loading-text">Verifying...</span> : "Verify OTP"}
+              {isLoading ? (
+                <div className="ecom-loading-circle"></div>
+              ) : (
+                "VERIFY & CREATE ACCOUNT"
+              )}
             </button>
           </div>
         )}
 
-        {message && <p className="message">{message}</p>}
-
-        <p className="login-link">
-          Already registered? <Link to="/login">Login here</Link>
-        </p>
+        <div className="ecom-signup-footer">
+          <p className="ecom-footer-text">
+            Already have an account?{" "}
+            <Link to="/login" className="ecom-footer-link">
+              Login here
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
