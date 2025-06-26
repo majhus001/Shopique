@@ -6,12 +6,17 @@ import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
 import Sidebar from "../sidebar/Sidebar";
+import "../../App.css";
 import ValidUserData from "../../utils/ValidUserData";
+import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
+import { FiLogIn, FiAlertCircle } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = location.state || " ";
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userDetails, setUserDetails] = useState({
     image: user?.image || " ",
     username: user?.username || " ",
@@ -23,20 +28,20 @@ const ProfilePage = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    console.log("prof")
-    const checkUser = async () => {
-      try {
-        const userData = await ValidUserData();
-        if (userData) {
-          setUserDetails(userData);
-        }
-      } catch (error) {
-        console.error("Error validating user:", error);
-        
+  const checkUser = async () => {
+    try {
+      const userData = await ValidUserData();
+      if (userData) {
+        setUserDetails(userData);
       }
-    };
+      setIsLoggedIn(true);
+    } catch (error) {
+      setIsLoggedIn(false);
+      console.error("Error validating user:", error);
+    }
+  };
 
+  useEffect(() => {
     checkUser();
   }, []);
 
@@ -115,160 +120,222 @@ const ProfilePage = () => {
     }
   };
 
+  const handleNavigation = (path) => {
+    navigate(`/${path}`, { state: { user: userDetails } });
+  };
+
   return (
     <div className="usprof-container">
       <div className="usprof-nav">
-        <Navbar user={user} />
+        <Navbar user={userDetails} />
       </div>
 
-      <div className="usprof-main">
-        {/* Sidebar */}
-        <Sidebar user={user} />
-
-        {/* Profile Content */}
-        <div className="usprof-content">
-          <div className="usprof-header">
-            <h2 className="usprof-title">
-              {isEditing ? "Edit Profile" : "My Profile"}
-            </h2>
-
+      {!isLoggedIn ? (
+        <motion.div
+          className="auth-required"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="auth-card">
+            <FiAlertCircle className="auth-icon" />
+            <h2>Sign In Required</h2>
+            <p>Please login to view your order history</p>
             <button
-              className={`usprof-edit-btn ${isEditing ? "usprof-cancel" : ""}`}
-              onClick={toggleEdit}
+              className="auth-button"
+              onClick={() => handleNavigation("login")}
             >
-              {isEditing ? (
-                <>
-                  <i className="fas fa-times"></i> Cancel
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-edit"></i> Edit
-                </>
-              )}
+              <FiLogIn className="btn-icon" />
+              Sign In
             </button>
           </div>
+        </motion.div>
+      ) : (
+        <div className="usprof-main">
+          {/* Sidebar */}
+          <Sidebar user={userDetails} />
 
-          <div className="usprof-details-container">
-            <div className="usprof-image-section">
-              <div className="usprof-image-wrapper">
-                <img
-                  src={userDetails.image}
-                  alt="Profile"
-                  className="usprof-profile-img"
-                />
-              </div>
-              {isEditing && (
-                <div className="usprof-image-upload">
-                  <label
-                    htmlFor="profile-image"
-                    className="usprof-upload-label"
-                  >
-                    <i className="fas fa-camera"></i> Change Photo
-                  </label>
-                  <input
-                    id="profile-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="usprof-file-input"
-                  />
-                </div>
-              )}
+          {/* Profile Content */}
+          <div className="usprof-content">
+            <div className="usprof-header">
+              <h2 className="usprof-title">
+                {isEditing ? "Edit Profile" : "My Profile"}
+              </h2>
+
+              <button
+                className={`usprof-edit-btn ${
+                  isEditing ? "usprof-cancel" : ""
+                }`}
+                onClick={toggleEdit}
+              >
+                {isEditing ? (
+                  <>
+                    <i className="fas fa-times"></i> Cancel
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-edit"></i> Edit
+                  </>
+                )}
+              </button>
             </div>
 
-            <div className="usprof-form-section">
-              <div className="usprof-form-grid">
-                <div className="usprof-form-group">
-                  <label className="usprof-form-label">Full Name</label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={userDetails.username}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="usprof-form-input"
+            <div className="usprof-details-container">
+              <div className="usprof-image-section">
+                <div className="usprof-image-wrapper">
+                  <img
+                    src={userDetails.image}
+                    alt="Profile"
+                    className="usprof-profile-img"
+                    loading="lazy"
                   />
                 </div>
-
-                <div className="usprof-form-group">
-                  <label className="usprof-form-label">Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={userDetails.email}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="usprof-form-input"
-                  />
-                </div>
-
-                <div className="usprof-form-group">
-                  <label className="usprof-form-label">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={userDetails.password}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="usprof-form-input"
-                  />
-                </div>
-
-                <div className="usprof-form-group">
-                  <label className="usprof-form-label">Mobile Number</label>
-                  <input
-                    type="text"
-                    name="mobile"
-                    value={userDetails.mobile}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    maxLength={10}
-                    pattern="\d*"
-                    inputMode="numeric"
-                    placeholder="Enter 10-digit number"
-                    className="usprof-form-input"
-                  />
-                </div>
-
-                <div className="usprof-form-group">
-                  <label className="usprof-form-label">Pincode</label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    value={userDetails.pincode}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    maxLength={6}
-                    pattern="\d*"
-                    inputMode="numeric"
-                    placeholder="Enter 6-digit Pincode"
-                    className="usprof-form-input"
-                  />
-                </div>
-
-                <div className="usprof-form-group usprof-full-width">
-                  <label className="usprof-form-label">Delivery Address</label>
-                  <textarea
-                    name="address"
-                    value={userDetails.address}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="usprof-form-textarea"
-                    rows="4"
-                  />
-                </div>
+                {isEditing && (
+                  <div className="usprof-image-upload">
+                    <label
+                      htmlFor="profile-image"
+                      className="usprof-upload-label"
+                    >
+                      <i className="fas fa-camera"></i> Change Photo
+                    </label>
+                    <input
+                      id="profile-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="usprof-file-input"
+                    />
+                  </div>
+                )}
               </div>
 
-              {isEditing && (
-                <div className="usprof-action-btns">
-                  <button onClick={saveDetails} className="usprof-save-btn">
-                    <i className="fas fa-save"></i> Save Changes
-                  </button>
+              <div className="usprof-form-section">
+                <div className="usprof-form-grid">
+                  <div className="usprof-form-group">
+                    <label className="usprof-form-label">Full Name</label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={userDetails.username}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="usprof-form-input"
+                    />
+                  </div>
+
+                  <div className="usprof-form-group">
+                    <label className="usprof-form-label">Email Address</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={userDetails.email}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="usprof-form-input"
+                    />
+                  </div>
+
+                  <div className="usprof-form-group">
+                    <label className="usprof-form-label">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={userDetails.password}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="usprof-form-input"
+                    />
+                  </div>
+
+                  <div className="usprof-form-group">
+                    <label className="usprof-form-label">Mobile Number</label>
+                    <input
+                      type="text"
+                      name="mobile"
+                      value={userDetails.mobile}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      maxLength={10}
+                      pattern="\d*"
+                      inputMode="numeric"
+                      placeholder="Enter 10-digit number"
+                      className="usprof-form-input"
+                    />
+                  </div>
+
+                  <div className="usprof-form-group">
+                    <label className="usprof-form-label">Pincode</label>
+                    <input
+                      type="text"
+                      name="pincode"
+                      value={userDetails.pincode}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      maxLength={6}
+                      pattern="\d*"
+                      inputMode="numeric"
+                      placeholder="Enter 6-digit Pincode"
+                      className="usprof-form-input"
+                    />
+                  </div>
+
+                  <div className="usprof-form-group usprof-full-width">
+                    <label className="usprof-form-label">
+                      Delivery Address
+                    </label>
+                    <textarea
+                      name="address"
+                      value={userDetails.address}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="usprof-form-textarea"
+                      rows="4"
+                    />
+                  </div>
                 </div>
-              )}
+
+                {isEditing && (
+                  <div className="usprof-action-btns">
+                    <button onClick={saveDetails} className="usprof-save-btn">
+                      <i className="fas fa-save"></i> Save Changes
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      <div className="bottom-nav">
+        <button
+          className="bot-nav-btn"
+          onClick={() => handleNavigation("home")}
+        >
+          <FaHome />
+          <span>Home</span>
+        </button>
+        <button
+          className="bot-nav-btn"
+          onClick={() => handleNavigation("myorders")}
+        >
+          <FaListAlt />
+          <span>Orders</span>
+        </button>
+        <button
+          className="bot-nav-btn bot-active"
+          onClick={() => handleNavigation("profilepage")}
+        >
+          <FaUser />
+          <span>Account</span>
+        </button>
+        <button
+          className="bot-nav-btn"
+          onClick={() => handleNavigation("cart")}
+        >
+          <FaShoppingCart />
+          <span>Cart</span>
+        </button>
       </div>
     </div>
   );

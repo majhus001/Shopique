@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./HomeStyle.css";
@@ -7,7 +7,14 @@ import bannerImage1 from "../../assets/banner2.jpeg";
 import bannerImage2 from "../../assets/banner3.jpeg";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
-import { FiClock, FiShoppingBag, FiStar, FiChevronRight } from "react-icons/fi";
+import {
+  FiClock,
+  FiShoppingBag,
+  FiStar,
+  FiChevronRight,
+  FiChevronLeft,
+} from "react-icons/fi";
+import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
 import ValidUserData from "../../utils/ValidUserData";
 
 const capitalizeWords = (string) => {
@@ -22,7 +29,7 @@ const HomePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [UserData, setUserData] = useState(location.state?.user || null);
-  const [products, setProducts] = useState([]);
+  const [productsByCategory, setProductsByCategory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,10 +42,33 @@ const HomePage = () => {
     seconds: 0,
   });
 
+  const productContainerRefs = useRef({});
+
+  const scrollLeft = (categoryId) => {
+    if (productContainerRefs.current[categoryId]) {
+      productContainerRefs.current[categoryId].scrollBy({
+        left: -300,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollRight = (categoryId) => {
+    if (productContainerRefs.current[categoryId]) {
+      productContainerRefs.current[categoryId].scrollBy({
+        left: 300,
+        behavior: "smooth",
+      });
+    }
+  };
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/products/fetchAll`);
+      setError(null);
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/fetchByCategories`
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,14 +77,20 @@ const HomePage = () => {
       const responseData = await response.json();
 
       if (responseData.success && Array.isArray(responseData.data)) {
-        setProducts(responseData.data);
+        const processedData = responseData.data.map((category) => ({
+          ...category,
+          subCategory:
+            category.displayName || capitalizeWords(category.subCategory || ""),
+        }));
+
+        setProductsByCategory(processedData);
       } else {
-        throw new Error("Invalid data format received from server");
+        throw new Error("No products data received");
       }
     } catch (err) {
       console.error("Error fetching data:", err);
-      setError("Failed to load data. Please try again later.");
-      setProducts([]);
+      setError("Failed to load products. Please try again later.");
+      setProductsByCategory([]);
     } finally {
       setLoading(false);
     }
@@ -64,7 +100,9 @@ const HomePage = () => {
     const initializeUser = async () => {
       try {
         const userData = await ValidUserData();
-        setUserData(prev => JSON.stringify(prev) !== JSON.stringify(userData) ? userData : prev);
+        setUserData((prev) =>
+          JSON.stringify(prev) !== JSON.stringify(userData) ? userData : prev
+        );
       } catch (error) {
         console.error("User validation error:", error);
       }
@@ -106,7 +144,44 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const subCategories = [...new Set(products.map((product) => product.subCategory))].filter(Boolean);
+  const handlecategoryClick = (displayName) => {
+    let prodCategory = null;
+    let prodSubCategory = null;
+    let productId = null;
+    productsByCategory.forEach((item) => {
+      if (item.displayName === displayName) {
+        item.products.forEach((el) => {
+          prodSubCategory = el.subCategory;
+          prodCategory = el.category;
+          productId = el._id;
+        });
+      }
+    });
+    navigate(`/seprodlist/${productId}`, {
+      state: {
+        productCategory: prodCategory,
+        productSubCategory: prodSubCategory,
+      },
+    });
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const nav = document.querySelector(".usprof-nav");
+      if (window.scrollY > 50) {
+        nav.classList.add("scrolled");
+      } else {
+        nav.classList.remove("scrolled");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleNavigation = (path) => {
+    navigate(`/${path}`, { state: { user: UserData } });
+  };
 
   return (
     <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
@@ -131,6 +206,7 @@ const HomePage = () => {
                     src={bannerImages[currentImage]}
                     alt={`Banner ${currentImage + 1}`}
                     className="banner-image"
+                    loading="lazy"
                   />
                   <div className="banner-overlay"></div>
                   <div className="banner-content">
@@ -156,7 +232,7 @@ const HomePage = () => {
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.6 }}
                       className="shop-now-btn"
-                      onClick={() => navigate('/products')}
+                      onClick={() => navigate("/products")}
                     >
                       Shop Now
                     </motion.button>
@@ -167,65 +243,102 @@ const HomePage = () => {
               <div className="banner-indicators">
                 {bannerImages.map((_, index) => (
                   <button
-                    key={index}
-                    className={`indicator ${index === currentImage ? "active" : ""}`}
+                    key={`banner-${index}`}
+                    className={`indicator ${
+                      index === currentImage ? "active" : ""
+                    }`}
                     onClick={() => setCurrentImage(index)}
+                    aria-label={`Go to banner ${index + 1}`}
                   />
                 ))}
               </div>
             </div>
 
-            <div className="countdown-card">
+            <motion.div
+              className="countdown-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
               <div className="countdown-header">
                 <FiClock className="countdown-icon" />
                 <h3>Limited Time Offer</h3>
               </div>
               <div className="timer-grid">
-                <div className="timer-block">
+                <motion.div
+                  className="timer-block"
+                  whileHover={{ scale: 1.05 }}
+                >
                   <span className="timer-value">{timeLeft.days}</span>
                   <span className="timer-label">Days</span>
-                </div>
-                <div className="timer-block">
+                </motion.div>
+                <motion.div
+                  className="timer-block"
+                  whileHover={{ scale: 1.05 }}
+                >
                   <span className="timer-value">{timeLeft.hours}</span>
                   <span className="timer-label">Hours</span>
-                </div>
-                <div className="timer-block">
+                </motion.div>
+                <motion.div
+                  className="timer-block"
+                  whileHover={{ scale: 1.05 }}
+                >
                   <span className="timer-value">{timeLeft.minutes}</span>
                   <span className="timer-label">Minutes</span>
-                </div>
-                <div className="timer-block">
+                </motion.div>
+                <motion.div
+                  className="timer-block"
+                  whileHover={{ scale: 1.05 }}
+                >
                   <span className="timer-value">{timeLeft.seconds}</span>
                   <span className="timer-label">Seconds</span>
-                </div>
+                </motion.div>
               </div>
-              <button className="deal-btn" onClick={() => navigate('/products')}>
+              <motion.button
+                className="deal-btn"
+                onClick={() => navigate("/products")}
+                aria-label="Grab the deal"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <FiShoppingBag className="deal-icon" />
                 Grab the Deal
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </section>
 
           <section className="featured-section">
-            <h2 className="section-title">Shop by Category</h2>
-            <div className="category-grid">
-              {subCategories.slice(0, 4).map((subCategory) => (
+            <motion.h2
+              className="section-title"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              Shop by Category
+            </motion.h2>
+
+            <div className="category-cont">
+              {productsByCategory.slice(0, 4).map((category, index) => (
                 <motion.div
-                  key={subCategory}
+                  key={category._id}
                   whileHover={{ y: -5 }}
                   className="category-card"
+                  onClick={() => handlecategoryClick(category.subCategory)}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <div className="category-image">
                     <div className="category-image-placeholder">
-                      {subCategory.charAt(0).toUpperCase()}
+                      {category.subCategory.charAt(0).toUpperCase()}
                     </div>
                   </div>
-                  <h3>{capitalizeWords(subCategory)}</h3>
-                  <Link
-                    to={`/subcategory/${encodeURIComponent(subCategory)}`}
-                    className="category-link"
-                  >
+                  <h3>{category.subCategory}</h3>
+                  <span className="category-link">
                     Explore <FiChevronRight />
-                  </Link>
+                  </span>
                 </motion.div>
               ))}
             </div>
@@ -233,186 +346,342 @@ const HomePage = () => {
 
           <section className="products-section">
             {error && (
-              <div className="error-message">
+              <motion.div
+                className="error-message"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
                 <p>{error}</p>
                 <button onClick={fetchData}>Retry</button>
-              </div>
+              </motion.div>
             )}
 
             {loading ? (
-              <div className="loading-container">
+              <motion.div
+                className="loading-container"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
                 <div className="loading-spinner"></div>
                 <p>Loading products...</p>
-              </div>
-            ) : subCategories.length > 0 ? (
-              subCategories.map((subCategory) => {
-                const categoryProducts = products.filter(
-                  (product) => product.subCategory === subCategory
-                );
+              </motion.div>
+            ) : productsByCategory.length > 0 ? (
+              productsByCategory.map(
+                ({
+                  subCategory,
+                  products: categoryProducts,
+                  _id: categoryId,
+                }) => (
+                  <div className="product-category" key={categoryId}>
+                    <motion.div
+                      className="category-header"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <h3>{subCategory}</h3>
+                      <Link
+                        to={`/subcategory/${encodeURIComponent(subCategory)}`}
+                        className="view-all-link"
+                        aria-label={`View all ${subCategory}`}
+                      >
+                        View All <FiChevronRight />
+                      </Link>
+                    </motion.div>
 
-                return (
-                  <div className="product-category" key={subCategory}>
-                    <div className="category-header">
-                      <h3>{capitalizeWords(subCategory)}</h3>
-                      {categoryProducts.length > 4 && (
-                        <Link
-                          to={`/subcategory/${encodeURIComponent(subCategory)}`}
-                          className="view-all-link"
-                        >
-                          View All <FiChevronRight />
-                        </Link>
-                      )}
-                    </div>
+                    <div className="horizontal-scroll-container">
+                      <motion.button
+                        className="scroll-button left"
+                        onClick={() => scrollLeft(categoryId)}
+                        aria-label="Scroll left"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <FiChevronLeft />
+                      </motion.button>
 
-                    <div className="product-grid">
-                      {categoryProducts.slice(0, 4).map((item) => (
-                        <motion.div
-                          className="product-card"
-                          key={item._id}
-                          whileHover={{
-                            boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-                            y: -5,
-                          }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Link
-                            to={`/prodlist/${item._id}`}
-                            state={{
-                              user: UserData,
-                              name: item.name,
-                              price: item.price,
-                              brand: item.brand,
-                              images: item.images,
-                              rating: item.rating,
-                              description: item.description,
-                              stock: item.stock,
-                              category: item.category,
-                              deliverytime: item.deliverytime,
+                      <div
+                        className="product-horizontal-scroll"
+                        ref={(el) =>
+                          (productContainerRefs.current[categoryId] = el)
+                        }
+                      >
+                        {categoryProducts.map((item) => (
+                          <motion.div
+                            className="product-card-horizontal"
+                            key={item._id}
+                            whileHover={{
+                              boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+                              y: -5,
                             }}
+                            transition={{ duration: 0.3 }}
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
                           >
-                            <div className="product-image-container">
-                              <img
-                                src={item.images?.[0] || ""}
-                                alt={item.name}
-                                className="product-image"
-                                onError={(e) => {
-                                  e.target.src = "";
-                                  e.target.alt = "Image not available";
-                                  e.target.className = "product-image-error";
-                                }}
-                              />
-                              {item.offerPrice && (
-                                <div className="discount-badge">
-                                  {Math.round(
-                                    ((item.price - item.offerPrice) / item.price) * 100
-                                  )}
-                                  % OFF
-                                </div>
-                              )}
-                            </div>
-                            <div className="product-details">
-                              <h4 className="product-name">{item.name}</h4>
-                              <div className="price-container">
-                                {item.offerPrice ? (
-                                  <>
-                                    <span className="offer-price">
-                                      ₹{item.offerPrice}
-                                    </span>
-                                    <span className="original-price">
-                                      ₹{item.price}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span className="price">₹{item.price}</span>
+                            <Link
+                              to={`/prodlist/${item._id}`}
+                              state={{
+                                user: UserData,
+                                name: item.name,
+                                price: item.price,
+                                brand: item.brand,
+                                images: item.images,
+                                rating: item.rating,
+                                description: item.description,
+                                stock: item.stock,
+                                category: item.category,
+                                deliverytime: item.deliveryTime,
+                                lastSoldAt: item.lastSoldAt,
+                                salesCount: item.salesCount,
+                              }}
+                              aria-label={`View ${item.name}`}
+                            >
+                              <div className="product-image-container">
+                                <motion.img
+                                  src={item.images?.[0] || ""}
+                                  alt={item.name}
+                                  className="product-image"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    e.target.src = "";
+                                    e.target.alt = "Image not available";
+                                    e.target.className = "product-image-error";
+                                  }}
+                                  whileHover={{ scale: 1.05 }}
+                                />
+                                {item.offerPrice && (
+                                  <motion.div
+                                    className="discount-badge"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                  >
+                                    {Math.round(
+                                      ((item.price - item.offerPrice) /
+                                        item.price) *
+                                        100
+                                    )}
+                                    % OFF
+                                  </motion.div>
                                 )}
                               </div>
-                              {item.rating > 0 && (
-                                <div className="rating">
-                                  <FiStar className="star-icon" />
-                                  <span>{item.rating.toFixed(1)}</span>
+                              <div className="product-details">
+                                <h4 className="product-name">{item.name}</h4>
+                                <div className="price-container">
+                                  {item.offerPrice ? (
+                                    <>
+                                      <span className="offer-price">
+                                        ₹{item.offerPrice}
+                                      </span>
+                                      <span className="original-price">
+                                        ₹{item.price}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="price">₹{item.price}</span>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          </Link>
-                        </motion.div>
-                      ))}
+                                <div className="product-meta">
+                                  {item.rating > 0 && (
+                                    <div className="rating">
+                                      <FiStar className="star-icon" />
+                                      <span>{item.rating.toFixed(1)}</span>
+                                    </div>
+                                  )}
+                                  {item.salesCount > 0 && (
+                                    <div className="sales-count">
+                                      <FiShoppingBag />
+                                      <span>{item.salesCount} sold</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <motion.button
+                        className="scroll-button right"
+                        onClick={() => scrollRight(categoryId)}
+                        aria-label="Scroll right"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <FiChevronRight />
+                      </motion.button>
                     </div>
                   </div>
-                );
-              })
+                )
+              )
             ) : (
-              <div className="empty-state">
-                <img src="/empty-state.svg" alt="No products" />
+              <motion.div
+                className="empty-state"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <img
+                  src="/empty-state.svg"
+                  alt="No products available"
+                  loading="lazy"
+                />
                 <h3>No products available</h3>
                 <p>Check back later for new arrivals</p>
-              </div>
+                <button onClick={fetchData}>Refresh</button>
+              </motion.div>
             )}
           </section>
 
-          <section className="newsletter-section">
+          <motion.section
+            className="newsletter-section"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="newsletter-container">
               <div className="newsletter-content">
                 <h2>Subscribe to Our Newsletter</h2>
                 <p>Get the latest updates on new products and upcoming sales</p>
                 <form className="newsletter-form">
-                  <input
+                  <motion.input
                     type="email"
                     placeholder="Your email address"
                     required
+                    aria-label="Email address for newsletter"
+                    whileFocus={{ boxShadow: "0 0 0 2px var(--primary-color)" }}
                   />
-                  <button type="submit">Subscribe</button>
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Subscribe
+                  </motion.button>
                 </form>
               </div>
             </div>
-          </section>
+          </motion.section>
         </div>
       </div>
 
-      <footer className="modern-footer">
+      <motion.footer
+        className="modern-footer"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="footer-container">
           <div className="footer-grid">
-            <div className="footer-column">
+            <motion.div
+              className="footer-column"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
               <h4>Shop</h4>
               <ul>
-                <li><Link to="/products">All Products</Link></li>
-                <li><Link to="/products?filter=featured">Featured</Link></li>
-                <li><Link to="/products?filter=new">New Arrivals</Link></li>
-                <li><Link to="/products?filter=sale">Sale Items</Link></li>
+                <li>
+                  <Link to="/products">All Products</Link>
+                </li>
+                <li>
+                  <Link to="/products?filter=featured">Featured</Link>
+                </li>
+                <li>
+                  <Link to="/products?filter=new">New Arrivals</Link>
+                </li>
+                <li>
+                  <Link to="/products?filter=sale">Sale Items</Link>
+                </li>
               </ul>
-            </div>
-            <div className="footer-column">
+            </motion.div>
+            <motion.div
+              className="footer-column"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <h4>Customer Service</h4>
               <ul>
-                <li><Link to="/contact">Contact Us</Link></li>
-                <li><Link to="/faq">FAQs</Link></li>
-                <li><Link to="/shipping">Shipping Policy</Link></li>
-                <li><Link to="/returns">Returns & Exchanges</Link></li>
+                <li>
+                  <Link to="/contact">Contact Us</Link>
+                </li>
+                <li>
+                  <Link to="/faq">FAQs</Link>
+                </li>
+                <li>
+                  <Link to="/shipping">Shipping Policy</Link>
+                </li>
+                <li>
+                  <Link to="/returns">Returns & Exchanges</Link>
+                </li>
               </ul>
-            </div>
-            <div className="footer-column">
+            </motion.div>
+            <motion.div
+              className="footer-column"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <h4>About Us</h4>
               <ul>
-                <li><Link to="/about">Our Story</Link></li>
-                <li><Link to="/careers">Careers</Link></li>
-                <li><Link to="/blog">Blog</Link></li>
-                <li><Link to="/press">Press</Link></li>
+                <li>
+                  <Link to="/about">Our Story</Link>
+                </li>
+                <li>
+                  <Link to="/careers">Careers</Link>
+                </li>
+                <li>
+                  <Link to="/blog">Blog</Link>
+                </li>
+                <li>
+                  <Link to="/press">Press</Link>
+                </li>
               </ul>
-            </div>
-            <div className="footer-column">
+            </motion.div>
+            <motion.div
+              className="footer-column"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <h4>Connect With Us</h4>
               <div className="social-links">
-                <a href="#"><i className="fab fa-facebook"></i></a>
-                <a href="#"><i className="fab fa-instagram"></i></a>
-                <a href="#"><i className="fab fa-twitter"></i></a>
-                <a href="#"><i className="fab fa-pinterest"></i></a>
+                <motion.a href="#" aria-label="Facebook" whileHover={{ y: -3 }}>
+                  <i className="fab fa-facebook"></i>
+                </motion.a>
+                <motion.a
+                  href="#"
+                  aria-label="Instagram"
+                  whileHover={{ y: -3 }}
+                >
+                  <i className="fab fa-instagram"></i>
+                </motion.a>
+                <motion.a href="#" aria-label="Twitter" whileHover={{ y: -3 }}>
+                  <i className="fab fa-twitter"></i>
+                </motion.a>
+                <motion.a
+                  href="#"
+                  aria-label="Pinterest"
+                  whileHover={{ y: -3 }}
+                >
+                  <i className="fab fa-pinterest"></i>
+                </motion.a>
               </div>
               <div className="payment-methods">
-                <i className="fab fa-cc-visa"></i>
-                <i className="fab fa-cc-mastercard"></i>
-                <i className="fab fa-cc-paypal"></i>
-                <i className="fab fa-cc-apple-pay"></i>
+                <i className="fab fa-cc-visa" aria-label="Visa"></i>
+                <i className="fab fa-cc-mastercard" aria-label="Mastercard"></i>
+                <i className="fab fa-cc-paypal" aria-label="PayPal"></i>
+                <i className="fab fa-cc-apple-pay" aria-label="Apple Pay"></i>
               </div>
-            </div>
+            </motion.div>
           </div>
           <div className="footer-bottom">
             <p>&copy; 2025 E-Commerce Website. All rights reserved.</p>
@@ -422,7 +691,38 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-      </footer>
+      </motion.footer>
+
+      <div className="bottom-nav">
+        <button
+          className="bot-nav-btn bot-active"
+          onClick={() => handleNavigation("home")}
+        >
+          <FaHome />
+          <span>Home</span>
+        </button>
+        <button
+          className="bot-nav-btn "
+          onClick={() => handleNavigation("myorders")}
+        >
+          <FaListAlt />
+          <span>Orders</span>
+        </button>
+        <button
+          className="bot-nav-btn"
+          onClick={() => handleNavigation("profilepage")}
+        >
+          <FaUser />
+          <span>Account</span>
+        </button>
+        <button
+          className="bot-nav-btn"
+          onClick={() => handleNavigation("cart")}
+        >
+          <FaShoppingCart />
+          <span>Cart</span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -5,6 +5,7 @@ const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { product } = require("../models/products");
+const Category  = require("../models/Category");
 
 // Configure Cloudinary
 cloudinary.config({
@@ -88,7 +89,7 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
         console.error("Error uploading images:", uploadError);
       }
     }
-    
+
     const newProduct = new product(productData);
     const savedProduct = await newProduct.save();
 
@@ -124,6 +125,55 @@ router.get("/fetchAll", async (req, res) => {
   }
 });
 
+router.get("/fetchByCategories", async (req, res) => {
+  try {
+    // Get active categories sorted by priority
+    const categories = await Category.find({ isActive: true })
+      .sort({ priority: -1 })
+      .lean(); 
+
+      const categoriesWithProducts = await Promise.all(
+        categories.map(async (category) => {
+          const products = await product.find({
+            subCategory: category.name
+          })
+          .sort({
+            rating: -1,
+            salesCount: -1,
+            createdAt: -1,
+          })
+          .limit(10)
+          .select(
+            "_id name price offerPrice images category subCategory rating salesCount brand description stock deliveryTime"
+          )
+          .lean();
+          
+        return {
+          subCategory: category.name,
+          displayName: category.displayName,
+          products,
+        };
+      })
+    );
+
+    // Filter out empty categories
+    const filteredCategories = categoriesWithProducts.filter(
+      (category) => category.products.length > 0
+    );
+
+    res.status(200).json({
+      success: true,
+      data: filteredCategories,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch products",
+    });
+  }
+});
+
 // Get product by ID
 router.get("/fetch/:id", async (req, res) => {
   try {
@@ -149,15 +199,39 @@ router.get("/fetch/:id", async (req, res) => {
 
 router.get("/fetchbycategory/:category", async (req, res) => {
   try {
-    const {category} = req.params;
-    
-    const products = await product.find({category: category});
+    const { category } = req.params;
+    const products = await product.find({ category: category });
     if (!products) {
       return res.status(404).json({
         success: false,
         error: "Product not found",
       });
     }
+    
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch product",
+    });
+  }
+});
+
+router.get("/fetchbysubCategory/:productSubCategory", async (req, res) => {
+  try {
+    const { productSubCategory } = req.params;
+    const products = await product.find({ subCategory: productSubCategory });
+    if (!products) {
+      return res.status(404).json({
+        success: false,
+        error: "Product not found",
+      });
+    }
+    
     res.status(200).json({
       success: true,
       data: products,

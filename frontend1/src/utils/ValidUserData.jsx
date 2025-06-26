@@ -24,6 +24,7 @@ const ValidUserData = async () => {
     );
     
     if (!userRes.data.data) {
+      console.log("kkkk")
       throw new Error("User data not found");
     }
     
@@ -31,7 +32,7 @@ const ValidUserData = async () => {
     return userRes.data.data;
   } catch (error) {
     console.error("Error fetching user:", error);
-    throw error; // Re-throw the error to be handled by the calling component
+    throw error; 
   } 
 };
 

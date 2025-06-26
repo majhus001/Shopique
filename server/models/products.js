@@ -32,10 +32,15 @@ const productSchema = new mongoose.Schema(
       default: []
     },
     sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "Seller", required: true },
+    saleCount: {type: Number, default: 0, required: false},
+    lastSoldAt: {type: Date, default: null, required: false},
   },
   { timestamps: true }
 );
 
+productSchema.index({ subCategory: 1, rating: -1 });
+productSchema.index({ salesCount: -1 });
+productSchema.index({ lastSoldAt: -1 });
 
 const product = mongoose.model("products", productSchema);
 

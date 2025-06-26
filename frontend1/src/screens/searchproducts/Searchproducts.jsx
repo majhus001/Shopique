@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import "./Searchproducts.css";
 import axios from "axios";
 import API_BASE_URL from "../../api";
-import { FiShoppingCart, FiShoppingBag, FiChevronLeft, FiChevronRight, FiStar } from "react-icons/fi";
+import {
+  FiShoppingCart,
+  FiShoppingBag,
+  FiChevronLeft,
+  FiChevronRight,
+  FiStar,
+} from "react-icons/fi";
 
 export default function Searchproducts() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, categoryData, clickedProduct } = location.state || {};
+  const { id } = useParams();
+  const { user, clickedProduct, productCategory, productSubCategory } =
+    location.state || {};
 
   const userId = user?._id;
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [groupedProducts, setGroupedProducts] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 100000]);
+  const [priceRange, setPriceRange] = useState([0, 100000]); // Default range
+  const [maxPrice, setMaxPrice] = useState(100000);
   const [cartStatus, setCartStatus] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
@@ -22,71 +31,117 @@ export default function Searchproducts() {
 
   // Fetch products of the clicked category and organize by subCategory
   useEffect(() => {
-    if (!clickedProduct || !clickedProduct.category) return;
-
-    const fetchCategoryProducts = async () => {
+    // In the fetchProducts function within useEffect:
+    // In the fetchProducts function within useEffect:
+    const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/products/fetchbycategory/${clickedProduct.category}`
-        );
-        if (response) {
-          const products = response.data.products || [];
-          const allProducts = [clickedProduct, ...categoryData, ...products];
-          
-          // Remove duplicates
-          const uniqueProductsMap = new Map();
-          allProducts.forEach((prod) => {
-            uniqueProductsMap.set(prod._id, prod);
-          });
-          
-          // Convert to array
-          let productsArray = Array.from(uniqueProductsMap.values());
-          setCategoryProducts(productsArray);
+        let categoryToFetch;
+        let priorityProduct = null;
+        let prioritySubCategory = null;
 
-          // Group by subCategory
-          const grouped = {};
-          productsArray.forEach(product => {
-            const subCat = product.subCategory || 'Other';
-            if (!grouped[subCat]) {
-              grouped[subCat] = [];
-            }
-            grouped[subCat].push(product);
-          });
-
-          // Get the clicked subCategory (if exists)
-          const clickedSubCategory = clickedProduct.subCategory || 'Other';
-          
-          // Create ordered array of subCategories with clicked first
-          const subCategories = Object.keys(grouped);
-          const orderedSubCategories = [clickedSubCategory];
-          
-          // Add other subCategories in order (excluding the clicked one if already added)
-          subCategories.forEach(subCat => {
-            if (subCat !== clickedSubCategory) {
-              orderedSubCategories.push(subCat);
+        // Scenario 1: We have a clickedProduct
+        if (clickedProduct?.category) {
+          categoryToFetch = clickedProduct.category;
+          priorityProduct = clickedProduct;
+          prioritySubCategory = clickedProduct.subCategory;
+        } else if (productCategory) {
+          categoryToFetch = productCategory;
+          const response = await axios.get(
+            `${API_BASE_URL}/api/products/fetchbycategory/${productCategory}`
+          );
+          response.data.data.forEach((item) => {
+            if (item.subCategory == productSubCategory) {
+              priorityProduct = item;
+              prioritySubCategory = productSubCategory;
             }
           });
-
-          // Create final grouped products array in the desired order
-          const orderedGroupedProducts = orderedSubCategories.map(subCat => ({
-            subCategory: subCat,
-            products: grouped[subCat]
-          }));
-
-          setGroupedProducts(orderedGroupedProducts);
-        } else {
-          console.log(response.data.message);
         }
+        // Scenario 3: We only have an ID (from params)
+        else if (id) {
+          const response = await axios.get(
+            `${API_BASE_URL}/api/products/fetch/${id}`
+          );
+          priorityProduct = response.data.data;
+          categoryToFetch = priorityProduct.category;
+          prioritySubCategory = priorityProduct.subCategory;
+        } else {
+          console.error("No product information available");
+          return;
+        }
+
+        let productsArray = [];
+        if(!productSubCategory){
+          const response = await axios.get(
+            `${API_BASE_URL}/api/products/fetchbycategory/${categoryToFetch}`
+          );
+          productsArray = response.data.data || [];
+        }else{
+          console.log("kkkk")
+          const response = await axios.get(
+            `${API_BASE_URL}/api/products/fetchbysubCategory/${productSubCategory}`
+          );
+          productsArray = response.data.data || [];
+        }
+
+
+        if (priorityProduct) {
+          productsArray = productsArray.filter(
+            (p) => p._id !== priorityProduct._id
+          );
+
+          productsArray = [priorityProduct, ...productsArray];
+        }
+
+        const calculatedMaxPrice = productsArray.reduce(
+          (max, item) => Math.max(max, item.price),
+          0
+        );
+
+        setCategoryProducts(productsArray);
+        setMaxPrice(calculatedMaxPrice);
+        setPriceRange([0, calculatedMaxPrice]);
+
+        // Group by subCategory
+        const grouped = {};
+        productsArray.forEach((product) => {
+          const subCat = product.subCategory || "Other";
+          if (!grouped[subCat]) {
+            grouped[subCat] = [];
+          }
+          grouped[subCat].push(product);
+        });
+
+        // Determine subCategory order - priority first if exists
+        const subCategories = Object.keys(grouped);
+        let orderedSubCategories = subCategories;
+
+        if (
+          prioritySubCategory &&
+          subCategories.includes(prioritySubCategory)
+        ) {
+          orderedSubCategories = [
+            prioritySubCategory,
+            ...subCategories.filter((sc) => sc !== prioritySubCategory),
+          ];
+        }
+
+        // Create final grouped products array
+        const orderedGroupedProducts = orderedSubCategories.map((subCat) => ({
+          subCategory: subCat,
+          products: grouped[subCat],
+        }));
+
+        setGroupedProducts(orderedGroupedProducts);
       } catch (error) {
-        console.error("Error fetching category products:", error);
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCategoryProducts();
-  }, [clickedProduct]);
+    fetchProducts();
+  }, [clickedProduct, productCategory, id]);
 
   // Fetch cart status
   useEffect(() => {
@@ -215,7 +270,7 @@ export default function Searchproducts() {
   // Get paginated products from all groups
   const getPaginatedProducts = () => {
     let allFilteredProducts = [];
-    groupedProducts.forEach(group => {
+    groupedProducts.forEach((group) => {
       const filtered = filterProductsByPrice(group.products);
       if (filtered.length > 0) {
         allFilteredProducts = [...allFilteredProducts, ...filtered];
@@ -225,13 +280,17 @@ export default function Searchproducts() {
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
     return {
-      paginatedProducts: allFilteredProducts.slice(indexOfFirstProduct, indexOfLastProduct),
+      paginatedProducts: allFilteredProducts.slice(
+        indexOfFirstProduct,
+        indexOfLastProduct
+      ),
       totalPages: Math.ceil(allFilteredProducts.length / productsPerPage),
-      allFilteredProducts
+      allFilteredProducts,
     };
   };
 
-  const { paginatedProducts, totalPages, allFilteredProducts } = getPaginatedProducts();
+  const { paginatedProducts, totalPages, allFilteredProducts } =
+    getPaginatedProducts();
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -243,9 +302,10 @@ export default function Searchproducts() {
 
   // Truncate description to 2 lines
   const truncateDescription = (text) => {
-    const words = text.split(' ');
+    if (!text) return "";
+    const words = text.split(" ");
     if (words.length > 10) {
-      return words.slice(0, 10).join(' ') + '...';
+      return words.slice(0, 10).join(" ") + "...";
     }
     return text;
   };
@@ -262,12 +322,12 @@ export default function Searchproducts() {
             <div className="sp-price-filter-section">
               <h4>Price Range</h4>
               <div className="sp-price-range-display">
-                ₹{priceRange[0]} - ₹{priceRange[1]}
+                ₹{priceRange[0]} - ₹{Math.min(priceRange[1], maxPrice)}
               </div>
               <input
                 type="range"
                 min="0"
-                max="100000"
+                max={maxPrice}
                 step="1000"
                 value={priceRange[1]}
                 onChange={handlePriceChange}
@@ -275,7 +335,7 @@ export default function Searchproducts() {
               />
               <div className="sp-price-limits">
                 <span>₹0</span>
-                <span>₹100,000</span>
+                <span>₹{maxPrice.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -293,31 +353,44 @@ export default function Searchproducts() {
               <div className="sp-product-grid">
                 {paginatedProducts.map((item) => (
                   <div key={item._id} className="sp-product-card">
-                    <div className="sp-product-image-container" onClick={() => handleOnclknav(item)}>
+                    <div
+                      className="sp-product-image-container"
+                      onClick={() => handleOnclknav(item)}
+                    >
                       <img
-                        src={item.images[0] || '/placeholder-product.jpg'}
+                        src={item.images?.[0] || "/placeholder-product.jpg"}
                         alt={item.name}
                         onError={(e) => {
-                          e.target.src = '/placeholder-product.jpg';
+                          e.target.src = "/placeholder-product.jpg";
                         }}
                       />
                       {item.offerPrice && (
                         <div className="sp-discount-badge">
-                          {Math.round((item.price - item.offerPrice) / item.price * 100)}% OFF
+                          {Math.round(
+                            ((item.price - item.offerPrice) / item.price) * 100
+                          )}
+                          % OFF
                         </div>
                       )}
                     </div>
                     <div className="sp-product-details">
                       <h3 onClick={() => handleOnclknav(item)}>{item.name}</h3>
-                      <div className="sp-product-description" title={item.description}>
+                      <div
+                        className="sp-product-description"
+                        title={item.description}
+                      >
                         {truncateDescription(item.description)}
                       </div>
                       <div className="sp-price-rating-container">
                         <div className="sp-price-container">
                           {item.offerPrice ? (
                             <>
-                              <span className="sp-offer-price">₹{item.offerPrice}</span>
-                              <span className="sp-original-price">₹{item.price}</span>
+                              <span className="sp-offer-price">
+                                ₹{item.offerPrice}
+                              </span>
+                              <span className="sp-original-price">
+                                ₹{item.price}
+                              </span>
                             </>
                           ) : (
                             <span className="sp-price">₹{item.price}</span>
@@ -326,7 +399,7 @@ export default function Searchproducts() {
                         {item.rating > 0 && (
                           <div className="sp-rating">
                             <FiStar className="sp-star-icon" />
-                            <span>{item.rating.toFixed(1)}</span>
+                            <span>{item.rating?.toFixed(1)}</span>
                           </div>
                         )}
                       </div>
@@ -384,9 +457,12 @@ export default function Searchproducts() {
               <img src="/no-products.svg" alt="No products" />
               <h3>No products available in this price range</h3>
               <p>Try adjusting your price filter</p>
-              <button 
+              <button
                 className="sp-reset-filter-btn"
-                onClick={() => setPriceRange([0, 100000])}
+                onClick={() => {
+                  setPriceRange([0, maxPrice]);
+                  setCurrentPage(1);
+                }}
               >
                 Reset Filters
               </button>

@@ -1,5 +1,8 @@
 /* ProfilePage.css */
 
+.btn-icon {
+  font-size: 18px;
+}
 /* Base Styles */
 .usprof-container {
   display: flex;

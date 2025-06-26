@@ -11,101 +11,120 @@ const { authenticateToken } = require("../middleware/auth");
 
 // Route to save bill
 router.post("/savebill", authenticateToken, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const billData = req.body;
-    const { items, customerId, employeeId, createdAt, billNumber } = billData;
+    const { items, customerId, employeeId, billNumber } = billData;
 
     // Check for duplicate bill number
-    const existingBill = await Bill.findOne({
-      billNumber: billNumber,
-    });
+    const existingBill = await Bill.findOne({ billNumber }).session(session);
     if (existingBill) {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: "Bill with this number already exists",
       });
     }
 
-    // Save new bill
-    const newBill = new Bill(billData);
-    await newBill.save();
-
-    // Update product stock
-    for (const item of billData.items) {
-      const productItem = await product.findById(item.productId);
-      if (productItem) {
-        await product.findByIdAndUpdate(item.productId, {
-          $inc: { stock: -item.quantity },
+    // Validate stock availability first
+    for (const item of items) {
+      const productItem = await product
+        .findById(item.productId)
+        .session(session);
+      if (!productItem) {
+        await session.abortTransaction();
+        return res.status(404).json({
+          success: false,
+          message: `Product not found: ${item.productId}`,
         });
-        console.log(`Stock updated for: ${item.name}`);
-      } else {
-        console.warn(`Product not found: ${item.productId}`);
+      }
+      if (productItem.stock < item.quantity) {
+        await session.abortTransaction();
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for ${productItem.name}. Available: ${productItem.stock}, Requested: ${item.quantity}`,
+        });
       }
     }
 
-    // Update customer's total purchases
-    const customer = await Customer.findById(customerId);
-    if (customer) {
-      customer.totalPurchases += 1;
-      await customer.save();
-      console.log("Customer purchase count updated");
-    } else {
-      console.log("Customer not found");
+    // Save new bill
+    const newBill = new Bill(billData);
+    await newBill.save({ session });
+    console.log("update salecount")
+    // Update product stock and sales count
+    for (const item of items) {
+      await product.findByIdAndUpdate(
+        item.productId,
+        {
+          $inc: {
+            stock: -item.quantity, 
+            salesCount: +item.quantity, 
+          },
+          $set: { lastSoldAt: new Date() },
+        },
+        { session }
+      );
+      console.log("salecount of ", item.name," ", item.saleCount)
+
+    }
+
+    // Update customer's total purchases if customer exists
+    if (customerId) {
+      await Customer.findByIdAndUpdate(
+        customerId,
+        { $inc: { totalPurchases: 1 } },
+        { session, new: true }
+      );
     }
 
     // Log activity
-    try {
-      const activity = new EmployeeRecentActivity({
-        employeeId: billData.employeeId,
-        activityType: "BILL_CREATED",
-        description: `Created bill #${billData.billNumber}`,
-        billId: newBill._id,
-        itemsCount: billData.items.length,
-        totalAmount: billData.grandTotal,
-        timestamp: new Date(),
-      });
-      await activity.save();
-      console.log("Activity recorded");
-    } catch (activityError) {
-      console.error("Activity logging failed:", activityError);
-    }
+    const activity = new EmployeeRecentActivity({
+      employeeId,
+      activityType: "BILL_CREATED",
+      description: `Created bill #${billNumber}`,
+      billId: newBill._id,
+      itemsCount: items.length,
+      totalAmount: billData.grandTotal,
+      timestamp: new Date(),
+    });
+    await activity.save({ session });
 
-    //log the daily sales
-    try {
-      for (const item of items) {
-        const sale = new Dailysales({
-          productId: item.productId,
-          billNumber: billNumber,
-          productname: item.name,
-          price: item.unitPrice,
-          quantity: item.quantity,
-          totalAmount: item.total,
-          category: item.category,
-          soldAt: new Date(),
-          soldBy: employeeId,
-          customerId: customerId,
-        });
-        await sale.save();
-        console.log(item.name, "saved to dailysale");
-      }
-    } catch (error) {
-      console.log("error on saving to daily sales");
-    }
+    // Log daily sales
+    const dailySalesRecords = items.map((item) => ({
+      productId: item.productId,
+      billNumber,
+      productname: item.name,
+      price: item.unitPrice,
+      quantity: item.quantity,
+      totalAmount: item.total,
+      category: item.category,
+      soldAt: new Date(),
+      soldBy: employeeId,
+      customerId,
+    }));
+    await Dailysales.insertMany(dailySalesRecords, { session });
 
-    // Final response
+    // Commit transaction if all operations succeeded
+    await session.commitTransaction();
+
     return res.status(201).json({
       success: true,
-      message: "Bill saved successfully and all updates applied",
+      message: "Bill saved successfully with all updates",
       billId: newBill._id,
       billNumber: newBill.billNumber,
     });
   } catch (error) {
+    await session.abortTransaction();
     console.error("Error saving bill:", error);
     return res.status(500).json({
       success: false,
       message: "Error saving bill",
       error: error.message,
     });
+  } finally {
+    session.endSession();
   }
 });
 
@@ -123,6 +142,64 @@ router.get("/fetch", async (req, res) => {
       success: false,
       message: "Error fetching bills",
       error: error.message,
+    });
+  }
+});
+
+router.get("/fetchByCategories", async (req, res) => {
+  try {
+    // Define the priority order for categories
+    const categoryPriorityOrder = [
+      "mobile",
+      "laptop",
+      "toys",
+      "electronics",
+      "fashion",
+      "home",
+      "beauty",
+      "sports"
+    ];
+
+    // Get all distinct subcategories that exist in our products
+    const allSubCategories = await product.distinct("subCategory");
+    
+    // Filter and sort subcategories according to our priority order
+    const sortedSubCategories = categoryPriorityOrder
+      .filter(cat => allSubCategories.includes(cat))
+      .concat(
+        allSubCategories.filter(cat => !categoryPriorityOrder.includes(cat))
+          .sort((a, b) => a.localeCompare(b))
+      );
+
+    // Fetch limited products for each subcategory with sorting
+    const productsByCategory = await Promise.all(
+      sortedSubCategories.map(async (subCategory) => {
+        const products = await product
+          .find({ subCategory })
+          .limit(10) // Limit to 10 products per category
+          .sort({ 
+            rating: -1,        // Highest rated first
+            salesCount: -1,    // Then by popularity
+            createdAt: -1     // Then by newest
+          })
+          .select('name price offerPrice images rating salesCount brand description stock deliverytime');
+        
+        return {
+          subCategory,
+          products
+        };
+      })
+    );
+    
+    res.status(200).json({
+      success: true,
+      data: productsByCategory,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch products",
     });
   }
 });
@@ -202,8 +279,8 @@ router.get("/customer/fetch/:custId", async (req, res) => {
         items: updatedItems,
       };
     });
-    
-   return res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       bills: billsWithImages,
     });
@@ -218,3 +295,5 @@ router.get("/customer/fetch/:custId", async (req, res) => {
 });
 
 module.exports = router;
+
+
