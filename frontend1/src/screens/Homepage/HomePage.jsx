@@ -80,9 +80,13 @@ const HomePage = () => {
         const processedData = responseData.data.map((category) => ({
           ...category,
           subCategory:
-            category.displayName || capitalizeWords(category.subCategory || ""),
+            category.subCategory || capitalizeWords(category.subCategory || ""),
         }));
-
+        processedData.map((item) => {
+          console.log(item);
+          // item.products.map((el) => {
+          // });
+        });
         setProductsByCategory(processedData);
       } else {
         throw new Error("No products data received");
@@ -144,12 +148,12 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handlecategoryClick = (displayName) => {
+  const handlecategoryClick = (subCategory) => {
     let prodCategory = null;
     let prodSubCategory = null;
     let productId = null;
     productsByCategory.forEach((item) => {
-      if (item.displayName === displayName) {
+      if (item.subCategory === subCategory) {
         item.products.forEach((el) => {
           prodSubCategory = el.subCategory;
           prodCategory = el.category;
@@ -231,7 +235,7 @@ const HomePage = () => {
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.6 }}
-                      className="shop-now-btn"
+                      className="ban-shop-now-btn"
                       onClick={() => navigate("/products")}
                     >
                       Shop Now
@@ -260,85 +264,107 @@ const HomePage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="countdown-header">
-                <FiClock className="countdown-icon" />
-                <h3>Limited Time Offer</h3>
+              <div className="countdown-content">
+                <div className="countdown-title-timer-cont">
+                  <div className="countdown-header">
+                    <FiClock className="countdown-icon" />
+                    <h3>Limited Time Offer</h3>
+                  </div>
+                  <div className="timer-grid">
+                    <motion.div
+                      className="timer-block"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <span className="timer-value">{timeLeft.days}</span>
+                      <span className="timer-label">Days</span>
+                    </motion.div>
+                    <motion.div
+                      className="timer-block"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <span className="timer-value">{timeLeft.hours}</span>
+                      <span className="timer-label">Hours</span>
+                    </motion.div>
+                    <motion.div
+                      className="timer-block"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <span className="timer-value">{timeLeft.minutes}</span>
+                      <span className="timer-label">Minutes</span>
+                    </motion.div>
+                    <motion.div
+                      className="timer-block"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <span className="timer-value">{timeLeft.seconds}</span>
+                      <span className="timer-label">Seconds</span>
+                    </motion.div>
+                  </div>
+                </div>
+                <motion.button
+                  className="deal-btn"
+                  onClick={() => navigate("/products")}
+                  aria-label="Grab the deal"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FiShoppingBag className="deal-icon" />
+                  <span>Grab the Deal</span>
+                </motion.button>
               </div>
-              <div className="timer-grid">
-                <motion.div
-                  className="timer-block"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <span className="timer-value">{timeLeft.days}</span>
-                  <span className="timer-label">Days</span>
-                </motion.div>
-                <motion.div
-                  className="timer-block"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <span className="timer-value">{timeLeft.hours}</span>
-                  <span className="timer-label">Hours</span>
-                </motion.div>
-                <motion.div
-                  className="timer-block"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <span className="timer-value">{timeLeft.minutes}</span>
-                  <span className="timer-label">Minutes</span>
-                </motion.div>
-                <motion.div
-                  className="timer-block"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <span className="timer-value">{timeLeft.seconds}</span>
-                  <span className="timer-label">Seconds</span>
-                </motion.div>
-              </div>
-              <motion.button
-                className="deal-btn"
-                onClick={() => navigate("/products")}
-                aria-label="Grab the deal"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <FiShoppingBag className="deal-icon" />
-                Grab the Deal
-              </motion.button>
             </motion.div>
           </section>
 
           <section className="featured-section">
-            <motion.h2
-              className="section-title"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              Shop by Category
-            </motion.h2>
-
-            <div className="category-cont">
-              {productsByCategory.slice(0, 4).map((category, index) => (
+            <div className="featured-category-cont">
+              {productsByCategory.slice(0, 10).map((category) => (
                 <motion.div
                   key={category._id}
-                  whileHover={{ y: -5 }}
-                  className="category-card"
+                  className="featured-category-card"
                   onClick={() => handlecategoryClick(category.subCategory)}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <div className="category-image">
-                    <div className="category-image-placeholder">
-                      {category.subCategory.charAt(0).toUpperCase()}
-                    </div>
+                  <div className="category-image-container">
+                    <img
+                      src={
+                        category.products[0]?.images[0] ||
+                        "/placeholder-category.jpg"
+                      }
+                      alt={category.displayName || category.subCategory}
+                      className="category-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = "/placeholder-category.jpg";
+                      }}
+                    />
                   </div>
-                  <h3>{category.subCategory}</h3>
-                  <span className="category-link">
-                    Explore <FiChevronRight />
-                  </span>
+                  <div className="category-info">
+                    <span>
+                      {capitalizeWords(category.subCategory)}
+                      <FiChevronRight />
+                    </span>
+                  </div>
+
+                  {/* Dropdown for subcategories - appears on hover */}
+                  <div className="category-dropdown">
+                    {category.products.slice(0, 5).map((product) => (
+                      <div
+                        key={product._id}
+                        className="dropdown-item"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/prodlist/${product._id}`, {
+                            state: {
+                              productCategory: product.category,
+                              productSubCategory: product.subCategory,
+                            },
+                          });
+                        }}
+                      >
+                        {product.name}
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -380,14 +406,13 @@ const HomePage = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
                     >
-                      <h3>{subCategory}</h3>
-                      <Link
-                        to={`/subcategory/${encodeURIComponent(subCategory)}`}
+                      <h3>{capitalizeWords(subCategory)}</h3>
+                      <span
+                        onClick={() => handlecategoryClick(subCategory)}
                         className="view-all-link"
-                        aria-label={`View all ${subCategory}`}
                       >
                         View All <FiChevronRight />
-                      </Link>
+                      </span>
                     </motion.div>
 
                     <div className="horizontal-scroll-container">

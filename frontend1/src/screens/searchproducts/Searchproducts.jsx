@@ -31,8 +31,7 @@ export default function Searchproducts() {
 
   // Fetch products of the clicked category and organize by subCategory
   useEffect(() => {
-    // In the fetchProducts function within useEffect:
-    // In the fetchProducts function within useEffect:
+    
     const fetchProducts = async () => {
       setLoading(true);
       try {
@@ -57,7 +56,7 @@ export default function Searchproducts() {
             }
           });
         }
-        // Scenario 3: We only have an ID (from params)
+       
         else if (id) {
           const response = await axios.get(
             `${API_BASE_URL}/api/products/fetch/${id}`
@@ -328,7 +327,7 @@ export default function Searchproducts() {
                 type="range"
                 min="0"
                 max={maxPrice}
-                step="1000"
+                step="100"
                 value={priceRange[1]}
                 onChange={handlePriceChange}
                 className="sp-price-slider"

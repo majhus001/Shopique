@@ -1,3 +1,7 @@
+.bottom-nav{
+  display: none;
+}
+
 .auth-required {
   display: flex;
   justify-content: center;
@@ -52,8 +56,11 @@
 .btn-icon {
   font-size: 1.1rem;
 }
-@media (max-width: 576px) {
-    .auth-card {
+
+
+@media (max-width: 780px) {
+    
+.auth-card {
   height: 200px;
   width: 300px;
 }
@@ -79,7 +86,6 @@
 }
 .auth-button {
   padding: 10px 15px;
-  
 
 }
  .bottom-nav {
@@ -114,14 +120,16 @@
   font-size: 1.25rem;
   margin-bottom: 0.25rem;
 }
-  .mob-view-top {
-    display: block;
-    text-align: center;
-    justify-content: center;
-    padding: 5px;
-    background: #4a6bff;
-    color: white;
-    font-size: 1.2rem;
-  }
 }
 
+@media (min-width: 481px) and (max-width: 780px) {
+
+}
+
+
+@media (min-width: 781px) {
+  .bottom-nav {
+    display: none; 
+  }
+
+}

@@ -164,22 +164,27 @@ const Orderhistory = () => {
     }).format(amount);
   };
 
-  const filteredOrders = filter === "All" 
-    ? orders 
-    : orders.filter(order => order.OrderStatus === filter);
+  const filteredOrders =
+    filter === "All"
+      ? orders
+      : orders.filter((order) => order.OrderStatus === filter);
 
-  const orderCounts = orders.reduce((acc, order) => {
-    acc[order.OrderStatus] = (acc[order.OrderStatus] || 0) + 1;
-    return acc;
-  }, {All: orders.length});
+  const orderCounts = orders.reduce(
+    (acc, order) => {
+      acc[order.OrderStatus] = (acc[order.OrderStatus] || 0) + 1;
+      return acc;
+    },
+    { All: orders.length }
+  );
 
   return (
     <div className="order-history-container">
-      <Navbar user={userDetails} />
+      <div className="usprof-nav">
+        <Navbar user={userDetails} />
+      </div>
 
-      <div className="order-history-content">
         {!isLoggedIn ? (
-          <motion.div 
+          <motion.div
             className="auth-required"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -199,36 +204,42 @@ const Orderhistory = () => {
             </div>
           </motion.div>
         ) : (
-          <>
-            <Sidebar user={userDetails} />
-            <div className="order-history-main">
+          <div className="orderhis-main-cont">
+            <div className="sidebar-cont">
+              <Sidebar user={userDetails} />
+            </div>
+            <div className="order-history-content">
               <div className="order-history-header-container">
-                <div className="order-history-header">
-                  <motion.h1 
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    My Orders
-                  </motion.h1>
-                  <p>View and manage your recent purchases</p>
-                  
-                  <div className="order-filters">
-                    {['All', 'Pending', 'Accepted', 'Completed', 'Cancelled'].map((status) => (
+                <motion.h1
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="ord-his-header-title"
+                >
+                  My Orders
+                </motion.h1>
+                <p>View and manage your recent purchases</p>
+
+                <div className="order-filters">
+                  {["All", "Pending", "Accepted", "Completed", "Cancelled"].map(
+                    (status) => (
                       <button
                         key={status}
-                        className={`filter-btn ${filter === status ? 'active' : ''}`}
+                        className={`filter-btn ${
+                          filter === status ? "active" : ""
+                        }`}
                         onClick={() => setFilter(status)}
                       >
-                        {status} {orderCounts[status] ? `(${orderCounts[status]})` : ''}
+                        {status}{" "}
+                        {orderCounts[status] ? `(${orderCounts[status]})` : ""}
                       </button>
-                    ))}
-                  </div>
+                    )
+                  )}
                 </div>
               </div>
 
               {loading ? (
-                <motion.div 
+                <motion.div
                   className="loading-state"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -237,7 +248,7 @@ const Orderhistory = () => {
                   <p>Loading your orders...</p>
                 </motion.div>
               ) : error ? (
-                <motion.div 
+                <motion.div
                   className="error-state"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -255,7 +266,9 @@ const Orderhistory = () => {
                     {filteredOrders.map((order) => (
                       <motion.div
                         key={order._id}
-                        className={`order-card ${expandedOrder === order._id ? 'expanded' : ''}`}
+                        className={`order-card ${
+                          expandedOrder === order._id ? "expanded" : ""
+                        }`}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
@@ -303,7 +316,7 @@ const Orderhistory = () => {
                             <motion.div
                               className="order-details"
                               initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
+                              animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.3 }}
                             >
@@ -319,28 +332,36 @@ const Orderhistory = () => {
                               <div className="order-items">
                                 {order.OrderedItems.map((item, index) => (
                                   <div key={index} className="order-item">
-                                    <div className="item-image">
-                                      <img
-                                        src={
-                                          item.image ||
-                                          "https://via.placeholder.com/80?text=No+Image"
-                                        }
-                                        alt={item.name}
-                                        onError={(e) => {
-                                          e.target.src =
-                                            "https://via.placeholder.com/80?text=No+Image";
-                                        }}
-                                      />
-                                    </div>
-                                    <div className="item-details">
+                                    <img
+                                      className="item-image"
+                                      src={
+                                        item.image ||
+                                        "https://via.placeholder.com/80?text=No+Image"
+                                      }
+                                      alt={item.name}
+                                      onError={(e) => {
+                                        e.target.src =
+                                          "https://via.placeholder.com/80?text=No+Image";
+                                      }}
+                                    />
+                                    <div className="item-details-cont">
                                       <h4>{item.name}</h4>
-                                      <div className="item-meta">
+                                      <div className="item-details">
+                                        <span >Price :</span>
                                         <span className="item-price">
-                                          {formatCurrency(item.price)} ×{" "}
-                                          {item.quantity}
+                                          {formatCurrency(item.price)}
                                         </span>
+                                      </div>
+                                      <div className="item-details">
+                                        <span>Quantity :</span>
+                                        <span>{item.quantity}</span>
+                                      </div>
+                                      <div className="item-details">
+                                        <span>Total :</span>
                                         <span className="item-subtotal">
-                                          {formatCurrency(item.price * item.quantity)}
+                                          {formatCurrency(
+                                            item.price * item.quantity
+                                          )}
                                         </span>
                                       </div>
                                     </div>
@@ -368,7 +389,7 @@ const Orderhistory = () => {
                   </div>
                 </div>
               ) : (
-                <motion.div 
+                <motion.div
                   className="empty-orders"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -391,9 +412,8 @@ const Orderhistory = () => {
                 </motion.div>
               )}
             </div>
-          </>
+          </div>
         )}
-      </div>
 
       <div className="bottom-nav">
         <button

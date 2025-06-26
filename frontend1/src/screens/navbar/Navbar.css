@@ -7,7 +7,6 @@
   padding: 0.2rem 1rem;
   background: linear-gradient(135deg, #007AFF 0%, #0047AB 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  /* position: sticky; */
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
@@ -268,7 +267,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (max-width: 780px) {
   .hm-navbar {
     border-radius: 0 0 20px 20px;
     padding-top: 0.8rem;
@@ -310,7 +309,7 @@
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 780px) {
   .hm-navbar {
     flex-direction: row;
     justify-content: space-between;

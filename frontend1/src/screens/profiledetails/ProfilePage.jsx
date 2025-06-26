@@ -8,9 +8,16 @@ import getCoordinates from "../../utils/Geolocation";
 import Sidebar from "../sidebar/Sidebar";
 import "../../App.css";
 import ValidUserData from "../../utils/ValidUserData";
-import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
+import {
+  FaHome,
+  FaListAlt,
+  FaUser,
+  FaShoppingCart,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import { FiLogIn, FiAlertCircle } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import handleLogout from "../../utils/Logout";
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -57,7 +64,7 @@ const ProfilePage = () => {
       const digitsOnly = value.replace(/\D/g, "");
       if (digitsOnly.length <= 6) {
         setUserDetails((prev) => {
-          const updatedDetails = { ...prev, [name]: digitsOnly || null }; // Send null if empty
+          const updatedDetails = { ...prev, [name]: digitsOnly || null };
 
           if (digitsOnly.length === 6) {
             getCoordinates(digitsOnly).then((coordinates) => {
@@ -85,7 +92,6 @@ const ProfilePage = () => {
   };
 
   const toggleEdit = () => {
-    console.log("edit");
     setIsEditing(!isEditing);
   };
 
@@ -112,7 +118,6 @@ const ProfilePage = () => {
 
       if (response.status === 200) {
         alert("Profile updated successfully");
-        console.log("User details updated successfully:", response.data);
         setIsEditing(false);
       }
     } catch (error) {
@@ -122,6 +127,15 @@ const ProfilePage = () => {
 
   const handleNavigation = (path) => {
     navigate(`/${path}`, { state: { user: userDetails } });
+  };
+
+  const handleLogoutUser = async () => {
+    const logout = handleLogout();
+    if (logout) {
+      navigate("/home", { state: { user: userDetails } });
+    } else {
+      alert("unable to logout");
+    }
   };
 
   return (
@@ -140,7 +154,7 @@ const ProfilePage = () => {
           <div className="auth-card">
             <FiAlertCircle className="auth-icon" />
             <h2>Sign In Required</h2>
-            <p>Please login to view your order history</p>
+            <p>Please login to view your profile</p>
             <button
               className="auth-button"
               onClick={() => handleNavigation("login")}
@@ -152,32 +166,37 @@ const ProfilePage = () => {
         </motion.div>
       ) : (
         <div className="usprof-main">
-          {/* Sidebar */}
-          <Sidebar user={userDetails} />
-
-          {/* Profile Content */}
+          <div className="sidebar-cont">
+            <Sidebar user={userDetails} />
+          </div>
           <div className="usprof-content">
             <div className="usprof-header">
               <h2 className="usprof-title">
                 {isEditing ? "Edit Profile" : "My Profile"}
               </h2>
 
-              <button
-                className={`usprof-edit-btn ${
-                  isEditing ? "usprof-cancel" : ""
-                }`}
-                onClick={toggleEdit}
-              >
-                {isEditing ? (
-                  <>
-                    <i className="fas fa-times"></i> Cancel
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-edit"></i> Edit
-                  </>
-                )}
-              </button>
+              <div className="usprof-header-btns">
+                <button className="usprof-logout" onClick={handleLogoutUser}>
+                  <FaSignOutAlt />
+                  Logout
+                </button>
+                <button
+                  className={`usprof-edit-btn ${
+                    isEditing ? "usprof-cancel" : ""
+                  }`}
+                  onClick={toggleEdit}
+                >
+                  {isEditing ? (
+                    <>
+                      <i className="fas fa-times"></i> Cancel
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-edit"></i> Edit
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="usprof-details-container">
