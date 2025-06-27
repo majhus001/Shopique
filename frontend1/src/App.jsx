@@ -26,6 +26,7 @@ import ProfilePage from "./screens/profiledetails/ProfilePage";
 import Orderhistory from "./screens/Order/Orderhistory";
 import Buynow from "./screens/Productscreens/Buynow";
 import ScrollToTop from "./ScrollToTop";
+import Test from "./screens/Homepage/Test";
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/buynow" element={<Buynow />} />
+        <Route path="/test" element={<Test />} />
 
         <Route path="/adprod" element={<ProductAddPage />} />
         <Route path="/orderdet" element={<Orderdetails />} />

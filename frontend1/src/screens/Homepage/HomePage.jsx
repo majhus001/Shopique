@@ -187,6 +187,25 @@ const HomePage = () => {
     navigate(`/${path}`, { state: { user: UserData } });
   };
 
+  const handleprodlistnavigation = (item) => {
+    navigate(`/prodlist/${item._id}`, {
+      state: {
+        user: UserData,
+        name: item.name,
+        price: item.price,
+        brand: item.brand,
+        images: item.images,
+        rating: item.rating,
+        description: item.description,
+        stock: item.stock,
+        category: item.category,
+        deliverytime: item.deliveryTime,
+        lastSoldAt: item.lastSoldAt,
+        salesCount: item.salesCount,
+      },
+    });
+  };
+
   return (
     <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
       <div className="usprof-nav">
@@ -316,57 +335,54 @@ const HomePage = () => {
           </section>
 
           <section className="featured-section">
-            <div className="featured-category-cont">
-              {productsByCategory.slice(0, 10).map((category) => (
-                <motion.div
-                  key={category._id}
-                  className="featured-category-card"
-                  onClick={() => handlecategoryClick(category.subCategory)}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="category-image-container">
-                    <img
-                      src={
-                        category.products[0]?.images[0] ||
-                        "/placeholder-category.jpg"
-                      }
-                      alt={category.displayName || category.subCategory}
-                      className="category-image"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.src = "/placeholder-category.jpg";
-                      }}
-                    />
-                  </div>
-                  <div className="category-info">
-                    <span>
-                      {capitalizeWords(category.subCategory)}
-                      <FiChevronRight />
-                    </span>
-                  </div>
-
-                  {/* Dropdown for subcategories - appears on hover */}
-                  <div className="category-dropdown">
-                    {category.products.slice(0, 5).map((product) => (
-                      <div
-                        key={product._id}
-                        className="dropdown-item"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/prodlist/${product._id}`, {
-                            state: {
-                              productCategory: product.category,
-                              productSubCategory: product.subCategory,
-                            },
-                          });
+            <div className="featured-scroll-wrapper">
+              <div className="featured-category-cont">
+                {productsByCategory.slice(0, 10).map((category) => (
+                  <motion.div
+                    key={category._id}
+                    className="featured-category-card"
+                    onClick={() => handlecategoryClick(category.subCategory)}
+                    transition={{ duration: 0.3 }}
+                    whileHover={{ zIndex: 10 }}
+                  >
+                    <div className="category-image-container">
+                      <img
+                        src={
+                          category.products[0]?.images[0] ||
+                          "/placeholder-category.jpg"
+                        }
+                        alt={category.displayName || category.subCategory}
+                        className="category-image"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src = "/placeholder-category.jpg";
                         }}
-                      >
-                        {product.name}
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
+                      />
+                    </div>
+                    <div className="category-info">
+                      <span>
+                        {capitalizeWords(category.subCategory)}
+                        <FiChevronRight />
+                      </span>
+                    </div>
+
+                    <div className="category-dropdown">
+                      {category.products.slice(0, 5).map((item) => (
+                        <div
+                          key={item._id}
+                          className="dropdown-item"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleprodlistnavigation(item);
+                          }}
+                        >
+                          {item.name}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -406,7 +422,7 @@ const HomePage = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
                     >
-                      <h3>{capitalizeWords(subCategory)}</h3>
+                      <div>{capitalizeWords(subCategory)}</div>
                       <span
                         onClick={() => handlecategoryClick(subCategory)}
                         className="view-all-link"
@@ -445,23 +461,11 @@ const HomePage = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                           >
-                            <Link
-                              to={`/prodlist/${item._id}`}
-                              state={{
-                                user: UserData,
-                                name: item.name,
-                                price: item.price,
-                                brand: item.brand,
-                                images: item.images,
-                                rating: item.rating,
-                                description: item.description,
-                                stock: item.stock,
-                                category: item.category,
-                                deliverytime: item.deliveryTime,
-                                lastSoldAt: item.lastSoldAt,
-                                salesCount: item.salesCount,
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleprodlistnavigation(item);
                               }}
-                              aria-label={`View ${item.name}`}
                             >
                               <div className="product-image-container">
                                 <motion.img
@@ -523,7 +527,7 @@ const HomePage = () => {
                                   )}
                                 </div>
                               </div>
-                            </Link>
+                            </div>
                           </motion.div>
                         ))}
                       </div>
