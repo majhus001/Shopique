@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
-import "./BottomNav.css";
+import "./Bottomnav.css";
 import { useEffect, useState } from "react";
 
 export default function BottomNav({ UserData }) {
