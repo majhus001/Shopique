@@ -422,7 +422,7 @@ const HomePage = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
                     >
-                      <div>{capitalizeWords(subCategory)}</div>
+                      <h4>{capitalizeWords(subCategory)}</h4>
                       <span
                         onClick={() => handlecategoryClick(subCategory)}
                         className="view-all-link"
@@ -436,8 +436,6 @@ const HomePage = () => {
                         className="scroll-button left"
                         onClick={() => scrollLeft(categoryId)}
                         aria-label="Scroll left"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
                       >
                         <FiChevronLeft />
                       </motion.button>
@@ -478,7 +476,6 @@ const HomePage = () => {
                                     e.target.alt = "Image not available";
                                     e.target.className = "product-image-error";
                                   }}
-                                  whileHover={{ scale: 1.05 }}
                                 />
                                 {item.offerPrice && (
                                   <motion.div
@@ -536,8 +533,6 @@ const HomePage = () => {
                         className="scroll-button right"
                         onClick={() => scrollRight(categoryId)}
                         aria-label="Scroll right"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
                       >
                         <FiChevronRight />
                       </motion.button>
