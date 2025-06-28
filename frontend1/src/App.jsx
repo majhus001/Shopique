@@ -26,6 +26,8 @@ import ProfilePage from "./screens/profiledetails/ProfilePage";
 import Orderhistory from "./screens/Order/Orderhistory";
 import Buynow from "./screens/Productscreens/Buynow";
 import ScrollToTop from "./ScrollToTop";
+import BottomNav from "./screens/Bottom Navbar/BottomNav";
+import AuthRequired from "./screens/Authentication/AuthRequired";
 
 const App = () => {
   return (
@@ -40,9 +42,11 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/buynow" element={<Buynow />} />
+        <Route path="/botnavbar" element={<BottomNav />} />
+        <Route path="/authentication" element={<AuthRequired />} />
       
         <Route path="/adprod" element={<ProductAddPage />} />
-        <Route path="/orderdet" element={<Orderdetails />} />
+        <Route path="/ordercheckout" element={<Orderdetails />} />
         <Route path="/myorders" element={<Orderhistory />} />
         <Route path="/profilepage" element={<ProfilePage />} />
         <Route path="/adhome" element={<AdminHome />} />

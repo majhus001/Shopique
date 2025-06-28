@@ -15,7 +15,6 @@ SECRET_KEY = process.env.JWT_SECRET;
 const verifyToken = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
-    console.log("false");
     return res
       .status(401)
       .json({ success: false, message: "Access denied. No token provided." });
@@ -230,12 +229,17 @@ router.post("/employee/login", async (req, res) => {
 
 router.post("/logout", (req, res) => {
   console.log("logingg out");
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "Strict",
-  });
-  res.json({ success: true, message: "Logged out successfully!" });
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+    });
+    res.json({ success: true, message: "Logged out successfully!" });
+  } catch {
+    res.json({ success: false, message: "Logged out error!" });
+
+  }
 });
 
 router.post("/employee/logout/:empId", async (req, res) => {

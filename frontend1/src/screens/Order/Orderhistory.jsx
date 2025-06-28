@@ -29,6 +29,7 @@ import {
 } from "react-icons/md";
 import ValidUserData from "../../utils/ValidUserData";
 import { motion, AnimatePresence } from "framer-motion";
+import BottomNav from "../Bottom Navbar/BottomNav";
 
 const Orderhistory = () => {
   const location = useLocation();
@@ -42,6 +43,44 @@ const Orderhistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("All");
+
+  const SkeletonLoading = () => {
+    return (
+      <div className="ordhis-skeleton-loading-container">
+        {/* Header skeleton */}
+        <div className="ordhis-skeleton-header">
+          <div className="ordhis-skeleton-title"></div>
+          <div className="ordhis-skeleton-subtitle"></div>
+        </div>
+        
+        {/* Filter skeletons */}
+        <div className="ordhis-skeleton-filters">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="ordhis-skeleton-filter"></div>
+          ))}
+        </div>
+        
+        {/* Order skeletons */}
+        <div className="ordhis-skeleton-orders">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="ordhis-skeleton-order">
+              <div className="ordhis-skeleton-order-header">
+                <div className="ordhis-skeleton-order-meta">
+                  <div className="ordhis-skeleton-text short"></div>
+                  <div className="ordhis-skeleton-text short"></div>
+                </div>
+                <div className="ordhis-skeleton-status"></div>
+              </div>
+              <div className="ordhis-skeleton-order-summary">
+                <div className="ordhis-skeleton-summary-item"></div>
+                <div className="ordhis-skeleton-summary-item"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const checkUser = async () => {
     try {
@@ -180,271 +219,239 @@ const Orderhistory = () => {
   return (
     <div className="order-history-container">
       <div className="usprof-nav">
-        <Navbar user={userDetails} />
+        <Navbar />
       </div>
 
-        {!isLoggedIn ? (
-          <motion.div
-            className="auth-required"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="auth-card">
-              <FiAlertCircle className="auth-icon" />
-              <h2>Sign In Required</h2>
-              <p>Please login to view your order history</p>
-              <button
-                className="auth-button"
-                onClick={() => handleNavigation("login")}
+      {!isLoggedIn ? (
+        <motion.div
+          className="auth-required"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="auth-card">
+            <FiAlertCircle className="auth-icon" />
+            <h2>Sign In Required</h2>
+            <p>Please login to view your order history</p>
+            <button
+              className="auth-button"
+              onClick={() => handleNavigation("login")}
+            >
+              <FiLogIn className="btn-icon" />
+              Sign In
+            </button>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="orderhis-main-cont">
+          <div className="sidebar-cont">
+            <Sidebar user={userDetails} />
+          </div>
+          <div className="order-history-content">
+            {loading ? (
+              <SkeletonLoading />
+            ) : error ? (
+              <motion.div
+                className="error-state"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
               >
-                <FiLogIn className="btn-icon" />
-                Sign In
-              </button>
-            </div>
-          </motion.div>
-        ) : (
-          <div className="orderhis-main-cont">
-            <div className="sidebar-cont">
-              <Sidebar user={userDetails} />
-            </div>
-            <div className="order-history-content">
-              <div className="order-history-header-container">
-                <motion.h1
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="ord-his-header-title"
-                >
-                  My Orders
-                </motion.h1>
-                <p>View and manage your recent purchases</p>
+                <FiAlertCircle className="error-icon" />
+                <p>{error}</p>
+                <button onClick={fetchOrders} className="retry-button">
+                  <FaRedo className="retry-icon" />
+                  Try Again
+                </button>
+              </motion.div>
+            ) : (
+              <>
+                <div className="order-history-header-container">
+                  <motion.h1
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="ord-his-header-title"
+                  >
+                    My Orders
+                  </motion.h1>
+                  <p>View and manage your recent purchases</p>
 
-                <div className="order-filters">
-                  {["All", "Pending", "Accepted", "Completed", "Cancelled"].map(
-                    (status) => (
-                      <button
-                        key={status}
-                        className={`filter-btn ${
-                          filter === status ? "active" : ""
-                        }`}
-                        onClick={() => setFilter(status)}
-                      >
-                        {status}{" "}
-                        {orderCounts[status] ? `(${orderCounts[status]})` : ""}
-                      </button>
-                    )
-                  )}
+                  <div className="order-filters">
+                    {["All", "Pending", "Accepted", "Completed", "Cancelled"].map(
+                      (status) => (
+                        <button
+                          key={status}
+                          className={`filter-btn ${
+                            filter === status ? "active" : ""
+                          }`}
+                          onClick={() => setFilter(status)}
+                        >
+                          {status}{" "}
+                          {orderCounts[status] ? `(${orderCounts[status]})` : ""}
+                        </button>
+                      )
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {loading ? (
-                <motion.div
-                  className="loading-state"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <div className="loading-spinner"></div>
-                  <p>Loading your orders...</p>
-                </motion.div>
-              ) : error ? (
-                <motion.div
-                  className="error-state"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <FiAlertCircle className="error-icon" />
-                  <p>{error}</p>
-                  <button onClick={fetchOrders} className="retry-button">
-                    <FaRedo className="retry-icon" />
-                    Try Again
-                  </button>
-                </motion.div>
-              ) : filteredOrders.length > 0 ? (
-                <div className="orders-list">
-                  <div>
-                    {filteredOrders.map((order) => (
-                      <motion.div
-                        key={order._id}
-                        className={`order-card ${
-                          expandedOrder === order._id ? "expanded" : ""
-                        }`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3 }}
-                        layout
-                        onClick={() => toggleOrderExpand(order._id)}
-                      >
-                        <div className="order-card-header">
-                          <div className="order-meta">
-                            <span className="order-date">
-                              {formatDate(order.createdAt)}
-                            </span>
-                            <span className="order-id">
-                              Order #{order._id.slice(-8).toUpperCase()}
-                            </span>
-                          </div>
-                          <div
-                            className="order-status"
-                            style={{
-                              color: statusConfig[order.OrderStatus]?.color,
-                              backgroundColor:
-                                statusConfig[order.OrderStatus]?.bgColor,
-                            }}
-                          >
-                            {statusConfig[order.OrderStatus]?.icon}
-                            <span>{statusConfig[order.OrderStatus]?.text}</span>
-                          </div>
-                        </div>
-
-                        <div className="order-summary">
-                          <div className="summary-item">
-                            <span>Total:</span>
-                            <strong className="order-total">
-                              {formatCurrency(order.totalPrice)}
-                            </strong>
-                          </div>
-                          <div className="summary-item">
-                            <span>Items:</span>
-                            <strong>{order.OrderedItems.length}</strong>
-                          </div>
-                        </div>
-
-                        <AnimatePresence>
-                          {expandedOrder === order._id && (
-                            <motion.div
-                              className="order-details"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3 }}
+                {filteredOrders.length > 0 ? (
+                  <div className="orders-list">
+                    <div>
+                      {filteredOrders.map((order) => (
+                        <motion.div
+                          key={order._id}
+                          className={`order-card ${
+                            expandedOrder === order._id ? "expanded" : ""
+                          }`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.3 }}
+                          layout
+                          onClick={() => toggleOrderExpand(order._id)}
+                        >
+                          <div className="order-card-header">
+                            <div className="order-meta">
+                              <span className="order-date">
+                                {formatDate(order.createdAt)}
+                              </span>
+                              <span className="order-id">
+                                Order #{order._id.slice(-8).toUpperCase()}
+                              </span>
+                            </div>
+                            <div
+                              className="order-status"
+                              style={{
+                                color: statusConfig[order.OrderStatus]?.color,
+                                backgroundColor:
+                                  statusConfig[order.OrderStatus]?.bgColor,
+                              }}
                             >
-                              <div className="delivery-info">
-                                <span>Delivery to:</span>
-                                <strong>{order.deliveryAddress}</strong>
-                              </div>
-                              <div className="payment-info">
-                                <span>Payment:</span>
-                                <strong>{order.paymentMethod}</strong>
-                              </div>
+                              {statusConfig[order.OrderStatus]?.icon}
+                              <span>{statusConfig[order.OrderStatus]?.text}</span>
+                            </div>
+                          </div>
 
-                              <div className="order-items">
-                                {order.OrderedItems.map((item, index) => (
-                                  <div key={index} className="order-item">
-                                    <img
-                                      className="item-image"
-                                      src={
-                                        item.image ||
-                                        "https://via.placeholder.com/80?text=No+Image"
-                                      }
-                                      alt={item.name}
-                                      onError={(e) => {
-                                        e.target.src =
-                                          "https://via.placeholder.com/80?text=No+Image";
-                                      }}
-                                    />
-                                    <div className="item-details-cont">
-                                      <h4>{item.name}</h4>
-                                      <div className="item-details">
-                                        <span >Price :</span>
-                                        <span className="item-price">
-                                          {formatCurrency(item.price)}
-                                        </span>
-                                      </div>
-                                      <div className="item-details">
-                                        <span>Quantity :</span>
-                                        <span>{item.quantity}</span>
-                                      </div>
-                                      <div className="item-details">
-                                        <span>Total :</span>
-                                        <span className="item-subtotal">
-                                          {formatCurrency(
-                                            item.price * item.quantity
-                                          )}
-                                        </span>
+                          <div className="order-summary">
+                            <div className="summary-item">
+                              <span>Total:</span>
+                              <strong className="order-total">
+                                {formatCurrency(order.totalPrice)}
+                              </strong>
+                            </div>
+                            <div className="summary-item">
+                              <span>Items:</span>
+                              <strong>{order.OrderedItems.length}</strong>
+                            </div>
+                          </div>
+
+                          <AnimatePresence>
+                            {expandedOrder === order._id && (
+                              <motion.div
+                                className="order-details"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <div className="delivery-info">
+                                  <span>Delivery to:</span>
+                                  <strong>{order.deliveryAddress}</strong>
+                                </div>
+                                <div className="payment-info">
+                                  <span>Payment:</span>
+                                  <strong>{order.paymentMethod}</strong>
+                                </div>
+
+                                <div className="order-items">
+                                  {order.OrderedItems.map((item, index) => (
+                                    <div key={index} className="order-item">
+                                      <img
+                                        className="item-image"
+                                        src={
+                                          item.image ||
+                                          "https://via.placeholder.com/80?text=No+Image"
+                                        }
+                                        alt={item.name}
+                                        onError={(e) => {
+                                          e.target.src =
+                                            "https://via.placeholder.com/80?text=No+Image";
+                                        }}
+                                      />
+                                      <div className="item-details-cont">
+                                        <h4>{item.name}</h4>
+                                        <div className="item-details">
+                                          <span>Price :</span>
+                                          <span className="item-price">
+                                            {formatCurrency(item.price)}
+                                          </span>
+                                        </div>
+                                        <div className="item-details">
+                                          <span>Quantity :</span>
+                                          <span>{item.quantity}</span>
+                                        </div>
+                                        <div className="item-details">
+                                          <span>Total :</span>
+                                          <span className="item-subtotal">
+                                            {formatCurrency(
+                                              item.price * item.quantity
+                                            )}
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ))}
-                              </div>
+                                  ))}
+                                </div>
 
-                              {order.OrderStatus === "Pending" && (
-                                <button
-                                  className="cancel-order-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCancelOrder(order._id);
-                                  }}
-                                >
-                                  <FaTimes className="cancel-icon" />
-                                  Cancel Order
-                                </button>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    ))}
+                                {order.OrderStatus === "Pending" && (
+                                  <button
+                                    className="cancel-order-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCancelOrder(order._id);
+                                    }}
+                                  >
+                                    <FaTimes className="cancel-icon" />
+                                    Cancel Order
+                                  </button>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <motion.div
-                  className="empty-orders"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <div className="empty-content">
-                    <img
-                      src="https://cdn.dribbble.com/users/5107895/screenshots/14532312/media/a7e6c2e9333d0989e3a54c95dd8321d7.gif"
-                      alt="No orders found"
-                    />
-                    <h2>No Orders Found</h2>
-                    <p>You don't have any {filter.toLowerCase()} orders yet</p>
-                    <button
-                      className="shop-now-btn"
-                      onClick={() => handleNavigation("products")}
-                    >
-                      Browse Products <FaArrowRight className="arrow-icon" />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
+                ) : (
+                  <motion.div
+                    className="empty-orders"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="empty-content">
+                      <img
+                        src="https://cdn.dribbble.com/users/5107895/screenshots/14532312/media/a7e6c2e9333d0989e3a54c95dd8321d7.gif"
+                        alt="No orders found"
+                      />
+                      <h2>No Orders Found</h2>
+                      <p>You don't have any {filter.toLowerCase()} orders yet</p>
+                      <button
+                        className="shop-now-btn"
+                        onClick={() => handleNavigation("products")}
+                      >
+                        Browse Products <FaArrowRight className="arrow-icon" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
-      <div className="bottom-nav">
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("home")}
-        >
-          <FaHome />
-          <span>Home</span>
-        </button>
-        <button
-          className="bot-nav-btn bot-active"
-          onClick={() => handleNavigation("myorders")}
-        >
-          <FaListAlt />
-          <span>Orders</span>
-        </button>
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("profilepage")}
-        >
-          <FaUser />
-          <span>Account</span>
-        </button>
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("cart")}
-        >
-          <FaShoppingCart />
-          <span>Cart</span>
-        </button>
-      </div>
+      <BottomNav UserData={userDetails} />
     </div>
   );
 };

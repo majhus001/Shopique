@@ -15,9 +15,9 @@ import {
   FaShoppingCart,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { FiLogIn, FiAlertCircle } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
 import handleLogout from "../../utils/Logout";
+import BottomNav from "../Bottom Navbar/BottomNav";
+import AuthRequired from "../Authentication/AuthRequired";
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -125,12 +125,8 @@ const ProfilePage = () => {
     }
   };
 
-  const handleNavigation = (path) => {
-    navigate(`/${path}`, { state: { user: userDetails } });
-  };
-
   const handleLogoutUser = async () => {
-    const logout = handleLogout();
+    const logout = await handleLogout();
     if (logout) {
       navigate("/home", { state: { user: userDetails } });
     } else {
@@ -141,29 +137,11 @@ const ProfilePage = () => {
   return (
     <div className="usprof-container">
       <div className="usprof-nav">
-        <Navbar user={userDetails} />
+        <Navbar />
       </div>
 
       {!isLoggedIn ? (
-        <motion.div
-          className="auth-required"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="auth-card">
-            <FiAlertCircle className="auth-icon" />
-            <h2>Sign In Required</h2>
-            <p>Please login to view your profile</p>
-            <button
-              className="auth-button"
-              onClick={() => handleNavigation("login")}
-            >
-              <FiLogIn className="btn-icon" />
-              Sign In
-            </button>
-          </div>
-        </motion.div>
+        <AuthRequired message="Please login to view your order history" />
       ) : (
         <div className="usprof-main">
           <div className="sidebar-cont">
@@ -326,36 +304,7 @@ const ProfilePage = () => {
         </div>
       )}
 
-      <div className="bottom-nav">
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("home")}
-        >
-          <FaHome />
-          <span>Home</span>
-        </button>
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("myorders")}
-        >
-          <FaListAlt />
-          <span>Orders</span>
-        </button>
-        <button
-          className="bot-nav-btn bot-active"
-          onClick={() => handleNavigation("profilepage")}
-        >
-          <FaUser />
-          <span>Account</span>
-        </button>
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("cart")}
-        >
-          <FaShoppingCart />
-          <span>Cart</span>
-        </button>
-      </div>
+      <BottomNav UserData={userDetails} />
     </div>
   );
 };

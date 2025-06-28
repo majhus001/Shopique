@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
 import ValidUserData from "../../utils/ValidUserData";
+import BottomNav from "../Bottom Navbar/BottomNav";
 
 const capitalizeWords = (string) => {
   if (!string) return "";
@@ -25,10 +26,66 @@ const capitalizeWords = (string) => {
     .join(" ");
 };
 
+const SkeletonLoading = () => {
+  return (
+    <div className="skeleton-loading-container">
+      {/* Banner skeleton */}
+      <div className="skeleton-banner"></div>
+
+      {/* Countdown skeleton */}
+      <div className="skeleton-countdown"></div>
+
+      {/* Featured categories skeleton */}
+      <div className="skeleton-section">
+        <div className="skeleton-header"></div>
+        <div className="skeleton-featured-categories">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="skeleton-featured-card"></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Product categories skeleton */}
+      {[...Array(3)].map((_, catIndex) => (
+        <div key={catIndex} className="skeleton-section">
+          <div className="skeleton-category-header">
+            <div className="skeleton-title"></div>
+            <div className="skeleton-view-all"></div>
+          </div>
+          <div className="skeleton-products-container">
+            <div className="skeleton-scroll-button left"></div>
+            <div className="skeleton-products-scroll">
+              {[...Array(5)].map((_, prodIndex) => (
+                <div key={prodIndex} className="skeleton-product-card">
+                  <div className="skeleton-product-image"></div>
+                  <div className="skeleton-product-details">
+                    <div className="skeleton-product-name"></div>
+                    <div className="skeleton-price-container">
+                      <div className="skeleton-price"></div>
+                    </div>
+                    <div className="skeleton-product-meta">
+                      <div className="skeleton-rating"></div>
+                      <div className="skeleton-sales"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="skeleton-scroll-button right"></div>
+          </div>
+        </div>
+      ))}
+
+      {/* Newsletter skeleton */}
+      <div className="skeleton-newsletter"></div>
+    </div>
+  );
+};
+
 const HomePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [UserData, setUserData] = useState(location.state?.user || null);
+  const [userDetails, setUserDetails] = useState(location.state?.user || null);
   const [productsByCategory, setProductsByCategory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,7 +100,6 @@ const HomePage = () => {
   });
 
   const productContainerRefs = useRef({});
-
   const scrollLeft = (categoryId) => {
     if (productContainerRefs.current[categoryId]) {
       productContainerRefs.current[categoryId].scrollBy({
@@ -82,11 +138,6 @@ const HomePage = () => {
           subCategory:
             category.subCategory || capitalizeWords(category.subCategory || ""),
         }));
-        processedData.map((item) => {
-          console.log(item);
-          // item.products.map((el) => {
-          // });
-        });
         setProductsByCategory(processedData);
       } else {
         throw new Error("No products data received");
@@ -104,10 +155,11 @@ const HomePage = () => {
     const initializeUser = async () => {
       try {
         const userData = await ValidUserData();
-        setUserData((prev) =>
+        setUserDetails((prev) =>
           JSON.stringify(prev) !== JSON.stringify(userData) ? userData : prev
         );
       } catch (error) {
+        setUserDetails(null);
         console.error("User validation error:", error);
       }
     };
@@ -183,14 +235,10 @@ const HomePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavigation = (path) => {
-    navigate(`/${path}`, { state: { user: UserData } });
-  };
-
   const handleprodlistnavigation = (item) => {
     navigate(`/prodlist/${item._id}`, {
       state: {
-        user: UserData,
+        user: userDetails,
         name: item.name,
         price: item.price,
         brand: item.brand,
@@ -209,385 +257,403 @@ const HomePage = () => {
   return (
     <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
       <div className="usprof-nav">
-        <Navbar user={UserData} />
+        <Navbar />
       </div>
 
       <div className="main-container">
         <div className="content">
-          <section className="hero-section">
-            <div className="hero-banner">
-              <AnimatePresence mode="wait">
+          {loading ? (
+            <SkeletonLoading />
+          ) : (
+            <>
+              <section className="hero-section">
+                <div className="hero-banner">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentImage}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="banner-image-container"
+                    >
+                      <img
+                        src={bannerImages[currentImage]}
+                        alt={`Banner ${currentImage + 1}`}
+                        className="banner-image"
+                        loading="lazy"
+                      />
+                      <div className="banner-overlay"></div>
+                      <div className="banner-content">
+                        <motion.h2
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          className="ad-ban-disount-heading"
+                        >
+                          Summer Collection 2025
+                        </motion.h2>
+                        <motion.p
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          Up to 50% off on selected items!
+                        </motion.p>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.6 }}
+                          className="ban-shop-now-btn"
+                          onClick={() => navigate("/products")}
+                        >
+                          Shop Now
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+
+                  <div className="banner-indicators">
+                    {bannerImages.map((_, index) => (
+                      <button
+                        key={`banner-${index}`}
+                        className={`indicator ${
+                          index === currentImage ? "active" : ""
+                        }`}
+                        onClick={() => setCurrentImage(index)}
+                        aria-label={`Go to banner ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
                 <motion.div
-                  key={currentImage}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="banner-image-container"
+                  className="countdown-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
                 >
-                  <img
-                    src={bannerImages[currentImage]}
-                    alt={`Banner ${currentImage + 1}`}
-                    className="banner-image"
-                    loading="lazy"
-                  />
-                  <div className="banner-overlay"></div>
-                  <div className="banner-content">
-                    <motion.h2
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="ad-ban-disount-heading"
-                    >
-                      Summer Collection 2025
-                    </motion.h2>
-                    <motion.p
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                    >
-                      Up to 50% off on selected items!
-                    </motion.p>
+                  <div className="countdown-content">
+                    <div className="countdown-title-timer-cont">
+                      <div className="countdown-header">
+                        <FiClock className="countdown-icon" />
+                        <h3>Limited Time Offer</h3>
+                      </div>
+                      <div className="timer-grid">
+                        <motion.div
+                          className="timer-block"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <span className="timer-value">{timeLeft.days}</span>
+                          <span className="timer-label">Days</span>
+                        </motion.div>
+                        <motion.div
+                          className="timer-block"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <span className="timer-value">{timeLeft.hours}</span>
+                          <span className="timer-label">Hours</span>
+                        </motion.div>
+                        <motion.div
+                          className="timer-block"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <span className="timer-value">
+                            {timeLeft.minutes}
+                          </span>
+                          <span className="timer-label">Minutes</span>
+                        </motion.div>
+                        <motion.div
+                          className="timer-block"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <span className="timer-value">
+                            {timeLeft.seconds}
+                          </span>
+                          <span className="timer-label">Seconds</span>
+                        </motion.div>
+                      </div>
+                    </div>
                     <motion.button
+                      className="deal-btn"
+                      onClick={() => navigate("/products")}
+                      aria-label="Grab the deal"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.6 }}
-                      className="ban-shop-now-btn"
-                      onClick={() => navigate("/products")}
                     >
-                      Shop Now
+                      <FiShoppingBag className="deal-icon" />
+                      <span>Grab the Deal</span>
                     </motion.button>
                   </div>
                 </motion.div>
-              </AnimatePresence>
+              </section>
 
-              <div className="banner-indicators">
-                {bannerImages.map((_, index) => (
-                  <button
-                    key={`banner-${index}`}
-                    className={`indicator ${
-                      index === currentImage ? "active" : ""
-                    }`}
-                    onClick={() => setCurrentImage(index)}
-                    aria-label={`Go to banner ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <motion.div
-              className="countdown-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <div className="countdown-content">
-                <div className="countdown-title-timer-cont">
-                  <div className="countdown-header">
-                    <FiClock className="countdown-icon" />
-                    <h3>Limited Time Offer</h3>
-                  </div>
-                  <div className="timer-grid">
-                    <motion.div
-                      className="timer-block"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <span className="timer-value">{timeLeft.days}</span>
-                      <span className="timer-label">Days</span>
-                    </motion.div>
-                    <motion.div
-                      className="timer-block"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <span className="timer-value">{timeLeft.hours}</span>
-                      <span className="timer-label">Hours</span>
-                    </motion.div>
-                    <motion.div
-                      className="timer-block"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <span className="timer-value">{timeLeft.minutes}</span>
-                      <span className="timer-label">Minutes</span>
-                    </motion.div>
-                    <motion.div
-                      className="timer-block"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <span className="timer-value">{timeLeft.seconds}</span>
-                      <span className="timer-label">Seconds</span>
-                    </motion.div>
-                  </div>
-                </div>
-                <motion.button
-                  className="deal-btn"
-                  onClick={() => navigate("/products")}
-                  aria-label="Grab the deal"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FiShoppingBag className="deal-icon" />
-                  <span>Grab the Deal</span>
-                </motion.button>
-              </div>
-            </motion.div>
-          </section>
-
-          <section className="featured-section">
-            <div className="featured-scroll-wrapper">
-              <div className="featured-category-cont">
-                {productsByCategory.slice(0, 10).map((category) => (
-                  <motion.div
-                    key={category._id}
-                    className="featured-category-card"
-                    onClick={() => handlecategoryClick(category.subCategory)}
-                    transition={{ duration: 0.3 }}
-                    whileHover={{ zIndex: 10 }}
-                  >
-                    <div className="category-image-container">
-                      <img
-                        src={
-                          category.products[0]?.images[0] ||
-                          "/placeholder-category.jpg"
+              <section className="featured-section">
+                <div className="featured-scroll-wrapper">
+                  <div className="featured-category-cont">
+                    {productsByCategory.slice(0, 10).map((category) => (
+                      <motion.div
+                        key={category._id}
+                        className="featured-category-card"
+                        onClick={() =>
+                          handlecategoryClick(category.subCategory)
                         }
-                        alt={category.displayName || category.subCategory}
-                        className="category-image"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src = "/placeholder-category.jpg";
-                        }}
-                      />
-                    </div>
-                    <div className="category-info">
-                      <span>
-                        {capitalizeWords(category.subCategory)}
-                        <FiChevronRight />
-                      </span>
-                    </div>
-
-                    <div className="category-dropdown">
-                      {category.products.slice(0, 5).map((item) => (
-                        <div
-                          key={item._id}
-                          className="dropdown-item"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleprodlistnavigation(item);
-                          }}
-                        >
-                          {item.name}
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="products-section">
-            {error && (
-              <motion.div
-                className="error-message"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <p>{error}</p>
-                <button onClick={fetchData}>Retry</button>
-              </motion.div>
-            )}
-
-            {loading ? (
-              <motion.div
-                className="loading-container"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="loading-spinner"></div>
-                <p>Loading products...</p>
-              </motion.div>
-            ) : productsByCategory.length > 0 ? (
-              productsByCategory.map(
-                ({
-                  subCategory,
-                  products: categoryProducts,
-                  _id: categoryId,
-                }) => (
-                  <div className="product-category" key={categoryId}>
-                    <motion.div
-                      className="category-header"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <h4>{capitalizeWords(subCategory)}</h4>
-                      <span
-                        onClick={() => handlecategoryClick(subCategory)}
-                        className="view-all-link"
+                        transition={{ duration: 0.3 }}
+                        whileHover={{ zIndex: 10 }}
                       >
-                        View All <FiChevronRight />
-                      </span>
-                    </motion.div>
-
-                    <div className="horizontal-scroll-container">
-                      <motion.button
-                        className="scroll-button left"
-                        onClick={() => scrollLeft(categoryId)}
-                        aria-label="Scroll left"
-                      >
-                        <FiChevronLeft />
-                      </motion.button>
-
-                      <div
-                        className="product-horizontal-scroll"
-                        ref={(el) =>
-                          (productContainerRefs.current[categoryId] = el)
-                        }
-                      >
-                        {categoryProducts.map((item) => (
-                          <motion.div
-                            className="product-card-horizontal"
-                            key={item._id}
-                            whileHover={{
-                              boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-                              y: -5,
+                        <div className="category-image-container">
+                          <img
+                            src={
+                              category.products[0]?.images[0] ||
+                              "/placeholder-category.jpg"
+                            }
+                            alt={category.displayName || category.subCategory}
+                            className="category-image"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.src = "/placeholder-category.jpg";
                             }}
-                            transition={{ duration: 0.3 }}
-                            initial={{ opacity: 0, x: 20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                          >
+                          />
+                        </div>
+                        <div className="category-info">
+                          <span>
+                            {capitalizeWords(category.subCategory)}
+                            <FiChevronRight />
+                          </span>
+                        </div>
+
+                        <div className="category-dropdown">
+                          {category.products.slice(0, 5).map((item) => (
                             <div
+                              key={item._id}
+                              className="dropdown-item"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleprodlistnavigation(item);
                               }}
                             >
-                              <div className="product-image-container">
-                                <motion.img
-                                  src={item.images?.[0] || ""}
-                                  alt={item.name}
-                                  className="product-image"
-                                  loading="lazy"
-                                  onError={(e) => {
-                                    e.target.src = "";
-                                    e.target.alt = "Image not available";
-                                    e.target.className = "product-image-error";
-                                  }}
-                                />
-                                {item.offerPrice && (
-                                  <motion.div
-                                    className="discount-badge"
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.3 }}
-                                  >
-                                    {Math.round(
-                                      ((item.price - item.offerPrice) /
-                                        item.price) *
-                                        100
-                                    )}
-                                    % OFF
-                                  </motion.div>
-                                )}
-                              </div>
-                              <div className="product-details">
-                                <h4 className="product-name">{item.name}</h4>
-                                <div className="price-container">
-                                  {item.offerPrice ? (
-                                    <>
-                                      <span className="offer-price">
-                                        ₹{item.offerPrice}
-                                      </span>
-                                      <span className="original-price">
-                                        ₹{item.price}
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <span className="price">₹{item.price}</span>
-                                  )}
-                                </div>
-                                <div className="product-meta">
-                                  {item.rating > 0 && (
-                                    <div className="rating">
-                                      <FiStar className="star-icon" />
-                                      <span>{item.rating.toFixed(1)}</span>
-                                    </div>
-                                  )}
-                                  {item.salesCount > 0 && (
-                                    <div className="sales-count">
-                                      <FiShoppingBag />
-                                      <span>{item.salesCount} sold</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
+                              <img
+                                className="dropdown-img"
+                                src={item.images[0]}
+                                alt={item.name}
+                              />
+                              <span className="dropdown-item-name">{item.name}</span>
                             </div>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      <motion.button
-                        className="scroll-button right"
-                        onClick={() => scrollRight(categoryId)}
-                        aria-label="Scroll right"
-                      >
-                        <FiChevronRight />
-                      </motion.button>
-                    </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-                )
-              )
-            ) : (
-              <motion.div
-                className="empty-state"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <img
-                  src="/empty-state.svg"
-                  alt="No products available"
-                  loading="lazy"
-                />
-                <h3>No products available</h3>
-                <p>Check back later for new arrivals</p>
-                <button onClick={fetchData}>Refresh</button>
-              </motion.div>
-            )}
-          </section>
+                </div>
+              </section>
 
-          <motion.section
-            className="newsletter-section"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="newsletter-container">
-              <div className="newsletter-content">
-                <h2>Subscribe to Our Newsletter</h2>
-                <p>Get the latest updates on new products and upcoming sales</p>
-                <form className="newsletter-form">
-                  <motion.input
-                    type="email"
-                    placeholder="Your email address"
-                    required
-                    aria-label="Email address for newsletter"
-                    whileFocus={{ boxShadow: "0 0 0 2px var(--primary-color)" }}
-                  />
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+              <section className="products-section">
+                {error && (
+                  <motion.div
+                    className="error-message"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                   >
-                    Subscribe
-                  </motion.button>
-                </form>
-              </div>
-            </div>
-          </motion.section>
+                    <p>{error}</p>
+                    <button onClick={fetchData}>Retry</button>
+                  </motion.div>
+                )}
+
+                {productsByCategory.length > 0 ? (
+                  productsByCategory.map(
+                    ({
+                      displayName,
+                      subCategory,
+                      products: categoryProducts,
+                      _id: categoryId,
+                    }) => (
+                      <div className="product-category" key={categoryId}>
+                        <motion.div
+                          className="category-header"
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <h4>{capitalizeWords(displayName)}</h4>
+                          <span
+                            onClick={() => handlecategoryClick(subCategory)}
+                            className="view-all-link"
+                          >
+                            View All <FiChevronRight />
+                          </span>
+                        </motion.div>
+
+                        <div className="horizontal-scroll-container">
+                          <motion.button
+                            className="scroll-button left"
+                            onClick={() => scrollLeft(categoryId)}
+                            aria-label="Scroll left"
+                          >
+                            <FiChevronLeft />
+                          </motion.button>
+
+                          <div
+                            className="product-horizontal-scroll"
+                            ref={(el) =>
+                              (productContainerRefs.current[categoryId] = el)
+                            }
+                          >
+                            {categoryProducts.map((item) => (
+                              <motion.div
+                                className="product-card-horizontal"
+                                key={item._id}
+                                whileHover={{
+                                  boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+                                  y: -5,
+                                }}
+                                transition={{ duration: 0.3 }}
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                              >
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleprodlistnavigation(item);
+                                  }}
+                                >
+                                  <div className="product-image-container">
+                                    <motion.img
+                                      src={item.images?.[0] || ""}
+                                      alt={item.name}
+                                      className="product-image"
+                                      loading="lazy"
+                                      onError={(e) => {
+                                        e.target.src = "";
+                                        e.target.alt = "Image not available";
+                                        e.target.className =
+                                          "product-image-error";
+                                      }}
+                                    />
+                                    {item.offerPrice && (
+                                      <motion.div
+                                        className="discount-badge"
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ delay: 0.3 }}
+                                      >
+                                        {Math.round(
+                                          ((item.price - item.offerPrice) /
+                                            item.price) *
+                                            100
+                                        )}
+                                        % OFF
+                                      </motion.div>
+                                    )}
+                                  </div>
+                                  <div className="product-details">
+                                    <h4 className="product-name">
+                                      {item.name}
+                                    </h4>
+                                    <div className="price-container">
+                                      {item.offerPrice ? (
+                                        <>
+                                          <span className="offer-price">
+                                            ₹{item.offerPrice}
+                                          </span>
+                                          <span className="original-price">
+                                            ₹{item.price}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <span className="price">
+                                          ₹{item.price}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="product-meta">
+                                      {item.rating > 0 && (
+                                        <div className="rating">
+                                          <FiStar className="star-icon" />
+                                          <span>{item.rating.toFixed(1)}</span>
+                                        </div>
+                                      )}
+                                      {item.salesCount > 0 && (
+                                        <div className="sales-count">
+                                          <FiShoppingBag />
+                                          <span>{item.salesCount} sold</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+
+                          <motion.button
+                            className="scroll-button right"
+                            onClick={() => scrollRight(categoryId)}
+                            aria-label="Scroll right"
+                          >
+                            <FiChevronRight />
+                          </motion.button>
+                        </div>
+                      </div>
+                    )
+                  )
+                ) : (
+                  <motion.div
+                    className="empty-state"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <img
+                      src="/empty-state.svg"
+                      alt="No products available"
+                      loading="lazy"
+                    />
+                    <h3>No products available</h3>
+                    <p>Check back later for new arrivals</p>
+                    <button onClick={fetchData}>Refresh</button>
+                  </motion.div>
+                )}
+              </section>
+
+              <motion.section
+                className="newsletter-section"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="newsletter-container">
+                  <div className="newsletter-content">
+                    <h2>Subscribe to Our Newsletter</h2>
+                    <p>
+                      Get the latest updates on new products and upcoming sales
+                    </p>
+                    <form className="newsletter-form">
+                      <motion.input
+                        type="email"
+                        placeholder="Your email address"
+                        required
+                        aria-label="Email address for newsletter"
+                        whileFocus={{
+                          boxShadow: "0 0 0 2px var(--primary-color)",
+                        }}
+                      />
+                      <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Subscribe
+                      </motion.button>
+                    </form>
+                  </div>
+                </div>
+              </motion.section>
+            </>
+          )}
         </div>
       </div>
 
@@ -717,36 +783,7 @@ const HomePage = () => {
         </div>
       </motion.footer>
 
-      <div className="bottom-nav">
-        <button
-          className="bot-nav-btn bot-active"
-          onClick={() => handleNavigation("home")}
-        >
-          <FaHome />
-          <span>Home</span>
-        </button>
-        <button
-          className="bot-nav-btn "
-          onClick={() => handleNavigation("myorders")}
-        >
-          <FaListAlt />
-          <span>Orders</span>
-        </button>
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("profilepage")}
-        >
-          <FaUser />
-          <span>Account</span>
-        </button>
-        <button
-          className="bot-nav-btn"
-          onClick={() => handleNavigation("cart")}
-        >
-          <FaShoppingCart />
-          <span>Cart</span>
-        </button>
-      </div>
+      <BottomNav UserData={userDetails} />
     </div>
   );
 };

@@ -6,7 +6,7 @@ import API_BASE_URL from "../../api";
 import Sidebar from "../sidebar/Sidebar";
 import ValidUserData from "../../utils/ValidUserData";
 
-export default function Navbar({ user, pageno = null }) {
+export default function Navbar() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(null); // null means not determined yet
@@ -15,7 +15,6 @@ export default function Navbar({ user, pageno = null }) {
   const [searchResults, setSearchResults] = useState([]);
   const [cartlength, setCartLength] = useState(0);
   const [allProducts, setAllProducts] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const debounceTimeout = useRef(null);
   const searchRef = useRef(null);

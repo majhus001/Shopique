@@ -5,6 +5,7 @@ import axios from "axios";
 import "./Orderdetails.css";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
+import { motion } from "framer-motion";
 
 const Orderdetails = () => {
   const location = useLocation();
@@ -13,201 +14,206 @@ const Orderdetails = () => {
   const {
     cartItems = [],
     totalPrice = 0,
+    deliveryfee = 0,
+    platformFee = 0,
     discount = 0,
-    platformFee = 50,
-    deliveryFee = 20,
+    statePincode = "",
     path,
   } = location.state || {};
-  const stateUser = location.state?.user || null;
 
-  const [user, setUser] = useState(stateUser);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mobileNumber, setMobileNumber] = useState(user.mobile || "");
-  const [pincode, setPincode] = useState(user.pincode || "");
-  const [deliveryAddress, setDeliveryAddress] = useState(user.address || "");
+  const user = location.state?.user || null;
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user);
+  const [mobileNumber, setMobileNumber] = useState(user?.mobile || "");
+  const [pincode, setPincode] = useState(statePincode);
+  const [deliveryAddress, setDeliveryAddress] = useState(user?.address || "");
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [isMobileDone, setIsMobileDone] = useState(false);
   const [isAddressDone, setIsAddressDone] = useState(false);
   const [isPincodeDone, setIsPincodeDone] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
+    if (!user) {
+      navigate(-1);
+      return;
     }
-  });
 
-  const checkvaliduser = async () => {
-    try {
-      setLoading(true);
-      console.log("Checking user validity...");
-      const response = await axios.get(
-        `${API_BASE_URL}/api/auth/checkvaliduser`,
-        {
-          withCredentials: true,
-        }
-      );
-      if (!response.data.user) {
-        navigate("/login");
-        return;
-      }
-
-      const userId = response.data.user.userId;
-      const userRes = await axios.get(
-        `${API_BASE_URL}/api/auth/fetch/${userId}`
-      );
-      setUser(userRes.data.data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      navigate("/login");
-    } finally {
-      setLoading(false);
+    // Auto-mark done if fields are already filled
+    if (user.mobile?.length === 10) {
+      setIsMobileDone(true);
     }
-  };
+    if (statePincode?.length === 6) {
+      setIsPincodeDone(true);
+    }
+    if (user.address) {
+      setIsAddressDone(true);
+    }
+  }, [user, navigate, statePincode]);
 
-  useEffect(() => {
-    checkvaliduser();
-  }, []);
-
-  // Separate handlers for each field
   const handleMobileChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ""); // digits only
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 10) {
       setMobileNumber(value);
-    }
-  };
-
-  const handlePincodeChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ""); // digits only
-    if (value.length <= 6) {
-      setPincode(value);
-      if (value.length === 6) {
-        getCoordinates(value).then((coordinates) => {
-          if (coordinates && coordinates.address) {
-            setDeliveryAddress(coordinates.address);
-            setIsPincodeDone(true);
-          }else{
-            alert("Invalid Pincode");
-            return;
-          }
-        });
-      }
+      setIsMobileDone(value.length === 10);
     }
   };
 
   const handleAddressChange = (e) => {
     setDeliveryAddress(e.target.value);
+    setIsAddressDone(!!e.target.value.trim());
   };
 
   const handlePlaceOrder = async () => {
-    if (!mobileNumber || !deliveryAddress) {
-      alert("Please fill in all the details.");
+    if (!isLoggedIn) {
+      alert("Please login to place an order");
       return;
     }
 
-    if (!user.pincode || !user.address) {
-      alert("Please fill in your pincode and address in your profile.");
-      navigate("/profilepage", { state: { user: user } });
+    if (!mobileNumber || mobileNumber.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number.");
       return;
     }
+
+    if (!pincode || pincode.length !== 6) {
+      alert("Please enter a valid 6-digit pincode.");
+      return;
+    }
+
+    if (!deliveryAddress.trim()) {
+      alert("Please enter your delivery address.");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert("Your cart is empty. Please add items before placing an order.");
+      return;
+    }
+
+    setPlacingOrder(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/orders/add`, {
+      const orderData = {
         userId: user._id,
         cartItems,
-        totalPrice: totalPrice + platformFee + deliveryFee - discount,
+        totalPrice: totalPrice + deliveryfee + platformFee - discount,
         mobileNumber,
         pincode,
         deliveryAddress,
         paymentMethod,
-      });
+      };
 
-      if (response.data) {
-        const result = response.data;
-        alert(result.message);
-        if (path == "cart") {
-          await clearCart();
-        }
-        try {
-          if (cartItems.length > 0) {
-            const StockUpdate = await axios.put(
-              `${API_BASE_URL}/api/orders/stockupdate/`,
-              { cartItems }
-            );
-          } else {
-            console.error("Cart is empty");
-          }
-        } catch (error) {
-          console.error("Error updating stock:", error);
-          alert("An error occurred. Please try again.");
-        }
+      const response = await axios.post(
+        `${API_BASE_URL}/api/orders/add`,
+        orderData
+      );
 
-        try {
-          const recActivity = await axios.post(
-            `${API_BASE_URL}/api/user/reactivity/add`,
-            { name: user.username, activity: "has Placed an order" }
-          );
-          console.log("placed an order");
-        } catch (error) {
-          console.error("Error updating Recent Activity:", error);
-        }
+      if (response.data.success) {
+        await clearCart();
+        
+        await axios.put(`${API_BASE_URL}/api/orders/stockupdate/`, {
+          cartItems,
+        });
 
-        navigate("/home", { state: { user: user } });
+        await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
+          name: user.username,
+          activity: "has Placed an order",
+        });
+
+        alert("Order placed successfully!");
+        navigate("/home", { state: { user } });
       } else {
-        const error = await response.json();
-        alert(error.message || "Failed to place order.");
+        throw new Error(response.data.message || "Failed to place order.");
       }
     } catch (error) {
       console.error("Error placing order:", error);
-      alert("An error occurred. Please try again.");
+      alert(error.message || "An error occurred. Please try again.");
+    } finally {
+      setPlacingOrder(false);
     }
   };
 
   const clearCart = async () => {
     try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/api/cart/clear/${user._id}`
-      );
-      if (response.data.success) {
-        console.log("Cart cleared successfully!");
-      } else {
-        console.error("Failed to clear cart.");
-      }
+      await axios.delete(`${API_BASE_URL}/api/cart/clear/${user._id}`);
+      console.log("Cart cleared successfully!");
     } catch (error) {
       console.error("Error clearing cart:", error);
     }
   };
 
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <div className="ord-container">
+          <div className="ord-skeleton-loading">
+            <div className="ord-skeleton-header"></div>
+            <div className="ord-skeleton-line"></div>
+            <div className="ord-skeleton-line"></div>
+            <div className="ord-skeleton-line"></div>
+            <div className="ord-skeleton-line"></div>
+            <div className="ord-skeleton-line"></div>
+          </div>
+          <div className="ord-skeleton-loading">
+            <div className="ord-skeleton-header"></div>
+            <div className="ord-skeleton-line"></div>
+            <div className="ord-skeleton-line"></div>
+            <div className="ord-skeleton-line"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <Navbar user={user} pageno="123" />
-      <div className="order-details-container">
-        {/* Address Details Section */}
-        <div className="address-details">
+    <div className="checkout-container">
+      <div className="cart-navbar">
+        <Navbar />
+      </div>
+      <motion.h1
+        className="ord-checkout-title"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        Your CheckOut
+      </motion.h1>
+      <div className="ord-container">
+        <div className="ord-address-details">
           <h3>Address Details</h3>
 
-          {/* User Login Section */}
-          <div className="input-group">
-            {isLoggedIn ? (
-              <div>
-                <h4>1. User Login ✅</h4>
-              </div>
-            ) : (
-              <div>
-                <h4>1. User Login ❌</h4>
+          <div className="ord-input-group">
+            {!isLoggedIn ? (
+              <div className="ord-step-incomplete">
+                <h4>
+                  1. User Login <span className="ord-crossmark">✗</span>
+                </h4>
                 <h5>
                   You are not logged in. Please log in to place an order.
-                  <Link to="/login">
-                    <button className="ord-login">Login</button>
+                  <Link to="/login" state={{ from: location }}>
+                    <button className="ord-login-btn">Login</button>
                   </Link>
                 </h5>
+              </div>
+            ) : (
+              <div className="ord-step-complete">
+                <h4>
+                  1. User Login <span className="ord-checkmark">✓</span>
+                </h4>
               </div>
             )}
           </div>
 
-          {/* Mobile Number Section */}
-          <div className="input-group">
-            <h4>2. Mobile Number</h4>
+          <div className="ord-input-group">
+            <h4>
+              2. Mobile Number{" "}
+              {isMobileDone ? (
+                <span className="ord-checkmark">✓</span>
+              ) : (
+                <span className="ord-crossmark">✗</span>
+              )}
+            </h4>
             {isLoggedIn ? (
               <>
                 <input
@@ -216,24 +222,32 @@ const Orderdetails = () => {
                   placeholder="Enter your mobile number"
                   value={mobileNumber}
                   onChange={handleMobileChange}
+                  maxLength="10"
+                  className="ord-input"
                 />
-                {!isMobileDone && mobileNumber.length === 10 && (
+                {mobileNumber.length === 10 && !isMobileDone && (
                   <button
-                    className="done-button"
+                    className="ord-done-btn"
                     onClick={() => setIsMobileDone(true)}
                   >
-                    Done
+                    Verify
                   </button>
                 )}
               </>
             ) : (
-              <p>Please log in to enter your mobile number.</p>
+              <p className="ord-login-required">Please log in to continue.</p>
             )}
           </div>
 
-          {/* Pincode Section */}
-          <div className="input-group">
-            <h4>3. Pincode</h4>
+          <div className="ord-input-group">
+            <h4>
+              3. Pincode{" "}
+              {isPincodeDone ? (
+                <span className="ord-checkmark">✓</span>
+              ) : (
+                <span className="ord-crossmark">✗</span>
+              )}
+            </h4>
             {isMobileDone ? (
               <>
                 <input
@@ -241,24 +255,25 @@ const Orderdetails = () => {
                   name="pincode"
                   placeholder="Enter your pincode"
                   value={pincode}
-                  onChange={handlePincodeChange}
-                  // disabled={isPincodeDone}
+                  maxLength="6"
+                  className="ord-input"
+                  readOnly
                 />
-                {!isPincodeDone && pincode.length === 6 && (
-                  <button
-                    className="done-button"
-                    onClick={handlePincodeChange}
-                  >
-                    Done
-                  </button>
-                )}
               </>
-            ) : null}
+            ) : (
+              <p className="ord-step-waiting">Complete previous step first.</p>
+            )}
           </div>
 
-          {/* Delivery Address Section */}
-          <div className="input-group">
-            <h4>4. Delivery Address</h4>
+          <div className="ord-input-group">
+            <h4>
+              4. Delivery Address{" "}
+              {isAddressDone ? (
+                <span className="ord-checkmark">✓</span>
+              ) : (
+                <span className="ord-crossmark">✗</span>
+              )}
+            </h4>
             {isPincodeDone ? (
               <>
                 <textarea
@@ -266,74 +281,106 @@ const Orderdetails = () => {
                   placeholder="Enter your delivery address"
                   value={deliveryAddress}
                   onChange={handleAddressChange}
-                  // disabled={isAddressDone}
+                  className="ord-textarea"
                 />
-                {!isAddressDone && deliveryAddress.trim() && (
+                {deliveryAddress.trim() && !isAddressDone && (
                   <button
-                    className="done-button"
+                    className="ord-done-btn"
                     onClick={() => setIsAddressDone(true)}
                   >
-                    Done
+                    Confirm
                   </button>
                 )}
               </>
             ) : (
-              <p></p>
+              <p className="ord-step-waiting">Complete previous step first.</p>
             )}
           </div>
 
-          {/* Payment Method Section */}
-          <div className="input-group">
-            <h4>5. Payment Method</h4>
+          <div className="ord-input-group">
+            <h4>
+              5. Payment Method{" "}
+              {isAddressDone ? (
+                <span className="ord-checkmark">✓</span>
+              ) : (
+                <span className="ord-crossmark">✗</span>
+              )}
+            </h4>
             {isAddressDone ? (
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
+                className="ord-select"
               >
                 <option value="Cash on Delivery">Cash on Delivery</option>
                 <option value="Credit/Debit Card">Credit/Debit Card</option>
                 <option value="UPI">UPI</option>
               </select>
             ) : (
-              <p> </p>
+              <p className="ord-step-waiting">Complete previous steps first.</p>
             )}
           </div>
         </div>
 
-        {/* Cart Price Details Section */}
-        <div className="order-price-details">
-          <h3>Price Details</h3>
-          <div>
-            <h4>Total items: {cartItems.length}</h4>
-            <h4>Discount: ₹{discount}</h4>
-            <h4>Platform Fee: ₹{platformFee}</h4>
-            <h4>Delivery Fee: ₹{deliveryFee}</h4>
-            <h4>Products in Cart:</h4>
-            <ul id="cart-proddet-list">
-              {cartItems.map((item) => (
-                <li key={item._id}>
-                  <h4>
-                    {item.name} - {item.quantity} * ₹{item.price}
-                  </h4>
-                </li>
-              ))}
-            </ul>
+        <div className="ord-price-details">
+          <div className="ord-price-breakdown">
+            <div className="ord-products-list">
+              <h4>Products in Cart:</h4>
+              <ul>
+                {cartItems.map((item) => (
+                  <li key={item._id || item.id}>
+                    <img src={item.image} className="ord-product-img" />
+                    <div className="ord-product-details">
+                      <span className="ord-product-item-name">{item.name}</span>
+                      <span>
+                        {item.quantity} × ₹{item.price} ={" "}
+                        {item.quantity + item.price}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <h3>Price Details</h3>
+            <div className="ord-price-row">
+              <span>Total items:</span>
+              <span>{cartItems.length}</span>
+            </div>
+            <div className="ord-price-row">
+              <span>Subtotal:</span>
+              <span>₹{totalPrice}</span>
+            </div>
+            <div className="ord-price-row">
+              <span>Discount:</span>
+              <span>-₹{discount}</span>
+            </div>
+
+            <div className="ord-price-row">
+              <span>Delivery Fee:</span>
+              <span>₹{deliveryfee}</span>
+            </div>
           </div>
-          <div>
-            {cartItems.length > 0 && (
-              <div className="total-price">
-                <strong>
-                  Total Price: ₹
-                  {totalPrice + platformFee + deliveryFee - discount}
-                </strong>
-              </div>
-            )}
+
+          <div className="ord-total-section">
+            <div className="ord-price-row ord-total">
+              <span>Total Price:</span>
+              <span>₹{totalPrice + platformFee + deliveryfee - discount}</span>
+            </div>
+
             <button
-              className="buy-now-btn"
+              className={`ord-buy-now-btn ${
+                !(isMobileDone && isPincodeDone && isAddressDone) ||
+                placingOrder
+                  ? "ord-disabled"
+                  : ""
+              }`}
               onClick={handlePlaceOrder}
-              disabled={!isAddressDone}
+              disabled={
+                !(isMobileDone && isPincodeDone && isAddressDone) ||
+                placingOrder
+              }
             >
-              Place Order
+              {placingOrder ? "Placing Order..." : "Place Order"}
             </button>
           </div>
         </div>

@@ -1,3 +1,121 @@
+/* Skeleton Loading Styles */
+.ordhis-skeleton-loading-container {
+  width: 100%;
+  padding: 20px;
+}
+
+.ordhis-skeleton-header {
+  margin-bottom: 30px;
+}
+
+.ordhis-skeleton-title {
+  width: 200px;
+  height: 32px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  animation: shimmer 1.5s infinite;
+}
+
+.ordhis-skeleton-subtitle {
+  width: 300px;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.ordhis-skeleton-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.ordhis-skeleton-filter {
+  width: 80px;
+  height: 36px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 20px;
+  animation: shimmer 1.5s infinite;
+}
+
+.ordhis-skeleton-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ordhis-skeleton-order {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.ordhis-skeleton-order-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.ordhis-skeleton-order-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ordhis-skeleton-text {
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.ordhis-skeleton-text.short {
+  width: 120px;
+}
+
+.ordhis-skeleton-text.medium {
+  width: 180px;
+}
+
+.ordhis-skeleton-status {
+  width: 100px;
+  height: 28px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 14px;
+  animation: shimmer 1.5s infinite;
+}
+
+.ordhis-skeleton-order-summary {
+  display: flex;
+  gap: 20px;
+}
+
+.ordhis-skeleton-summary-item {
+  width: 100px;
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 /* Base Styles */
 .order-history-container {
   display: flex;

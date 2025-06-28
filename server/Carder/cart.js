@@ -57,7 +57,6 @@ router.post("/add", async (req, res) => {
 router.get("/fetch", async (req, res) => {
   const { userId } = req.query;
 
-  // Validation: Check if userId is provided
   if (!userId) {
     return res.status(400).json({
       success: false,
@@ -68,17 +67,12 @@ router.get("/fetch", async (req, res) => {
   try {
     const cartItems = await Cart.find({ userId });
 
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No items found in the cart for this user.",
-      });
-    }
-
+    // Return empty array instead of error for empty cart
     return res.status(200).json({
       success: true,
-      cartItems,
+      cartItems: cartItems || [],
     });
+    
   } catch (error) {
     console.error("Error fetching cart data:", error.message);
     return res.status(500).json({
@@ -173,7 +167,7 @@ router.delete("/clear/:userId", async (req, res) => {
     const { userId } = req.params;
 
     await Cart.deleteMany({ userId });
-
+    console.log("cart cleared")
     res.json({ success: true, message: "Cart cleared successfully!" });
   } catch (error) {
     console.error("Error clearing cart:", error);

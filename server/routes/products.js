@@ -5,7 +5,7 @@ const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { product } = require("../models/products");
-const Category  = require("../models/Category");
+const Category = require("../models/Category");
 
 // Configure Cloudinary
 cloudinary.config({
@@ -130,12 +130,13 @@ router.get("/fetchByCategories", async (req, res) => {
     // Get active categories sorted by priority
     const categories = await Category.find({ isActive: true })
       .sort({ priority: -1 })
-      .lean(); 
+      .lean();
 
-      const categoriesWithProducts = await Promise.all(
-        categories.map(async (category) => {
-          const products = await product.find({
-            subCategory: category.name
+    const categoriesWithProducts = await Promise.all(
+      categories.map(async (category) => {
+        const products = await product
+          .find({
+            subCategory: category.name,
           })
           .sort({
             rating: -1,
@@ -147,7 +148,7 @@ router.get("/fetchByCategories", async (req, res) => {
             "_id name price offerPrice images category subCategory rating salesCount brand description stock deliveryTime"
           )
           .lean();
-          
+
         return {
           subCategory: category.name,
           displayName: category.displayName,
@@ -207,7 +208,7 @@ router.get("/fetchbycategory/:category", async (req, res) => {
         error: "Product not found",
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: products,
@@ -231,7 +232,7 @@ router.get("/fetchbysubCategory/:productSubCategory", async (req, res) => {
         error: "Product not found",
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: products,
@@ -420,6 +421,53 @@ router.get("/search", async (req, res) => {
       error: "Failed to search products",
       details: error.message,
     });
+  }
+});
+
+router.post("/add/review", async (req, res) => {
+  try {
+    const { itemId, userId, review, rating } = req.body;
+
+    if (!userId || !itemId || !review || !rating) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const Reviewproduct = await product.findById(itemId);
+
+    if (!Reviewproduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    Reviewproduct.reviews.push({ userId, review, rating });
+
+    // Update average rating
+    const totalRatings = Reviewproduct.reviews.reduce((sum, r) => sum + r.rating, 0);
+    Reviewproduct.rating = totalRatings / Reviewproduct.reviews.length;
+
+    await Reviewproduct.save();
+    res.status(201).json({ message: "Review added successfully", Reviewproduct });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/fetch/reviews", async (req, res) => {
+  try {
+    const { itemId } = req.query;
+    console.log(req.query);
+    if (!itemId) {
+      return res.status(400).json({ message: "itemId is required" });
+    }
+
+    const product = await mobile.findById(itemId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ reviews: product.reviews });
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

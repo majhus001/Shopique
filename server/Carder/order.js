@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/orderschema");
-const {mobile, cloth, homeappliances} = require("../models/products")
-
+const { product } = require("../models/products");
 
 router.post("/add", async (req, res) => {
 
@@ -42,6 +41,7 @@ router.post("/add", async (req, res) => {
 
     await newOrder.save();
     return res.status(201).json({
+      success:true,
       message: "Order placed successfully!",
       orderId: newOrder._id, 
     });
@@ -103,14 +103,13 @@ router.put("/cancelorder/:orderId", async (req, res) => {
 
 router.put("/stockupdate", async (req, res) => {
   try {
-    console.log("Stock update request received");
-
-    const { cartItems } = req.body;
+      const { cartItems } = req.body;
 
     if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ message: "Invalid cart items" });
     }
 
+    let collection = product;
     // Process each item in cartItems
     for (let item of cartItems) {
       const { itemId, quantity, category } = item;
@@ -119,23 +118,7 @@ router.put("/stockupdate", async (req, res) => {
         return res.status(400).json({ message: "Invalid item data" });
       }
 
-      // Select the correct collection dynamically
-      let Collection;
-      switch (category) {
-        case "mobiles":
-          Collection = mobile;
-          break;
-        case "clothings":
-          Collection = cloth;
-          break;
-        case "hoappliances":
-          Collection = homeappliances;
-          break;
-        default:
-          return res.status(400).json({ message: `Invalid category: ${category}` });
-      }
-
-      const product = await Collection.findById(itemId);
+      const product = await collection.findById(itemId);
       if (!product) {
         return res.status(404).json({ message: `Product ${itemId} not found` });
       }
@@ -148,7 +131,6 @@ router.put("/stockupdate", async (req, res) => {
       await product.save();
     }
 
-    console.log("Stock updated successfully");
     res.json({ message: "Stock updated successfully" });
 
   } catch (error) {

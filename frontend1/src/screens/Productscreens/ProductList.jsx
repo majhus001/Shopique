@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import "./ProductList.css";
+import {
+  FaShoppingCart,
+  FaStar,
+  FaRegStar,
+  FaTruck,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+} from "react-icons/fa";
+import { RiFlashlightFill } from "react-icons/ri";
+import { IoIosArrowForward } from "react-icons/io";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
+import "./ProductList.css";
 
 const ProductList = () => {
   const location = useLocation();
@@ -15,6 +25,7 @@ const ProductList = () => {
   const [productData, setProductData] = useState({
     name: "",
     price: 0,
+    offerprice: 0,
     brand: "",
     images: [],
     rating: 0,
@@ -43,36 +54,22 @@ const ProductList = () => {
   const [urating, setRating] = useState("");
   const [reviews, setReviews] = useState([]);
   const [userImages, setUserImages] = useState({});
+  const [activeTab, setActiveTab] = useState("description");
+  const [zoomImage, setZoomImage] = useState(false);
 
   // Fetch product data if not in location state
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (location.state) {
-          // Use data from location state if available
-          setProductData({
-            name: location.state.name || "",
-            price: location.state.price || 0,
-            brand: location.state.brand || "",
-            images: location.state.images || [],
-            rating: location.state.rating || 0,
-            description: location.state.description || "",
-            stock: location.state.stock || 0,
-            category: location.state.category || "",
-            deliverytime: location.state.deliverytime || "",
-          });
-        } else {
-          // Fetch from backend if no location state
-          const response = await axios.get(
-            `${API_BASE_URL}/api/products/fetch/${id}`
-          );
-          setProductData(response.data.data);
-        }
+        const response = await axios.get(
+          `${API_BASE_URL}/api/products/fetch/${id}`
+        );
+        setProductData(response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching product data:", error);
         setLoading(false);
-        navigate("/not-found"); // Or handle error appropriately
+        navigate("/not-found");
       }
     };
 
@@ -154,13 +151,14 @@ const ProductList = () => {
       alert("Review submitted successfully!");
       setReview("");
       setRating("");
-      // Refresh reviews
+      
       const response = await axios.get(
         `${API_BASE_URL}/api/${productData.category}/fetch/reviews`,
         {
           params: { itemId: id },
         }
       );
+
       setReviews(response.data.reviews || []);
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -271,10 +269,10 @@ const ProductList = () => {
         const deliveryDate = new Date();
         deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
 
-        setExpectedDelivery(`📍 Customer Location: ${userCoords.address}`);
-        setExpectedDeliverydist(`📦 Distance: ${distanceKm} km`);
+        setExpectedDelivery(`Customer Location: ${userCoords.address}`);
+        setExpectedDeliverydist(`Distance: ${distanceKm} km`);
         setExpectedDeliverydate(
-          `🚚 Delivery in ${deliveryDays} day(s) (Expected: ${deliveryDate.toLocaleDateString()})`
+          `Delivery in ${deliveryDays} day(s) (Expected: ${deliveryDate.toLocaleDateString()})`
         );
       } else {
         setExpectedDelivery("Unable to check delivery for this pincode.");
@@ -289,47 +287,81 @@ const ProductList = () => {
     }
   };
 
+  const renderStars = (rating) => {
+    return Array(5)
+      .fill(0)
+      .map((_, i) =>
+        i < rating ? (
+          <FaStar key={i} className="star-filled" />
+        ) : (
+          <FaRegStar key={i} className="star-empty" />
+        )
+      );
+  };
+
   if (loading) {
     return (
-      <div className="pl-container">
-        <div className="pl-navbar">
-          <Navbar user={user} />
+      <div className="product-page-container">
+        <Navbar user={user} />
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading product details...</p>
         </div>
-        <div className="pl-loading">Loading product details...</div>
       </div>
     );
   }
 
   return (
-    <div className="pl-container">
-      <div className="pl-navbar">
-        <Navbar user={user} />
-      </div>
+    <div className="product-page-container">
+      <Navbar user={user} />
+
       {updateMessage && (
-        <div className="pl-update-message">{updateMessage}</div>
+        <div className="notification-banner success">
+          {updateMessage}
+          <span className="close-btn" onClick={() => setUpdateMessage("")}>
+            &times;
+          </span>
+        </div>
       )}
-      <div className="pl-page">
-        <div className="pl-main-container">
-          {/* Image Gallery Section */}
-          <div className="pl-gallery-section">
-            <div className="pl-main-image-container">
+
+      <div className="product-main-content">
+        {/* Breadcrumbs */}
+        <div className="breadcrumbs">
+          <span>Home</span>
+          <IoIosArrowForward className="breadcrumb-arrow" />
+          <span>{productData.category}</span>
+          <IoIosArrowForward className="breadcrumb-arrow" />
+          <span className="current">{productData.name}</span>
+        </div>
+
+        {/* Product Section */}
+        <div className="product-section">
+          {/* Image Gallery */}
+          <div className="product-gallery">
+            <div
+              className={`main-image-container ${zoomImage ? "zoomed" : ""}`}
+              onClick={() => setZoomImage(!zoomImage)}
+            >
               {productData.images?.length > 0 ? (
                 <img
                   src={productData.images[selectedImageIndex]}
                   alt={productData.name}
-                  className="pl-main-image"
+                  className="main-product-image"
                 />
               ) : (
-                <div className="pl-no-image">No image available</div>
+                <div className="no-image-placeholder">
+                  <RiFlashlightFill className="placeholder-icon" />
+                  <p>No image available</p>
+                </div>
               )}
             </div>
 
-            <div className="pl-thumbnail-container">
+            <div className="thumbnail-scroller">
               {productData.images?.map((img, index) => (
                 <div
                   key={index}
-                  className={`pl-thumbnail ${
-                    index === selectedImageIndex ? "pl-thumbnail-active" : ""
+                  className={`thumbnail-item ${
+                    index === selectedImageIndex ? "active" : ""
                   }`}
                   onClick={() => handleImageSelect(index)}
                 >
@@ -339,85 +371,96 @@ const ProductList = () => {
             </div>
           </div>
 
-          {/* Product Info Section */}
-          <div className="pl-info-section">
-            <h1 className="pl-product-title">
-              {productData.name || "Product Name"}
-            </h1>
-            <div className="pl-rating-badge">
-              <span className="pl-rating-star">
-                ★ {productData.rating || "N/A"}
-              </span>
-              <span className="pl-rating-count">
-                | {reviews.length} Ratings
-              </span>
+          {/* Product Info */}
+          <div className="product-info">
+            <h1 className="product-title">{productData.name}</h1>
+
+            <div className="product-meta">
+              <div className="rating-badge">
+                {renderStars(Math.round(productData.rating))}
+                <span className="rating-text">
+                  {productData.rating.toFixed(1)} | {reviews.length} Ratings
+                </span>
+              </div>
+              <span className="brand-name">{productData.brand}</span>
             </div>
 
-            <div className="pl-price-section">
-              <span className="pl-price">₹{productData.price || "N/A"}</span>
-              <span className="pl-price-offer">inclusive of all taxes</span>
+            <div className="price-section">
+              <div>
+                <div className="current-price">
+                  ₹{productData.price.toLocaleString()}
+                </div>
+                <span></span>
+              </div>
+              <div className="price-meta">inclusive of all taxes</div>
             </div>
 
-            <div className="pl-highlights">
-              <h3 className="pl-section-title">Highlights</h3>
-              <ul className="pl-highlight-list">
-                <li>{productData.brand || "Brand not specified"}</li>
-                <li>{productData.description || "No description available"}</li>
-              </ul>
-            </div>
+            <div className="delivery-section">
+              <h3 className="section-heading">
+                <FaTruck className="section-icon" />
+                Delivery Options
+              </h3>
 
-            <div className="pl-delivery-section">
-              <h3 className="pl-section-title">Delivery Options</h3>
-              <div className="pl-stock-status">
+              <div
+                className={`stock-status ${
+                  productData.stock > 0 ? "in-stock" : "out-stock"
+                }`}
+              >
                 {productData.stock > 0 ? (
-                  <span className="pl-in-stock">
-                    In Stock ({productData.stock} available)
-                  </span>
+                  <>
+                    <span className="status-badge available">In Stock</span>
+                    <span className="stock-text">
+                      {productData.stock} units available
+                    </span>
+                  </>
                 ) : (
-                  <span className="pl-out-stock">Out of Stock</span>
+                  <span className="status-badge unavailable">Out of Stock</span>
                 )}
               </div>
 
-              <div className="pl-delivery-checker">
-                <div className="pl-delivery-input-group">
-                  <input
-                    type="text"
-                    placeholder="Enter Pincode"
-                    className="pl-delivery-input"
-                    maxLength="6"
-                    value={pincode}
-                    onChange={(e) => setPincode(e.target.value)}
-                  />
+              <div className="delivery-checker">
+                <div className="pincode-input-group">
+                  <div className="input-with-icon">
+                    <FaMapMarkerAlt className="input-icon" />
+                    <input
+                      type="text"
+                      placeholder="Enter Delivery Pincode"
+                      maxLength="6"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value)}
+                    />
+                  </div>
                   <button
-                    className="pl-check-button"
+                    className="check-btn"
                     onClick={handleCheckDelivery}
                     disabled={pincodeload}
                   >
-                    {pincodeload ? <span className="pl-loader"></span> : "Check"}
+                    {pincodeload ? "Checking..." : "Check"}
                   </button>
                 </div>
 
                 {expectedDelivery && (
-                  <div className="pl-delivery-info">
-                    <div className="pl-delivery-message">
-                      {expectedDelivery}
+                  <div className="delivery-info-card">
+                    <div className="info-row">
+                      <FaMapMarkerAlt className="info-icon" />
+                      <span>{expectedDelivery}</span>
                     </div>
-                    <div className="pl-delivery-distance">
-                      {expectedDeliverydist}
+                    <div className="info-row">
+                      <FaTruck className="info-icon" />
+                      <span>{expectedDeliverydist}</span>
                     </div>
-                    <div className="pl-delivery-date">
-                      {expectedDeliverydate}
+                    <div className="info-row">
+                      <FaCalendarAlt className="info-icon" />
+                      <span>{expectedDeliverydate}</span>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="pl-action-buttons">
+            <div className="action-buttons">
               <button
-                className={`pl-cart-button ${
-                  isProdAdded ? "pl-go-to-cart" : ""
-                }`}
+                className={`pl-cart-btn ${isProdAdded ? "go-to-cart" : ""}`}
                 onClick={() => {
                   if (productData.stock <= 0) {
                     alert("Sorry, Out of Stock");
@@ -431,7 +474,7 @@ const ProductList = () => {
                 }}
                 disabled={productData.stock <= 0 && !isProdAdded}
               >
-                <i className="fas fa-shopping-cart pl-button-icon"></i>
+                <FaShoppingCart className="btn-icon" />
                 {isProdAdded
                   ? "Go to Cart"
                   : productData.stock > 0
@@ -440,90 +483,147 @@ const ProductList = () => {
               </button>
 
               <button
-                className="pl-buy-button"
+                className="buy-btn"
                 onClick={handleBuyNow}
                 disabled={productData.stock <= 0}
               >
                 {productData.stock > 0 ? "Buy Now" : "Out of Stock"}
               </button>
             </div>
+
+            <div className="product-highlights">
+              <h3 className="section-heading">Highlights</h3>
+              <ul className="highlight-list">
+                <li>Brand: {productData.brand || "Not specified"}</li>
+                <li>Category: {productData.category}</li>
+                {productData.description && <li>{productData.description}</li>}
+              </ul>
+            </div>
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <div className="pl-reviews-section">
-          <div className="pl-reviews-container">
-            <h2 className="pl-reviews-title">Customer Reviews</h2>
+        {/* Product Details Tabs */}
+        <div className="product-details-tabs">
+          <div className="tab-header">
+            <button
+              className={`tab-btn ${
+                activeTab === "description" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("description")}
+            >
+              Description
+            </button>
+            <button
+              className={`tab-btn ${activeTab === "reviews" ? "active" : ""}`}
+              onClick={() => setActiveTab("reviews")}
+            >
+              Reviews ({reviews.length})
+            </button>
+          </div>
 
-            <div className="pl-review-form">
-              <h3 className="pl-review-form-title">Write a Review</h3>
-              <textarea
-                className="pl-review-textarea"
-                placeholder="Share your experience with this product..."
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-              />
-              <div className="pl-rating-input-group">
-                <input
-                  type="number"
-                  className="pl-rating-input"
-                  placeholder="Rating (1-5)"
-                  value={urating}
-                  onChange={(e) => setRating(e.target.value)}
-                  min="1"
-                  max="5"
-                />
-                <button className="pl-submit-review" onClick={handleSubmit}>
-                  Submit Review
-                </button>
+          <div className="tab-content">
+            {activeTab === "description" ? (
+              <div className="description-content">
+                <h3>Product Details</h3>
+                <p>
+                  {productData.description ||
+                    "No detailed description available for this product."}
+                </p>
+                <div className="specs-grid">
+                  <div className="spec-item">
+                    <span className="spec-label">Brand</span>
+                    <span className="spec-value">
+                      {productData.brand || "-"}
+                    </span>
+                  </div>
+                  <div className="spec-item">
+                    <span className="spec-label">Category</span>
+                    <span className="spec-value">
+                      {productData.category || "-"}
+                    </span>
+                  </div>
+                  <div className="spec-item">
+                    <span className="spec-label">Rating</span>
+                    <span className="spec-value">
+                      {productData.rating.toFixed(1)} ({reviews.length} reviews)
+                    </span>
+                  </div>
+                  <div className="spec-item">
+                    <span className="spec-label">Delivery Time</span>
+                    <span className="spec-value">
+                      {productData.deliverytime || "Standard delivery"}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="pl-reviews-list">
-              {reviews.length > 0 ? (
-                reviews.map((r, index) => (
-                  <div key={index} className="pl-review-card">
-                    <div className="pl-review-header">
-                      <div className="pl-reviewer-info">
-                        <img
-                          src={
-                            userImages[r.userId]?.image || "/default-user.png"
-                          }
-                          alt="User"
-                          className="pl-reviewer-avatar"
+            ) : (
+              <div className="reviews-content">
+                <div className="review-form-card">
+                  <h3>Write a Review</h3>
+                  <textarea
+                    placeholder="Share your experience with this product..."
+                    value={review}
+                    onChange={(e) => setReview(e.target.value)}
+                  />
+                  <div className="rating-input-container">
+                    <span>Your Rating:</span>
+                    <div className="star-rating-input">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <FaStar
+                          key={star}
+                          className={`rating-star ${
+                            star <= urating ? "selected" : ""
+                          }`}
+                          onClick={() => setRating(star)}
                         />
-                        <div className="pl-reviewer-details">
-                          <h4>
-                            {userImages[r.userId]?.username || "Anonymous"}
-                          </h4>
-                          <div className="pl-review-rating">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <span
-                                key={i}
-                                className={`pl-review-star ${
-                                  i < r.rating
-                                    ? "pl-star-filled"
-                                    : "pl-star-empty"
-                                }`}
-                              >
-                                ★
-                              </span>
-                            ))}
+                      ))}
+                    </div>
+                    <button
+                      className="submit-review-btn"
+                      onClick={handleSubmit}
+                    >
+                      Submit Review
+                    </button>
+                  </div>
+                </div>
+
+                {reviews.length > 0 ? (
+                  <div className="reviews-list">
+                    {reviews.map((r, index) => (
+                      <div key={index} className="review-card">
+                        <div className="reviewer-info">
+                          <img
+                            src={
+                              userImages[r.userId]?.image || "/default-user.png"
+                            }
+                            alt="User"
+                            className="reviewer-avatar"
+                          />
+                          <div className="reviewer-details">
+                            <h4>
+                              {userImages[r.userId]?.username || "Anonymous"}
+                            </h4>
+                            <div className="review-rating">
+                              {renderStars(r.rating)}
+                            </div>
                           </div>
                         </div>
+                        <div className="review-text">
+                          <p>{r.review}</p>
+                        </div>
+                        <div className="review-date">
+                          {new Date(r.createdAt).toLocaleDateString()}
+                        </div>
                       </div>
-                    </div>
-                    <div className="pl-review-content">
-                      <p>{r.review}</p>
-                    </div>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <div className="pl-no-reviews">
-                  No reviews yet. Be the first to review!
-                </div>
-              )}
-            </div>
+                ) : (
+                  <div className="no-reviews">
+                    <p>No reviews yet. Be the first to review this product!</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
