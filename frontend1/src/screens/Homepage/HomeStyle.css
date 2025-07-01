@@ -691,23 +691,24 @@ body {
 
 .product-card-horizontal .offer-price {
   font-weight: 700;
-  color: var(--danger-color);
+  color: #059669;
   margin-right: 8px;
   font-size: 1.1rem;
 }
 
 .product-card-horizontal .original-price {
   text-decoration: line-through;
-  color: var(--text-light);
+  color: #b70505;
   font-size: 0.9rem;
 }
 
 .product-card-horizontal .product-meta {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
-
+  
 .product-card-horizontal .rating {
   display: flex;
   align-items: center;
@@ -1196,11 +1197,8 @@ body {
     top: 10px;
     right: 10px;
   }
-  
-  /* Adjust meta information */
   .product-card-horizontal .product-meta {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
     gap: 3px;
   }
   

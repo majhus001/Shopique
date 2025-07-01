@@ -1,67 +1,65 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema({
-  userId: {
+const orderedItemSchema = new mongoose.Schema({
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "products", 
+    required: true,
+  },
+  name: {
     type: String,
     required: true,
   },
-  OrderedItems: [
-    {
-      userId: {
-        type: String,
-        required: true,
-      },
-      itemId: {
-        type: String,
-        required: true,
-      },
-      name: {
-        type: String,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-      brand: {
-        type: String,
-      },
-      quantity: {
-        type: Number,
-        required: true,
-      },
-      description: {
-        type: String,
-      },
-      image: {
-        type: String,
-      },
-      category: {
-        type: String,
-      },
-      deliveryTime: {
-        type: String,
-      },
-      rating: {
-        type: Number,
-        default: 0,
-      },
-      addedAt: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
+  price: {
+    type: Number,
+    required: true,
+  },
+  brand: {
+    type: String,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  image: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
+  deliveryTime: {
+    type: String,
+  },
+  rating: {
+    type: Number,
+    default: 0,
+  },
+  addedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const orderSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users", 
+    required: true,
+  },
+  OrderedItems: [orderedItemSchema],
   totalPrice: {
     type: Number,
     required: true,
   },
   mobileNumber: {
-    type: Number,
+    type: String,
     required: true,
   },
   pincode: {
-    type: Number,
+    type: String,
     required: true,
   },
   deliveryAddress: {
@@ -70,10 +68,12 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
+    enum: ["Cash on Delivery", "Online"],
     required: true,
   },
   OrderStatus: {
     type: String,
+    enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
     default: "Pending",
   },
   createdAt: {
@@ -82,7 +82,6 @@ const orderSchema = new mongoose.Schema({
   },
 });
 
-const Order = mongoose.model("Orderdetails", orderSchema);
-
+const Order = mongoose.model("Orders", orderSchema);
 
 module.exports = Order;

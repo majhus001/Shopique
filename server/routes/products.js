@@ -3,8 +3,8 @@ const router = express.Router();
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
-const mongoose = require("mongoose");
-const { product } = require("../models/products");
+const product = require("../models/products");
+const Cart = require("../models/CartSchema");
 const Category = require("../models/Category");
 
 // Configure Cloudinary
@@ -198,53 +198,209 @@ router.get("/fetch/:id", async (req, res) => {
   }
 });
 
-router.get("/fetchbycategory/:category", async (req, res) => {
+router.get("/paginated", async (req, res) => {
   try {
-    const { category } = req.params;
-    const products = await product.find({ category: category });
-    if (!products) {
-      return res.status(404).json({
-        success: false,
-        error: "Product not found",
-      });
+    const {
+      userId,
+      productId,
+      page = 1,
+      limit = 8,
+      minPrice = 0,
+      maxPrice = 100000,
+      selectedbrands,
+    } = req.query;
+
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
+    const parsedMinPrice = Number(minPrice);
+    const parsedMaxPrice = Number(maxPrice);
+
+    let category,
+    subCategory,
+      clickedProduct = null;
+
+    if (productId) {
+      try {
+        // Include all necessary fields for the clicked product
+        clickedProduct = await product
+          .findById(productId)
+          .select(
+            "category subCategory brand stock offerPrice price images name description rating "
+          )
+          .lean();
+
+        if (clickedProduct) {
+          ({ category, subCategory } = clickedProduct);
+          clickedProduct.images = clickedProduct.images?.length
+            ? clickedProduct.images
+            : ["/placeholder-product.jpg"];
+        }
+      } catch (error) {
+        console.error("Error fetching product by ID:", error);
+      }
+    } else {
+      category = req.query.category;
+      subCategory = req.query.subCategory;
     }
+
+    const baseFilter = {
+      ...(category && { category }),
+      ...(subCategory && { subCategory }),
+      offerPrice: {
+        $gte: parsedMinPrice,
+        $lte: parsedMaxPrice,
+      },
+    };
+    const sidebarFilter = {
+      ...(category && { category }),
+      ...(subCategory && { subCategory }),
+    };
+    
+    const finalFilter = selectedbrands
+    ? { ...baseFilter, brand: { $in: selectedbrands } } // Changed to $in operator
+    : baseFilter;
+
+    const [Uniquebrands, total, maxPriceResult] = await Promise.all([
+      product.distinct("brand", sidebarFilter),
+      product.countDocuments(finalFilter),
+      product
+        .findOne(sidebarFilter)
+        .sort({ offerPrice: -1 })
+        .select("offerPrice")
+        .lean(),
+    ]);
+
+    const maxOfferPrice = maxPriceResult?.offerPrice || 0;
+    const totalPages = Math.ceil(total / parsedLimit);
+
+    let skip = (parsedPage - 1) * parsedLimit;
+    const clickedProductInserted =
+    clickedProduct &&
+    clickedProduct.offerPrice <= parsedMaxPrice &&
+      (!selectedbrands || clickedProduct.brand === selectedbrands);
+
+    if (parsedPage > 1 && clickedProductInserted) {
+      skip = Math.max(skip - 1, 0);
+    }
+
+    // Get paginated products with all necessary fields
+    let products = await product
+    .find(finalFilter)
+    .select("name description price brand stock offerPrice images rating")
+    .skip(skip)
+    .limit(parsedLimit)
+    .sort({ createdAt: -1 })
+    .lean();
+    
+    if (clickedProduct) {
+      // First check if clicked product matches all current filters
+      const clickedProductMatchesFilters =
+        clickedProduct.offerPrice >= parsedMinPrice &&
+        clickedProduct.offerPrice <= parsedMaxPrice &&
+        (!selectedbrands || selectedbrands.includes(clickedProduct.brand));
+
+      // Filter out the clicked product if it exists in results
+      products = products.filter(
+        (p) => p._id.toString() !== clickedProduct._id.toString()
+      );
+
+      // Only insert if on first page and matches all filters
+      if (parsedPage === 1 && clickedProductMatchesFilters) {
+        const fullClickedProduct = {
+          ...clickedProduct,
+          
+        };
+
+        // Insert without reducing total count
+        products = [fullClickedProduct, ...products];
+
+        // Only slice if we exceeded the limit
+        if (products.length > parsedLimit) {
+          products = products.slice(0, parsedLimit);
+        }
+      }
+    }
+
+    let cartProductIds = [];
+    if (userId) {
+      const userCart = await Cart.findOne({ userId })
+        .select("items.productId")
+        .lean();
+      if (userCart) {
+        cartProductIds = userCart.items.map((item) =>
+          item.productId.toString()
+        );
+      }
+    }
+
+    const finalProducts = products.map((prod) => ({
+      ...prod,
+      isAddedToCart: cartProductIds.includes(prod._id.toString()),
+    }));
 
     res.status(200).json({
       success: true,
-      data: products,
+      data: finalProducts,
+      totalPages,
+      maxPrice: maxOfferPrice,
+      Uniquebrands,
     });
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error in paginated fetch:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch product",
+      error: "Failed to fetch paginated products",
     });
   }
 });
 
-router.get("/fetchbysubCategory/:productSubCategory", async (req, res) => {
-  try {
-    const { productSubCategory } = req.params;
-    const products = await product.find({ subCategory: productSubCategory });
-    if (!products) {
-      return res.status(404).json({
-        success: false,
-        error: "Product not found",
-      });
-    }
+// router.get("/fetchbycategory/:category", async (req, res) => {
+//   try {
+//     const { category } = req.params;
+//     const products = await product.find({ category: category });
+//     if (!products) {
+//       return res.status(404).json({
+//         success: false,
+//         error: "Product not found",
+//       });
+//     }
 
-    res.status(200).json({
-      success: true,
-      data: products,
-    });
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch product",
-    });
-  }
-});
+//     res.status(200).json({
+//       success: true,
+//       data: products,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching product:", error);
+//     res.status(500).json({
+//       success: false,
+//       error: "Failed to fetch product",
+//     });
+//   }
+// });
+
+// router.get("/fetchbysubCategory/:productSubCategory", async (req, res) => {
+//   try {
+//     const { productSubCategory } = req.params;
+//     const products = await product.find({ subCategory: productSubCategory });
+//     if (!products) {
+//       return res.status(404).json({
+//         success: false,
+//         error: "Product not found",
+//       });
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       data: products,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching product:", error);
+//     res.status(500).json({
+//       success: false,
+//       error: "Failed to fetch product",
+//     });
+//   }
+// });
 
 // Update product
 router.put("/update/:id", upload.array("images", 5), async (req, res) => {
@@ -421,53 +577,6 @@ router.get("/search", async (req, res) => {
       error: "Failed to search products",
       details: error.message,
     });
-  }
-});
-
-router.post("/add/review", async (req, res) => {
-  try {
-    const { itemId, userId, review, rating } = req.body;
-
-    if (!userId || !itemId || !review || !rating) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const Reviewproduct = await product.findById(itemId);
-
-    if (!Reviewproduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    Reviewproduct.reviews.push({ userId, review, rating });
-
-    // Update average rating
-    const totalRatings = Reviewproduct.reviews.reduce((sum, r) => sum + r.rating, 0);
-    Reviewproduct.rating = totalRatings / Reviewproduct.reviews.length;
-
-    await Reviewproduct.save();
-    res.status(201).json({ message: "Review added successfully", Reviewproduct });
-  } catch (error) {
-    console.error("Error adding review:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-router.get("/fetch/reviews", async (req, res) => {
-  try {
-    const { itemId } = req.query;
-    console.log(req.query);
-    if (!itemId) {
-      return res.status(400).json({ message: "itemId is required" });
-    }
-
-    const product = await mobile.findById(itemId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.status(200).json({ reviews: product.reviews });
-  } catch (error) {
-    console.error("Error fetching reviews:", error);
-    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

@@ -4,23 +4,23 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },               // Product name
+    name: { type: String, required: true },              
     price: { type: Number, required: true, set: v => Number(v) },
-    brand: { type: String },                              // Optional brand
-    images: [{ type: String }],                           // Support multiple images
-    category: { type: String, required: true },           // cloth, kitchen, decor, etc.
-    subCategory: { type: String },                        // optional: shirt, frying pan, sofa
+    brand: { type: String },                             
+    images: [{ type: String }],                          
+    category: { type: String, required: true },          
+    subCategory: { type: String },                      
 
     description: { type: String, required: true },
     stock: { type: Number, required: true, set: v => Number(v) },
     rating: { type: Number, default: 0, set: v => Number(v) },
 
-    specifications: { type: mongoose.Schema.Types.Mixed }, // Varies by product (flexible)
-    tags: [{ type: String }],                              // For filtering/searching (e.g. "eco-friendly", "bestseller")
+    specifications: { type: mongoose.Schema.Types.Mixed }, 
+    tags: [{ type: String }],                            
 
-    isFeatured: { type: Boolean, default: false },         // For homepage banners or deals
-    offerPrice: { type: Number },                          // Optional discount price
-    deliveryTime: { type: String },                        // "2-3 days"
+    isFeatured: { type: Boolean, default: false },        
+    offerPrice: { type: Number },                          
+    deliveryTime: { type: String },                        
 
     reviews: {
       type: [{
@@ -32,138 +32,25 @@ const productSchema = new mongoose.Schema(
       default: []
     },
     sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "Seller", required: true },
-    saleCount: {type: Number, default: 0, required: false},
+    salesCount: {type: Number, default: 0, required: false},
     lastSoldAt: {type: Date, default: null, required: false},
   },
   { timestamps: true }
 );
 
-productSchema.index({ subCategory: 1, rating: -1 });
+productSchema.index({ category: 1, subCategory: 1 }); // combo index for filters
+productSchema.index({ subCategory: 1, rating: -1 });  // keep this, useful for top-rated sort
 productSchema.index({ salesCount: -1 });
 productSchema.index({ lastSoldAt: -1 });
+productSchema.index({ price: 1 });
+productSchema.index({ offerPrice: -1 });
+productSchema.index({ brand: 1 }); // 🔥 Add this if you plan to filter by brand
+
+
 
 const product = mongoose.model("products", productSchema);
 
 
+module.exports = product;
 
 
-
-
-
-const mobileSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    price: {
-      type: Number,
-      required: true,
-      set: v => Number(v) // Ensure conversion to number
-    },
-    brand: { type: String },
-    image: { type: String },
-    rating: {
-      type: Number,
-      default: 0,
-      set: v => Number(v) // Ensure conversion to number
-    },
-    description: { type: String, required: true },
-    stock: {
-      type: Number,
-      required: true,
-      set: v => Number(v) // Ensure conversion to number
-    },
-    category: { type: String, required: true },
-    deliverytime: { type: String },
-    reviews: {
-      type: [{
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-        review: { type: String, required: true },
-        rating: { type: Number, required: true, min: 1, max: 5 },
-        createdAt: { type: Date, default: Date.now },
-      }],
-      default: [] // Initialize with empty array
-    }
-  },
-  { timestamps: true }
-);
-
-const mobile = mongoose.model("mobileproduct", mobileSchema);
-
-
-const clothSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  price: {
-    type: Number,
-    required: true,
-    set: v => Number(v) // Ensure conversion to number
-  },
-  brand: { type: String },
-  image: { type: String },
-  rating: {
-    type: Number,
-    default: 0,
-    set: v => Number(v) // Ensure conversion to number
-  },
-  description: { type: String, required: true },
-  stock: {
-    type: Number,
-    required: true,
-    set: v => Number(v) // Ensure conversion to number
-  },
-  category: { type: String, required: true },
-  deliverytime: { type: String },
-  reviews: {
-    type: [{
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-      review: { type: String, required: true },
-      rating: { type: Number, required: true, min: 1, max: 5 },
-      createdAt: { type: Date, default: Date.now },
-    }],
-    default: [] // Initialize with empty array
-  }
- },
- { timestamps: true },
-);
-
-const cloth = mongoose.model("clothingproduct", clothSchema);
-
-
-
-const homeappliancesSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  price: {
-    type: Number,
-    required: true,
-    set: v => Number(v) // Ensure conversion to number
-  },
-  brand: { type: String },
-  image: { type: String },
-  rating: {
-    type: Number,
-    default: 0,
-    set: v => Number(v) // Ensure conversion to number
-  },
-  description: { type: String, required: true },
-  stock: {
-    type: Number,
-    required: true,
-    set: v => Number(v) // Ensure conversion to number
-  },
-  category: { type: String, required: true },
-  deliverytime: { type: String },
-  reviews: {
-    type: [{
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-      review: { type: String, required: true },
-      rating: { type: Number, required: true, min: 1, max: 5 },
-      createdAt: { type: Date, default: Date.now },
-    }],
-    default: [] // Initialize with empty array
-  }
- },
- { timestamps: true },
-);
-
-const homeappliances = mongoose.model("homeappliances", homeappliancesSchema);
-
-
-module.exports = {mobile, cloth, homeappliances, product}

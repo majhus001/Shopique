@@ -103,6 +103,7 @@ const Orderdetails = () => {
         paymentMethod,
       };
 
+      console.log(orderData)
       const response = await axios.post(
         `${API_BASE_URL}/api/orders/add`,
         orderData
@@ -111,9 +112,9 @@ const Orderdetails = () => {
       if (response.data.success) {
         await clearCart();
         
-        await axios.put(`${API_BASE_URL}/api/orders/stockupdate/`, {
-          cartItems,
-        });
+        // await axios.put(`${API_BASE_URL}/api/orders/stockupdate/`, {
+        //   cartItems,
+        // });
 
         await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
           name: user.username,
@@ -329,7 +330,7 @@ const Orderdetails = () => {
               <ul>
                 {cartItems.map((item) => (
                   <li key={item._id || item.id}>
-                    <img src={item.image} className="ord-product-img" />
+                    <img src={item.images[0]} className="ord-product-img" />
                     <div className="ord-product-details">
                       <span className="ord-product-item-name">{item.name}</span>
                       <span>

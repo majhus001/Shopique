@@ -3,11 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
-import {
-  FaTrash,
-  FaPlus,
-  FaMinus,
-} from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { FiAlertCircle } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import BottomNav from "../Bottom Navbar/BottomNav";
@@ -32,7 +28,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 const Buynow = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Extract data from location state
   const {
     user,
@@ -66,20 +62,22 @@ const Buynow = () => {
 
   useEffect(() => {
     if (location.state) {
-      setCartItems([{
-        userId: user?._id,
-        itemId,
-        name,
-        price,
-        brand,
-        quantity,
-        description,
-        image: images?.[0] || "https://via.placeholder.com/150?text=No+Image",
-        category,
-        deliverytime,
-        rating,
-        stock,
-      }]);
+      setCartItems([
+        {
+          userId: user?._id,
+          itemId,
+          name,
+          price,
+          brand,
+          quantity,
+          description,
+          image: images?.[0] || "https://via.placeholder.com/150?text=No+Image",
+          category,
+          deliverytime,
+          rating,
+          stock,
+        },
+      ]);
     }
   }, [location.state]);
 
@@ -97,7 +95,7 @@ const Buynow = () => {
 
   const handleBuyNow = () => {
     if (user && cartItems.length > 0) {
-      console.log(deliveryfee)
+      
       navigate("/ordercheckout", {
         state: {
           cartItems,
@@ -121,7 +119,9 @@ const Buynow = () => {
     );
     setCartItems(updatedCartItems);
     setUpdateMessage(
-      `Quantity updated to ${updatedCartItems.find(item => item.itemId === itemId).quantity}`
+      `Quantity updated to ${
+        updatedCartItems.find((item) => item.itemId === itemId).quantity
+      }`
     );
     setTimeout(() => setUpdateMessage(""), 3000);
   };
@@ -196,9 +196,7 @@ const Buynow = () => {
         <div className="cart-skeleton">
           {/* Skeleton loading similar to Cart page */}
           <div className="cart-skeleton-header"></div>
-          <div className="cart-skeleton-content">
-            {/* Skeleton items */}
-          </div>
+          <div className="cart-skeleton-content">{/* Skeleton items */}</div>
         </div>
       ) : error ? (
         <div className="cart-error-message">
@@ -289,11 +287,6 @@ const Buynow = () => {
                 </div>
 
                 <div className="cart-summary-row">
-                  <span>Platform Fee</span>
-                  <span>₹{platformFee}</span>
-                </div>
-
-                <div className="cart-summary-row">
                   <input
                     className="pincode-input"
                     placeholder="Enter delivery pincode"
@@ -340,7 +333,7 @@ const Buynow = () => {
                     <div className="cart-delivery-message">
                       {expectedDelivery}
                     </div>
-                    
+
                     {expectedDeliverydate && (
                       <div className="cart-delivery-date">
                         <strong className="cart-delivery-address-label">
@@ -384,7 +377,10 @@ const Buynow = () => {
                 />
                 <h3>No items to checkout</h3>
                 <p>Looks like you haven't selected any items to purchase</p>
-                <button onClick={() => navigate("/home")} className="cart-shop-now-btn">
+                <button
+                  onClick={() => navigate("/home")}
+                  className="cart-shop-now-btn"
+                >
                   Continue Shopping
                 </button>
               </div>

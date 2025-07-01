@@ -36,7 +36,7 @@ const Orderhistory = () => {
   const navigate = useNavigate();
   const { user } = location.state || {};
 
-  const [userDetails, setUserDetails] = useState(user);
+  const [userDetails, setUserDetails] = useState(location.state?.user);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [orders, setOrders] = useState([]);
   const [expandedOrder, setExpandedOrder] = useState(null);
@@ -105,9 +105,15 @@ const Orderhistory = () => {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `${API_BASE_URL}/api/orders/fetch/${user._id}`
+        `${API_BASE_URL}/api/orders/fetch/${user._id || userDetails._id}`
       );
+
       const result = response.data.data;
+      // result.map((order)=>{
+      //   order.OrderedItems.map((item)=>{
+      //     console.log(item.image)
+      //   })
+      // })
       if (result) {
         setOrders(result);
       } else {

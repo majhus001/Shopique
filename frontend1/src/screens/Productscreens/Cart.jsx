@@ -45,6 +45,7 @@ const Cart = () => {
   const [error, setError] = useState(null);
   const [updateMessage, setUpdateMessage] = useState("");
   const [pincode, setPincode] = useState(userDetails?.pincode || "");
+  const [isPincodeTouched, setIsPincodeTouched] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
   const [deliveryAddress, setDeliveryAddress] = useState(
@@ -96,14 +97,12 @@ const Cart = () => {
       if (userData) {
         setUserDetails(userData);
         setIsLoggedIn(true);
-        return true;
+        await fetchCartData();
       }
       setIsLoggedIn(false);
-      return false;
     } catch (error) {
       setIsLoggedIn(false);
       console.error("Error validating user:", error);
-      return false;
     }
   };
 
@@ -116,13 +115,14 @@ const Cart = () => {
       });
 
       if (response.data.success) {
-        const itemsWithQuantity = response.data.cartItems.map((item) => ({
-          ...item,
-          quantity: item.quantity || 1, // Changed from [] to 1
+        // Map the cart items correctly with product details
+        const itemsWithDetails = response.data.cart.items.map((item) => ({
+          ...item.productId, // Spread the product details
+          cartItemId: item._id, // The cart item ID
+          quantity: item.quantity,
         }));
-        setCartItems(itemsWithQuantity);
+        setCartItems(itemsWithDetails);
       } else {
-        // Empty cart is not an error, just set empty array
         setCartItems([]);
         if (
           response.data.message !== "No items found in the cart for this user."
@@ -140,29 +140,29 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    const initialize = async () => {
-      const isUserValid = await checkUser();
-      if (isUserValid) {
-        await fetchCartData();
-      }
-    };
-    initialize();
+    if (!location.state.user) {
+      checkUser();
+    }
+    fetchCartData();
+    setIsLoggedIn(true);
   }, []);
 
-  const handleQuantityChange = async (itemId, change) => {
+  const handleQuantityChange = async (cartItemId, change) => {
     const updatedCartItems = cartItems.map((item) =>
-      item._id === itemId
+      item.cartItemId === cartItemId
         ? { ...item, quantity: Math.max(item.quantity + change, 1) }
         : item
     );
-    const updatedItem = updatedCartItems.find((item) => item._id === itemId);
+    const updatedItem = updatedCartItems.find(
+      (item) => item.cartItemId === cartItemId
+    );
 
     try {
       const response = await axios.put(
         `${API_BASE_URL}/api/cart/update-quantity`,
         {
           userId: userDetails._id,
-          itemId: updatedItem.itemId,
+          productId: updatedItem._id,
           quantity: updatedItem.quantity,
         }
       );
@@ -180,15 +180,16 @@ const Cart = () => {
     }
   };
 
-  const handleRemoveItem = async (itemId) => {
+  const handleRemoveItem = async (cartItemId, productId) => {
     try {
       const response = await axios.delete(
-        `${API_BASE_URL}/api/cart/delete/${itemId}`,
-        { data: { userId: userDetails._id } }
+        `${API_BASE_URL}/api/cart/delete/${userDetails._id}/${productId}`
       );
 
       if (response.status === 200) {
-        setCartItems(cartItems.filter((item) => item._id !== itemId));
+        setCartItems(
+          cartItems.filter((item) => item.cartItemId !== cartItemId)
+        );
       }
     } catch (error) {
       console.error("Error removing item:", error);
@@ -217,7 +218,7 @@ const Cart = () => {
         cartItems,
         user: userDetails,
         totalPrice: calculateSubtotal(),
-        deliveryfee,
+        deliveryfee: deliveryfee,
         statePincode: pincode,
         path: "cart",
       },
@@ -324,7 +325,7 @@ const Cart = () => {
               <div className="cart-items-container">
                 {cartItems.map((item) => (
                   <motion.div
-                    key={item._id}
+                    key={item.cartItemId}
                     className="cart-item"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -332,7 +333,7 @@ const Cart = () => {
                   >
                     <div className="cart-item-image-container">
                       <img
-                        src={item.image}
+                        src={item.images[0]}
                         alt={item.name}
                         className="cart-item-img"
                         onError={(e) => {
@@ -349,7 +350,9 @@ const Cart = () => {
                       </p>
                       <div className="cart-quantity-controls">
                         <button
-                          onClick={() => handleQuantityChange(item._id, -1)}
+                          onClick={() =>
+                            handleQuantityChange(item.cartItemId, -1)
+                          }
                           disabled={item.quantity <= 1}
                           className="cart-quantity-btn"
                         >
@@ -357,7 +360,9 @@ const Cart = () => {
                         </button>
                         <span className="cart-quantity">{item.quantity}</span>
                         <button
-                          onClick={() => handleQuantityChange(item._id, 1)}
+                          onClick={() =>
+                            handleQuantityChange(item.cartItemId, 1)
+                          }
                           className="cart-quantity-btn"
                         >
                           <FaPlus />
@@ -365,7 +370,9 @@ const Cart = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleRemoveItem(item._id)}
+                      onClick={() =>
+                        handleRemoveItem(item.cartItemId, item._id)
+                      }
                       className="cart-remove-btn"
                     >
                       <FaTrash />
@@ -394,13 +401,22 @@ const Cart = () => {
                           handleCheckDelivery(value);
                         }
                       }
+                      if (!isPincodeTouched) {
+                        setIsPincodeTouched(true);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (!isPincodeTouched) {
+                        setIsPincodeTouched(true);
+                      }
                     }}
                     maxLength={6}
+                    style={{ color: isPincodeTouched ? "inherit" : "#aaa" }} // Light gray when untouched
                   />
                   <button
                     className="cart-pincode-check-btn"
                     onClick={() => handleCheckDelivery(pincode)}
-                    disabled={pincodeload || pincode.length !== 6}
+                    disabled={pincodeload || !isPincodeTouched} // Disabled if not touched
                   >
                     {pincodeload ? (
                       <>

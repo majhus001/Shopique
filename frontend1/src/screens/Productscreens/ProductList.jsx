@@ -8,13 +8,32 @@ import {
   FaTruck,
   FaMapMarkerAlt,
   FaCalendarAlt,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
+import ValidUserData from "../../utils/ValidUserData";
 import { RiFlashlightFill } from "react-icons/ri";
 import { IoIosArrowForward } from "react-icons/io";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
 import "./ProductList.css";
+import BottomNav from "../Bottom Navbar/BottomNav";
+
+const useScreenSize = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return { isMobile };
+};
 
 const ProductList = () => {
   const location = useLocation();
@@ -22,19 +41,7 @@ const ProductList = () => {
   const { id } = useParams();
 
   // State for product data
-  const [productData, setProductData] = useState({
-    name: "",
-    price: 0,
-    offerprice: 0,
-    brand: "",
-    images: [],
-    rating: 0,
-    description: "",
-    stock: 0,
-    category: "",
-    deliverytime: "",
-  });
-
+  const [productData, setProductData] = useState(location.state?.product || {});
   const [loading, setLoading] = useState(true);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [pincode, setPincode] = useState("");
@@ -44,93 +51,137 @@ const ProductList = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const warehousePincode = "641008";
 
-  // User data from location or local storage
-  const user = location.state?.user || null;
-  const userId = user?._id;
-
+  const [userId, setUserId] = useState(location.state?.user?._id || null);
+  const [userDetails, setUserDetails] = useState(location.state?.user || null);
   const [isProdAdded, setProdAdded] = useState(false);
   const [updateMessage, setUpdateMessage] = useState("");
   const [review, setReview] = useState("");
   const [urating, setRating] = useState("");
   const [reviews, setReviews] = useState([]);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [userImages, setUserImages] = useState({});
   const [activeTab, setActiveTab] = useState("description");
   const [zoomImage, setZoomImage] = useState(false);
 
-  // Fetch product data if not in location state
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/products/fetch/${id}`
-        );
-        setProductData(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching product data:", error);
-        setLoading(false);
-        navigate("/not-found");
-      }
-    };
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 10;
+  const [expandedReviews, setExpandedReviews] = useState({});
+  const { isMobile } = useScreenSize();
 
-    fetchData();
+  const getCharacterLimit = () => (isMobile ? 100 : 250);
+  const toggleReviewExpand = (reviewId) => {
+    setExpandedReviews((prev) => ({
+      ...prev,
+      [reviewId]: !prev[reviewId],
+    }));
+  };
+
+  const reviewsWithExpansion = reviews.map((r) => ({
+    ...r,
+    expanded: expandedReviews[r._id] || false,
+  }));
+
+  const checkUser = async () => {
+    try {
+      const userData = await ValidUserData();
+      if (userData) {
+        setUserDetails(userData);
+        setUserId(userData._id);
+      }
+    } catch (error) {
+      console.error("Error validating user:", error);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/products/fetch/${id}`
+      );
+      setProductData(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching product data:", error);
+      setLoading(false);
+      navigate("/not-found");
+    }
+  };
+
+  const checkIfItemInCart = async () => {
+    if (!userDetails) return;
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/cart/check`, {
+        params: { userId, productId: id },
+      });
+      setProdAdded(response.data.exists);
+    } catch (error) {
+      console.error("Error checking item in cart:", error);
+    }
+  };
+
+  const fetchUserDetails = async (userIds) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/auth/users/details`,
+        {
+          params: { userIds: userIds.join(",") },
+        }
+      );
+      setUserImages(response.data);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    }
+  };
+
+  const fetchReviews = async (page = 1) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/product/reviews/fetch`,
+        {
+          params: {
+            itemId: id,
+            page,
+            limit: reviewsPerPage,
+          },
+        }
+      );
+      setReviews(response.data.reviews || []);
+      setTotalReviews(response.data.total || 0);
+
+      const uniqueUserIds = [
+        ...new Set(response.data.reviews?.map((r) => r.userId) || []),
+      ];
+      if (uniqueUserIds.length > 0) {
+        fetchUserDetails(uniqueUserIds);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!location.state?.user) {
+      checkUser();
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+    fetchReviews();
   }, [id, location.state, navigate]);
 
-  // Other effects and handlers
   useEffect(() => {
-    const checkIfItemInCart = async () => {
-      if (!userId) return;
-
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/cart/check`, {
-          params: { userId, itemId: id },
-        });
-        setProdAdded(response.data.exists);
-      } catch (error) {
-        console.error("Error checking item in cart:", error);
-      }
-    };
-
-    const fetchUserDetails = async (userIds) => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/auth/users/details`,
-          {
-            params: { userIds: userIds.join(",") },
-          }
-        );
-        setUserImages(response.data);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      }
-    };
-
-    const fetchReviews = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/${productData.category}/fetch/reviews`,
-          {
-            params: { itemId: id },
-          }
-        );
-        setReviews(response.data.reviews || []);
-
-        const uniqueUserIds = [
-          ...new Set(response.data.reviews?.map((r) => r.userId) || []),
-        ];
-        if (uniqueUserIds.length > 0) {
-          fetchUserDetails(uniqueUserIds);
-        }
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      }
-    };
-
-    if (productData.category) {
-      fetchReviews();
-      if (userId) checkIfItemInCart();
+    if (userDetails) {
+      checkIfItemInCart();
     }
-  }, [userId, id, productData.category]);
+  }, [userDetails, id, productData.category]);
+
+  // Handle page change for reviews
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    fetchReviews(newPage);
+  };
 
   const handleSubmit = async () => {
     if (!review || !urating) {
@@ -139,27 +190,18 @@ const ProductList = () => {
     }
 
     try {
-      await axios.post(
-        `${API_BASE_URL}/api/${productData.category}/add/review`,
-        {
-          itemId: id,
-          userId,
-          review,
-          rating: parseInt(urating),
-        }
-      );
+      await axios.post(`${API_BASE_URL}/api/product/reviews/add`, {
+        itemId: id,
+        userId,
+        review,
+        rating: parseInt(urating),
+      });
       alert("Review submitted successfully!");
       setReview("");
       setRating("");
-      
-      const response = await axios.get(
-        `${API_BASE_URL}/api/${productData.category}/fetch/reviews`,
-        {
-          params: { itemId: id },
-        }
-      );
-
-      setReviews(response.data.reviews || []);
+      // Refresh reviews and reset to first page
+      fetchReviews(1);
+      setCurrentPage(1);
     } catch (error) {
       console.error("Error submitting review:", error);
       alert("Failed to submit review. Try again later.");
@@ -178,16 +220,8 @@ const ProductList = () => {
 
     const productDetails = {
       userId,
-      itemId: id,
-      name: productData.name,
-      price: productData.price,
-      brand: productData.brand,
+      productId: id,
       quantity: 1,
-      description: productData.description,
-      image: productData.images[0] || "",
-      category: productData.category,
-      deliverytime: productData.deliverytime,
-      rating: productData.rating,
     };
 
     try {
@@ -209,25 +243,16 @@ const ProductList = () => {
   };
 
   const handleBuyNow = () => {
-    if (!user) {
-      alert("Please log in to proceed to checkout.");
+    if (!userDetails) {
+      alert("Please log in to buy products.");
       return;
     }
 
     navigate("/buynow", {
       state: {
-        user,
-        itemId: id,
-        name: productData.name,
-        price: productData.price,
-        brand: productData.brand,
+        user: userDetails,
+        ...productData,
         quantity: 1,
-        description: productData.description,
-        images: productData.images,
-        category: productData.category,
-        deliverytime: productData.deliverytime,
-        rating: productData.rating,
-        stock: productData.stock,
       },
     });
   };
@@ -290,19 +315,25 @@ const ProductList = () => {
   const renderStars = (rating) => {
     return Array(5)
       .fill(0)
-      .map((_, i) =>
-        i < rating ? (
-          <FaStar key={i} className="star-filled" />
-        ) : (
-          <FaRegStar key={i} className="star-empty" />
-        )
-      );
+      .map((_, i) => {
+        if (i < Math.floor(rating)) {
+          return <FaStar key={i} className="star-filled" />;
+        }
+        if (i < rating) {
+          // Handles decimal (e.g., 3.5)
+          return <FaStarHalf key={i} className="star-half" />;
+        }
+        return <FaRegStar key={i} className="star-empty" />;
+      });
   };
+
+  // Calculate total pages for reviews
+  const totalPages = Math.ceil(totalReviews / reviewsPerPage);
 
   if (loading) {
     return (
       <div className="product-page-container">
-        <Navbar user={user} />
+        <Navbar user={userDetails} />
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading product details...</p>
@@ -313,7 +344,7 @@ const ProductList = () => {
 
   return (
     <div className="product-page-container">
-      <Navbar user={user} />
+      <Navbar />
 
       {updateMessage && (
         <div className="notification-banner success">
@@ -369,30 +400,105 @@ const ProductList = () => {
                 </div>
               ))}
             </div>
+
+            <div className="action-buttons">
+              <button
+                className={`pl-cart-btn ${isProdAdded ? "go-to-cart" : ""}`}
+                onClick={() => {
+                  if (productData.stock <= 0) {
+                    alert("Sorry, Out of Stock");
+                  } else if (isProdAdded) {
+                    navigate("/cart", {
+                      state: { user: userDetails },
+                    });
+                  } else {
+                    handleAddToCart();
+                  }
+                }}
+                disabled={productData.stock <= 0 && !isProdAdded}
+              >
+                <FaShoppingCart className="btn-icon" />
+                {isProdAdded
+                  ? "Go to Cart"
+                  : productData.stock > 0
+                  ? "Add to Cart"
+                  : "Out of Stock"}
+              </button>
+
+              <button
+                className="buy-btn"
+                onClick={handleBuyNow}
+                disabled={productData.stock <= 0}
+              >
+                {productData.stock > 0 ? "Buy Now" : "Out of Stock"}
+              </button>
+            </div>
           </div>
 
           {/* Product Info */}
           <div className="product-info">
-            <h1 className="product-title">{productData.name}</h1>
+            <h1 className="product-title">
+              <span className="product-name">{productData.name}</span>
+              <span className="brand-name">{productData.brand}</span>
+            </h1>
 
             <div className="product-meta">
               <div className="rating-badge">
                 {renderStars(Math.round(productData.rating))}
                 <span className="rating-text">
-                  {productData.rating.toFixed(1)} | {reviews.length} Ratings
+                  {productData.rating.toFixed(1)} | {totalReviews} Ratings
                 </span>
               </div>
-              <span className="brand-name">{productData.brand}</span>
             </div>
 
             <div className="price-section">
               <div>
                 <div className="current-price">
-                  ₹{productData.price.toLocaleString()}
+                  {productData.offerPrice &&
+                  productData.offerPrice !== productData.price ? (
+                    <>
+                      <span className="pl-offer-price">
+                        ₹{productData.offerPrice.toLocaleString()}
+                      </span>
+                      <span className="pl-original-price">
+                        ₹{productData.price.toLocaleString()}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="pl-offer-price">
+                      ₹{productData.price.toLocaleString()}
+                    </span>
+                  )}
                 </div>
-                <span></span>
               </div>
               <div className="price-meta">inclusive of all taxes</div>
+            </div>
+
+            <div className="product-highlights">
+              <h3 className="section-heading">Highlights</h3>
+              <ul className="highlight-list">
+                <li>Brand: {productData.brand || "Not specified"}</li>
+                <li>Category: {productData.category}</li>
+                {productData.description && <li>{productData.description}</li>}
+              </ul>
+
+              {productData.specifications && (
+                <>
+                  <h3 className="section-heading">Specifications</h3>
+                  <div className="specifications-cont">
+                    {Object.entries(productData.specifications).map(
+                      ([key, value]) => (
+                        <div key={key} className="pl-spec-item">
+                          <span className="pl-spec-label">
+                            {key.replace(/-/g, " ")}
+                          </span>
+                          <span className="pl-spec-value">{value}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="delivery-section">
@@ -457,48 +563,6 @@ const ProductList = () => {
                 )}
               </div>
             </div>
-
-            <div className="action-buttons">
-              <button
-                className={`pl-cart-btn ${isProdAdded ? "go-to-cart" : ""}`}
-                onClick={() => {
-                  if (productData.stock <= 0) {
-                    alert("Sorry, Out of Stock");
-                  } else if (isProdAdded) {
-                    navigate("/cart", {
-                      state: { user, stock: productData.stock },
-                    });
-                  } else {
-                    handleAddToCart();
-                  }
-                }}
-                disabled={productData.stock <= 0 && !isProdAdded}
-              >
-                <FaShoppingCart className="btn-icon" />
-                {isProdAdded
-                  ? "Go to Cart"
-                  : productData.stock > 0
-                  ? "Add to Cart"
-                  : "Out of Stock"}
-              </button>
-
-              <button
-                className="buy-btn"
-                onClick={handleBuyNow}
-                disabled={productData.stock <= 0}
-              >
-                {productData.stock > 0 ? "Buy Now" : "Out of Stock"}
-              </button>
-            </div>
-
-            <div className="product-highlights">
-              <h3 className="section-heading">Highlights</h3>
-              <ul className="highlight-list">
-                <li>Brand: {productData.brand || "Not specified"}</li>
-                <li>Category: {productData.category}</li>
-                {productData.description && <li>{productData.description}</li>}
-              </ul>
-            </div>
           </div>
         </div>
 
@@ -517,7 +581,7 @@ const ProductList = () => {
               className={`tab-btn ${activeTab === "reviews" ? "active" : ""}`}
               onClick={() => setActiveTab("reviews")}
             >
-              Reviews ({reviews.length})
+              Reviews ({totalReviews})
             </button>
           </div>
 
@@ -545,7 +609,7 @@ const ProductList = () => {
                   <div className="spec-item">
                     <span className="spec-label">Rating</span>
                     <span className="spec-value">
-                      {productData.rating.toFixed(1)} ({reviews.length} reviews)
+                      {productData.rating.toFixed(1)} ({totalReviews} reviews)
                     </span>
                   </div>
                   <div className="spec-item">
@@ -563,7 +627,19 @@ const ProductList = () => {
                   <textarea
                     placeholder="Share your experience with this product..."
                     value={review}
-                    onChange={(e) => setReview(e.target.value)}
+                    style={{
+                      resize: "none",
+                      width: "100%",
+                      height: "120px",
+                      padding: "10px",
+                      boxSizing: "border-box",
+                    }}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 500) {
+                        setReview(e.target.value);
+                      } else alert("Maximum characters reached");
+                    }}
+                    maxLength={501}
                   />
                   <div className="rating-input-container">
                     <span>Your Rating:</span>
@@ -588,35 +664,120 @@ const ProductList = () => {
                 </div>
 
                 {reviews.length > 0 ? (
-                  <div className="reviews-list">
-                    {reviews.map((r, index) => (
-                      <div key={index} className="review-card">
-                        <div className="reviewer-info">
-                          <img
-                            src={
-                              userImages[r.userId]?.image || "/default-user.png"
-                            }
-                            alt="User"
-                            className="reviewer-avatar"
-                          />
-                          <div className="reviewer-details">
-                            <h4>
-                              {userImages[r.userId]?.username || "Anonymous"}
-                            </h4>
-                            <div className="review-rating">
-                              {renderStars(r.rating)}
+                  <>
+                    <div className="reviews-list">
+                      {reviewsWithExpansion.map((r, index) => {
+                        const charLimit = getCharacterLimit();
+                        const shouldTruncate =
+                          r.review.length > charLimit && !r.expanded;
+
+                        return (
+                          <div key={index} className="review-card">
+                            <div className="reviewer-info">
+                              <img
+                                src={
+                                  userImages[r.userId]?.image ||
+                                  "/default-user.png"
+                                }
+                                alt="User"
+                                className="reviewer-avatar"
+                              />
+                              <div className="reviewer-details">
+                                <h4>
+                                  {userImages[r.userId]?.username ||
+                                    "Anonymous"}
+                                </h4>
+                                <div className="review-rating">
+                                  {renderStars(r.rating)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="review-text">
+                              <p>
+                                {shouldTruncate ? (
+                                  <>
+                                    {r.review.substring(0, charLimit)}...
+                                    <button
+                                      className="view-more-btn"
+                                      onClick={() => toggleReviewExpand(r._id)}
+                                    >
+                                      View More
+                                    </button>
+                                  </>
+                                ) : (
+                                  r.review
+                                )}
+                              </p>
+                              {r.review.length > charLimit && r.expanded && (
+                                <button
+                                  className="view-less-btn"
+                                  onClick={() => toggleReviewExpand(r._id)}
+                                >
+                                  View Less
+                                </button>
+                              )}
+                            </div>
+                            <div className="review-date">
+                              {new Date(r.createdAt).toLocaleDateString()}
                             </div>
                           </div>
-                        </div>
-                        <div className="review-text">
-                          <p>{r.review}</p>
-                        </div>
-                        <div className="review-date">
-                          {new Date(r.createdAt).toLocaleDateString()}
-                        </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="pagination-controls">
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="pagination-btn"
+                        >
+                          <FaChevronLeft />
+                        </button>
+
+                        {Array.from(
+                          { length: Math.min(5, totalPages) },
+                          (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                              pageNum = i + 1;
+                            } else if (currentPage <= 3) {
+                              pageNum = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i;
+                            } else {
+                              pageNum = currentPage - 2 + i;
+                            }
+
+                            return (
+                              <button
+                                key={pageNum}
+                                onClick={() => handlePageChange(pageNum)}
+                                className={`pagination-btn ${
+                                  currentPage === pageNum ? "active" : ""
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          }
+                        )}
+
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="pagination-btn"
+                        >
+                          <FaChevronRight />
+                        </button>
+
+                        <span className="pagination-info">
+                          Page {currentPage} of {totalPages}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <div className="no-reviews">
                     <p>No reviews yet. Be the first to review this product!</p>
@@ -627,6 +788,7 @@ const ProductList = () => {
           </div>
         </div>
       </div>
+      <BottomNav UserData={userDetails} />
     </div>
   );
 };

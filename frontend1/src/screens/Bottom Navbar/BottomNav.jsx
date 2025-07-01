@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
+import { motion } from "framer-motion";
 import "./Bottomnav.css";
 import { useEffect, useState } from "react";
 
@@ -31,34 +32,53 @@ export default function BottomNav({ UserData }) {
 
   return (
     <div className="bottom-nav">
-      <button
+      <motion.button
+        whileTap={{ scale: 0.9 }}
         className={`bot-nav-btn ${activeTab === "home" ? "bot-active" : ""}`}
         onClick={() => handleNavigation("home")}
       >
-        <FaHome />
-        <span>Home</span>
-      </button>
-      <button
+        <div className="icon-wrapper">
+          <FaHome className="nav-icon" />
+          {activeTab === "home" && <motion.span layoutId="indicator" className="active-indicator" />}
+        </div>
+        <span className="nav-label">Home</span>
+      </motion.button>
+
+      <motion.button
+        whileTap={{ scale: 0.9 }}
         className={`bot-nav-btn ${activeTab === "myorders" ? "bot-active" : ""}`}
         onClick={() => handleNavigation("myorders")}
       >
-        <FaListAlt />
-        <span>Orders</span>
-      </button>
-      <button
+        <div className="icon-wrapper">
+          <FaListAlt className="nav-icon" />
+          {activeTab === "myorders" && <motion.span layoutId="indicator" className="active-indicator" />}
+        </div>
+        <span className="nav-label">Orders</span>
+      </motion.button>
+
+      <motion.button
+        whileTap={{ scale: 0.9 }}
         className={`bot-nav-btn ${activeTab === "profilepage" ? "bot-active" : ""}`}
         onClick={() => handleNavigation("profilepage")}
       >
-        <FaUser />
-        <span>Account</span>
-      </button>
-      <button
+        <div className="icon-wrapper">
+          <FaUser className="nav-icon" />
+          {activeTab === "profilepage" && <motion.span layoutId="indicator" className="active-indicator" />}
+        </div>
+        <span className="nav-label">Account</span>
+      </motion.button>
+
+      <motion.button
+        whileTap={{ scale: 0.9 }}
         className={`bot-nav-btn ${activeTab === "cart" ? "bot-active" : ""}`}
         onClick={() => handleNavigation("cart")}
       >
-        <FaShoppingCart />
-        <span>Cart</span>
-      </button>
+        <div className="icon-wrapper">
+          <FaShoppingCart className="nav-icon" />
+          {activeTab === "cart" && <motion.span layoutId="indicator" className="active-indicator" />}
+        </div>
+        <span className="nav-label">Cart</span>
+      </motion.button>
     </div>
   );
 }

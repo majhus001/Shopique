@@ -215,6 +215,7 @@ const HomePage = () => {
     });
     navigate(`/seprodlist/${productId}`, {
       state: {
+        user: userDetails,
         productCategory: prodCategory,
         productSubCategory: prodSubCategory,
       },
@@ -236,20 +237,11 @@ const HomePage = () => {
   }, []);
 
   const handleprodlistnavigation = (item) => {
+    console.log(item)
     navigate(`/prodlist/${item._id}`, {
       state: {
         user: userDetails,
-        name: item.name,
-        price: item.price,
-        brand: item.brand,
-        images: item.images,
-        rating: item.rating,
-        description: item.description,
-        stock: item.stock,
-        category: item.category,
-        deliverytime: item.deliveryTime,
-        lastSoldAt: item.lastSoldAt,
-        salesCount: item.salesCount,
+        product: item,
       },
     });
   };
@@ -439,7 +431,9 @@ const HomePage = () => {
                                 src={item.images[0]}
                                 alt={item.name}
                               />
-                              <span className="dropdown-item-name">{item.name}</span>
+                              <span className="dropdown-item-name">
+                                {item.name}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -579,7 +573,9 @@ const HomePage = () => {
                                       {item.salesCount > 0 && (
                                         <div className="sales-count">
                                           <FiShoppingBag />
-                                          <span>{item.salesCount} sold</span>
+                                          <span>
+                                            {item.salesCount + 50} sold
+                                          </span>
                                         </div>
                                       )}
                                     </div>

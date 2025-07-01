@@ -482,7 +482,6 @@ router.delete("/delete/:userId", async (req, res) => {
 router.get("/users/details", async (req, res) => {
   try {
     const { userIds } = req.query; // Get user IDs from query params
-    console.log("Received User IDs:", userIds);
 
     if (!userIds || userIds.trim() === "") {
       return res.status(400).json({ error: "User IDs are required" });
