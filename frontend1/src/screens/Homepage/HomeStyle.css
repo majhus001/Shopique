@@ -592,7 +592,7 @@ body {
   max-width: 240px;
   background: white;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(223, 93, 93, 0.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
   transition: var(--transition);
   position: relative;
   flex-shrink: 0;
@@ -1381,8 +1381,7 @@ body {
   .product-card-horizontal .product-name {
     font-size: 0.6rem;
   }
-  .product-card-horizontal .price,
-  .product-card-horizontal .offer-price {
+  .product-card-horizontal .original-price{
     font-size: 0.6rem;
   }
   .product-card-horizontal .rating {
