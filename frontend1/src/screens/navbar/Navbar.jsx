@@ -76,7 +76,7 @@ export default function Navbar() {
         setIsLoading(false);
       }
     };
-    
+
     initialize();
   }, [checkUser, fetchAllProducts, fetchCartData]);
 
@@ -165,7 +165,7 @@ export default function Navbar() {
               aria-label="Profile"
             >
               <i className="fas fa-user"></i>
-              <span>{userDetails?.username || " "}</span>
+              <span>{userDetails?.username?.split(" ")[0] || " "}</span>
             </button>
           ) : (
             <button
@@ -277,7 +277,9 @@ export default function Navbar() {
           {!isOrderPage && (
             <button
               className="nav-btns cart-btn"
-              onClick={() => navigate("/cart", { state: { user: userDetails } })}
+              onClick={() =>
+                navigate("/cart", { state: { user: userDetails } })
+              }
             >
               <i className="fas fa-shopping-cart"></i>
               <span className="btn-text">Cart</span>
@@ -295,7 +297,7 @@ export default function Navbar() {
               }
             >
               <i className="fas fa-user"></i>
-              <span className="btn-text">{userDetails?.username}</span>
+              <span>{userDetails?.username?.split(" ")[0] || " "}</span>
             </button>
           ) : (
             <button

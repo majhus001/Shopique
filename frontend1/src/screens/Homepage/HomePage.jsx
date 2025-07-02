@@ -100,21 +100,19 @@ const HomePage = () => {
   });
 
   const productContainerRefs = useRef({});
-  const scrollLeft = (categoryId) => {
-    if (productContainerRefs.current[categoryId]) {
-      productContainerRefs.current[categoryId].scrollBy({
-        left: -300,
-        behavior: "smooth",
-      });
+
+  // Update the scroll functions
+  const scrollLeft = (subCategory) => {
+    const container = productContainerRefs.current[subCategory];
+    if (container) {
+      container.scrollBy({ left: -500, behavior: "smooth" });
     }
   };
 
-  const scrollRight = (categoryId) => {
-    if (productContainerRefs.current[categoryId]) {
-      productContainerRefs.current[categoryId].scrollBy({
-        left: 300,
-        behavior: "smooth",
-      });
+  const scrollRight = (subCategory) => {
+    const container = productContainerRefs.current[subCategory];
+    if (container) {
+      container.scrollBy({ left: 500, behavior: "smooth" });
     }
   };
 
@@ -138,6 +136,7 @@ const HomePage = () => {
           subCategory:
             category.subCategory || capitalizeWords(category.subCategory || ""),
         }));
+        console.log(processedData);
         setProductsByCategory(processedData);
       } else {
         throw new Error("No products data received");
@@ -237,7 +236,6 @@ const HomePage = () => {
   }, []);
 
   const handleprodlistnavigation = (item) => {
-    console.log(item)
     navigate(`/prodlist/${item._id}`, {
       state: {
         user: userDetails,
@@ -247,11 +245,8 @@ const HomePage = () => {
   };
 
   return (
-    <div className="app" style={{ cursor: loading ? "wait" : "default" }}>
-      <div className="usprof-nav">
-        <Navbar />
-      </div>
-
+    <div className="app">
+      <Navbar />
       <div className="main-container">
         <div className="content">
           {loading ? (
@@ -461,9 +456,8 @@ const HomePage = () => {
                       displayName,
                       subCategory,
                       products: categoryProducts,
-                      _id: categoryId,
                     }) => (
-                      <div className="product-category" key={categoryId}>
+                      <div className="product-category" key={subCategory}>
                         <motion.div
                           className="category-header"
                           initial={{ opacity: 0, y: 20 }}
@@ -483,7 +477,7 @@ const HomePage = () => {
                         <div className="horizontal-scroll-container">
                           <motion.button
                             className="scroll-button left"
-                            onClick={() => scrollLeft(categoryId)}
+                            onClick={() => scrollLeft(subCategory)} // 🔁 replaced categoryId
                             aria-label="Scroll left"
                           >
                             <FiChevronLeft />
@@ -492,7 +486,7 @@ const HomePage = () => {
                           <div
                             className="product-horizontal-scroll"
                             ref={(el) =>
-                              (productContainerRefs.current[categoryId] = el)
+                              (productContainerRefs.current[subCategory] = el)
                             }
                           >
                             {categoryProducts.map((item) => (
@@ -587,7 +581,7 @@ const HomePage = () => {
 
                           <motion.button
                             className="scroll-button right"
-                            onClick={() => scrollRight(categoryId)}
+                            onClick={() => scrollRight(subCategory)} // 🔁 replaced categoryId
                             aria-label="Scroll right"
                           >
                             <FiChevronRight />

@@ -35,13 +35,11 @@
 }
 
 .ord-address-details {
-  /* max-width: 60%; */
   flex: 1;
 }
 
 .ord-price-details {
   flex: 1;
-  /* max-width: 35%; */
   height: fit-content;
   position: sticky;
   top: 100px;
@@ -193,6 +191,7 @@
 .ord-product-details{
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
 .ord-product-item-name{
   font-size: 0.8rem;

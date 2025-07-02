@@ -225,7 +225,7 @@ router.get("/paginated", async (req, res) => {
         clickedProduct = await product
           .findById(productId)
           .select(
-            "category subCategory brand stock offerPrice price images name description rating "
+            "category subCategory brand stock salesCount offerPrice price images name description rating "
           )
           .lean();
 
@@ -286,7 +286,7 @@ router.get("/paginated", async (req, res) => {
     // Get paginated products with all necessary fields
     let products = await product
     .find(finalFilter)
-    .select("name description price brand stock offerPrice images rating")
+    .select("category subCategory name description price brand stock salesCount offerPrice images rating")
     .skip(skip)
     .limit(parsedLimit)
     .sort({ createdAt: -1 })

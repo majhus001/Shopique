@@ -24,7 +24,6 @@ const ValidUserData = async () => {
     );
     
     if (!userRes.data.data) {
-      console.log("kkkk")
       throw new Error("User data not found");
     }
     

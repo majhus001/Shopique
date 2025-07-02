@@ -25,13 +25,6 @@ body {
   scroll-behavior: smooth;
 }
 
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
 /* Skeleton Loading Styles */
 .skeleton-loading-container {
   width: 100%;
@@ -584,9 +577,9 @@ body {
   display: flex;
   overflow-x: auto;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
   gap: 25px;
   padding: 15px 0;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -599,7 +592,7 @@ body {
   max-width: 240px;
   background: white;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(223, 93, 93, 0.05);
   transition: var(--transition);
   position: relative;
   flex-shrink: 0;

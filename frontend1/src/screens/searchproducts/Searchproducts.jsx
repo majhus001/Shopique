@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import "./Searchproducts.css";
@@ -44,6 +44,44 @@ export default function Searchproducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const productsPerPage = 5;
+
+  // Refs for click-outside functionality
+  const filterSidebarRef = useRef(null);
+  const mobileFilterToggleRef = useRef(null);
+
+  // Click outside and ESC key handlers
+  useEffect(() => {
+    const handleOutsideInteraction = (event) => {
+      // Click outside logic
+      if (
+        event.type === "mousedown" &&
+        mobileFiltersOpen &&
+        filterSidebarRef.current &&
+        !filterSidebarRef.current.contains(event.target) &&
+        mobileFilterToggleRef.current &&
+        !mobileFilterToggleRef.current.contains(event.target)
+      ) {
+        setMobileFiltersOpen(false);
+      }
+
+      // ESC key logic
+      if (
+        event.type === "keydown" &&
+        event.key === "Escape" &&
+        mobileFiltersOpen
+      ) {
+        setMobileFiltersOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideInteraction);
+    document.addEventListener("keydown", handleOutsideInteraction);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideInteraction);
+      document.removeEventListener("keydown", handleOutsideInteraction);
+    };
+  }, [mobileFiltersOpen]);
 
   const checkUser = async () => {
     try {
@@ -149,8 +187,7 @@ export default function Searchproducts() {
     navigate("/buynow", {
       state: {
         user: userDetails,
-        ...item,
-        quantity: 1,
+        product: item,
       },
     });
   };
@@ -160,7 +197,6 @@ export default function Searchproducts() {
   };
 
   const handleprodlistnavigation = (item) => {
-    console.log(item)
     navigate(`/prodlist/${item._id}`, {
       state: {
         user: userDetails,
@@ -189,14 +225,22 @@ export default function Searchproducts() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-
   return (
     <div className="search-page">
       <Navbar />
 
+      {/* Overlay for mobile filters */}
+      {mobileFiltersOpen && (
+        <div
+          className="filter-overlay"
+          onClick={() => setMobileFiltersOpen(false)}
+        />
+      )}
+
       <div className="search-container">
         {/* Mobile Filter Toggle */}
         <button
+          ref={mobileFilterToggleRef}
           className="mobile-filter-toggle"
           onClick={() => setMobileFiltersOpen(true)}
         >
@@ -205,6 +249,7 @@ export default function Searchproducts() {
 
         {/* Filter Sidebar */}
         <div
+          ref={filterSidebarRef}
           className={`filter-sidebar ${mobileFiltersOpen ? "mobile-open" : ""}`}
         >
           <div className="sidebar-header">
@@ -290,9 +335,33 @@ export default function Searchproducts() {
         {/* Product Listing */}
         <div className="product-results">
           {loading ? (
-            <div className="loading-overlay">
-              <div className="spinner"></div>
-              <p>Loading products...</p>
+            <div className="sp-skeleton-loading">
+              <div className="sp-skeleton-filter-toggle"></div>
+              <div className="sp-skeleton-product-grid">
+                {[...Array(5)].map((_, index) => (
+                  <div key={index} className="sp-skeleton-product-card">
+                    <div className="sp-skeleton-product-image"></div>
+                    <div className="sp-skeleton-product-info">
+                      <div className="sp-skeleton-title"></div>
+                      <div className="sp-skeleton-price"></div>
+                      <div className="sp-skeleton-rating"></div>
+                      <div className="sp-skeleton-buttons">
+                        <div className="sp-skeleton-button"></div>
+                        <div className="sp-skeleton-button"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="sp-skeleton-pagination">
+                <div className="sp-skeleton-pagination-button"></div>
+                <div className="sp-skeleton-page-numbers">
+                  {[...Array(5)].map((_, index) => (
+                    <div key={index} className="sp-skeleton-page-btn"></div>
+                  ))}
+                </div>
+                <div className="sp-skeleton-pagination-button"></div>
+              </div>
             </div>
           ) : categoryProducts.length > 0 ? (
             <>
@@ -303,7 +372,7 @@ export default function Searchproducts() {
                     onClick={() => handleprodlistnavigation(item)}
                     className="product-card"
                   >
-                    <div className="product-image">
+                    <div className="sp-product-image">
                       <img
                         src={item.images?.[0] || "/placeholder-product.jpg"}
                         alt={item.name}
@@ -320,23 +389,31 @@ export default function Searchproducts() {
                         </div>
                       )}
                     </div>
-                    <div className="product-info">
-                      <h3 onClick={() => handleprodlistnavigation(item)}>
-                        {item.name}
-                      </h3>
-                      <div className="price-section">
-                        {item.offerPrice ? (
-                          <>
-                            <span className="current-price">
-                              ₹{item.offerPrice}
-                            </span>
-                            <span className="original-price">
-                              ₹{item.price}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="current-price">₹{item.price}</span>
+                    <div className="sp-product-info">
+                      <div className="sp-product-info-top">
+                        <h3>{item.name}</h3>
+                        {item.salesCount > 0 && (
+                          <div className="sp-sales-count">
+                            <FiShoppingBag />
+                            <span>{item.salesCount + 50} sold</span>
+                          </div>
                         )}
+                      </div>
+                      <div className="sp-price-section">
+                        <div className="sp-prod-prices">
+                          {item.offerPrice ? (
+                            <>
+                              <span className="sp-current-price">
+                                ₹{item.offerPrice}
+                              </span>
+                              <span className="sp-original-price">
+                                ₹{item.price}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="current-price">₹{item.price}</span>
+                          )}
+                        </div>
                         {item.rating > 0 && (
                           <div className="rating">
                             <FiStar className="star-icon" />
@@ -347,22 +424,31 @@ export default function Searchproducts() {
                       <div className="product-actions">
                         {item.isAddedToCart ? (
                           <button
-                            className="action-btn go-to-cart"
-                            onClick={handleGoToCart}
+                            className="action-btn sp-go-to-cart"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleGoToCart();
+                            }}
                           >
                             <FiShoppingCart /> Go to Cart
                           </button>
                         ) : (
                           <button
-                            className="action-btn add-to-cart"
-                            onClick={() => handleAddToCart(item)}
+                            className="action-btn sp-add-to-cart"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(item);
+                            }}
                           >
                             <FiShoppingCart /> Add to Cart
                           </button>
                         )}
                         <button
-                          className="action-btn buy-now"
-                          onClick={() => handleBuyNow(item)}
+                          className="action-btn sp-buy-now"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBuyNow(item);
+                          }}
                         >
                           <FiShoppingBag /> Buy Now
                         </button>

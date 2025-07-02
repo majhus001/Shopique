@@ -251,8 +251,8 @@ const ProductList = () => {
     navigate("/buynow", {
       state: {
         user: userDetails,
-        ...productData,
-        quantity: 1,
+        product: productData,
+
       },
     });
   };
@@ -345,7 +345,6 @@ const ProductList = () => {
   return (
     <div className="product-page-container">
       <Navbar />
-
       {updateMessage && (
         <div className="notification-banner success">
           {updateMessage}
@@ -603,7 +602,8 @@ const ProductList = () => {
                   <div className="spec-item">
                     <span className="spec-label">Category</span>
                     <span className="spec-value">
-                      {productData.category || "-"}
+
+                      {productData.category.charAt(0).toUpperCase() + productData.category.slice(1) || "-"}
                     </span>
                   </div>
                   <div className="spec-item">

@@ -15,6 +15,8 @@ router.post("/add", async (req, res) => {
     paymentMethod,
   } = req.body;
 
+  console.log(cartItems)
+
   if (
     !userId ||
     !cartItems ||
@@ -52,7 +54,6 @@ router.post("/add", async (req, res) => {
       product.salesCount += item.quantity;
       await product.save();
 
-      console.log("stock updated ",product.stock )
       formattedItems.push({
         productId: item._id,
         name: item.name,
@@ -60,10 +61,8 @@ router.post("/add", async (req, res) => {
         brand: item.brand,
         quantity: item.quantity,
         description: item.description,
-        image: item.images[0],
+        image: item.image,
         category: item.category,
-        deliveryTime: item.deliveryTime,
-        rating: item.rating,
       });
     }
 

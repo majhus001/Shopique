@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const orderedItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "products", 
+    ref: "products",
     required: true,
   },
   name: {
@@ -30,13 +30,6 @@ const orderedItemSchema = new mongoose.Schema({
   category: {
     type: String,
   },
-  deliveryTime: {
-    type: String,
-  },
-  rating: {
-    type: Number,
-    default: 0,
-  },
   addedAt: {
     type: Date,
     default: Date.now,
@@ -46,7 +39,7 @@ const orderedItemSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users", 
+    ref: "users",
     required: true,
   },
   OrderedItems: [orderedItemSchema],

@@ -29,21 +29,7 @@ const Buynow = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Extract data from location state
-  const {
-    user,
-    itemId,
-    name,
-    price,
-    brand,
-    quantity = 1,
-    description,
-    images,
-    category,
-    deliverytime,
-    rating,
-    stock,
-  } = location.state || {};
+  const { user, product } = location.state || {};
 
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -64,18 +50,16 @@ const Buynow = () => {
     if (location.state) {
       setCartItems([
         {
-          userId: user?._id,
-          itemId,
-          name,
-          price,
-          brand,
-          quantity,
-          description,
-          image: images?.[0] || "https://via.placeholder.com/150?text=No+Image",
-          category,
-          deliverytime,
-          rating,
-          stock,
+          _id: product._id,
+          name: product.name,
+          price: product.offerPrice,
+          brand: product.brand,
+          quantity: 1,
+          description: product.description,
+          image:
+            product.images?.[0] ||
+            "https://via.placeholder.com/150?text=No+Image",
+          category: product.category,
         },
       ]);
     }
@@ -95,7 +79,7 @@ const Buynow = () => {
 
   const handleBuyNow = () => {
     if (user && cartItems.length > 0) {
-      
+      console.log(cartItems);
       navigate("/ordercheckout", {
         state: {
           cartItems,
@@ -103,7 +87,7 @@ const Buynow = () => {
           totalPrice: calculateSubtotal(),
           deliveryfee,
           statePincode: pincode,
-          path: "buynow",
+          path : "buynow"
         },
       });
     } else {
@@ -224,7 +208,7 @@ const Buynow = () => {
             </motion.div>
           )}
 
-          {cartItems.length > 0 ? (
+          {cartItems?.length > 0 ? (
             <div className="cart-content">
               <div className="cart-items-container">
                 {cartItems.map((item) => (

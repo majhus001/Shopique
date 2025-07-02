@@ -9,10 +9,7 @@ import Sidebar from "../sidebar/Sidebar";
 import "../../App.css";
 import ValidUserData from "../../utils/ValidUserData";
 import {
-  FaHome,
-  FaListAlt,
-  FaUser,
-  FaShoppingCart,
+
   FaSignOutAlt,
 } from "react-icons/fa";
 import handleLogout from "../../utils/Logout";

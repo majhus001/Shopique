@@ -3,18 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
-import {
-  FaHome,
-  FaListAlt,
-  FaUser,
-  FaShoppingCart,
-  FaTrash,
-  FaPlus,
-  FaMinus,
-} from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { FiLogIn, FiAlertCircle } from "react-icons/fi";
 import ValidUserData from "../../utils/ValidUserData";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import BottomNav from "../Bottom Navbar/BottomNav";
 import AuthRequired from "../Authentication/AuthRequired";
 import "./Cart.css";
@@ -31,14 +23,15 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
       Math.cos(lat2 * (Math.PI / 180)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c); // Distance in km
-};
-
-const Cart = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState(location.state?.user || null);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.round(R * c); // Distance in km
+    };
+    
+    const Cart = () => {
+      const location = useLocation();
+      const navigate = useNavigate();
+      
+      const [userDetails, setUserDetails] = useState(location.state?.user || null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +49,7 @@ const Cart = () => {
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
   const [isPincodeDone, setIsPincodeDone] = useState(false);
   const warehousePincode = "641008";
-
+  
   // Skeleton Loading Component
   const CartSkeletonLoading = () => (
     <div className="cart-skeleton">
@@ -110,17 +103,23 @@ const Cart = () => {
     try {
       setLoading(true);
       setError(null);
+      
       const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
         params: { userId: userDetails?._id },
       });
 
       if (response.data.success) {
-        // Map the cart items correctly with product details
-        const itemsWithDetails = response.data.cart.items.map((item) => ({
-          ...item.productId, // Spread the product details
-          cartItemId: item._id, // The cart item ID
-          quantity: item.quantity,
-        }));
+        const itemsWithDetails = response.data.cart.items.map((item) => {
+          const product = item.productId;
+
+          return {
+            ...product,
+            image: product?.images?.[0] || "/placeholder.jpg", // ✅ new image field as string
+            cartItemId: item._id,
+            quantity: item.quantity,
+          };
+        });
+
         setCartItems(itemsWithDetails);
       } else {
         setCartItems([]);
@@ -138,9 +137,10 @@ const Cart = () => {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
-    if (!location.state.user) {
+    if (!location.state?.user) {
+      console.log("llll")
       checkUser();
     }
     fetchCartData();
@@ -220,7 +220,7 @@ const Cart = () => {
         totalPrice: calculateSubtotal(),
         deliveryfee: deliveryfee,
         statePincode: pincode,
-        path: "cart",
+        path: "cart"
       },
     });
   };

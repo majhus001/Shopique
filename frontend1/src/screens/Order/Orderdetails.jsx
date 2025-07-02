@@ -4,7 +4,6 @@ import Navbar from "../navbar/Navbar";
 import axios from "axios";
 import "./Orderdetails.css";
 import API_BASE_URL from "../../api";
-import getCoordinates from "../../utils/Geolocation";
 import { motion } from "framer-motion";
 
 const Orderdetails = () => {
@@ -22,6 +21,7 @@ const Orderdetails = () => {
   } = location.state || {};
 
   const user = location.state?.user || null;
+
   const [isLoggedIn, setIsLoggedIn] = useState(!!user);
   const [mobileNumber, setMobileNumber] = useState(user?.mobile || "");
   const [pincode, setPincode] = useState(statePincode);
@@ -103,18 +103,15 @@ const Orderdetails = () => {
         paymentMethod,
       };
 
-      console.log(orderData)
       const response = await axios.post(
         `${API_BASE_URL}/api/orders/add`,
         orderData
       );
 
       if (response.data.success) {
-        await clearCart();
-        
-        // await axios.put(`${API_BASE_URL}/api/orders/stockupdate/`, {
-        //   cartItems,
-        // });
+        if (path == "cart") {
+          await clearCart();
+        }
 
         await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
           name: user.username,
@@ -141,6 +138,10 @@ const Orderdetails = () => {
     } catch (error) {
       console.error("Error clearing cart:", error);
     }
+  };
+
+  const handleprodlistnavigation = (item) => {
+    navigate(`/prodlist/${item._id}`);
   };
 
   if (loading) {
@@ -330,8 +331,11 @@ const Orderdetails = () => {
               <ul>
                 {cartItems.map((item) => (
                   <li key={item._id || item.id}>
-                    <img src={item.images[0]} className="ord-product-img" />
-                    <div className="ord-product-details">
+                    <img src={item.image} className="ord-product-img" />
+                    <div
+                      onClick={() => handleprodlistnavigation(item)}
+                      className="ord-product-details"
+                    >
                       <span className="ord-product-item-name">{item.name}</span>
                       <span>
                         {item.quantity} × ₹{item.price} ={" "}

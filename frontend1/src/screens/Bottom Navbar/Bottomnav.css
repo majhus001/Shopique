@@ -9,13 +9,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(135deg, #007AFF 0%, #0047AB 100%);
+    background-color: #007AFF;
     padding: 12px 10px;
     justify-content: space-around;
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-    border-radius: 20px 20px 0 0;
-    gap: 5px;
+    gap: 10px;
   }
 
   .bot-nav-btn {
@@ -25,9 +23,8 @@
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75rem;
+    font-size: 0.5rem;
     cursor: pointer;
-    padding: 0.5rem;
     flex: 1;
     position: relative;
     transition: all 0.3s ease;
@@ -53,7 +50,7 @@
   }
 
   .nav-icon {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     transition: all 0.3s ease;
   }
 

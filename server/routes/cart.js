@@ -59,7 +59,20 @@ router.get("/fetch", async (req, res) => {
   }
 
   try {
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      select: "name brand price images description category",
+    });
+
+    if (cart && cart.items.length > 0) {
+      cart.items = cart.items.map((item) => {
+        const product = item.productId;
+        if (product?.images?.length > 0) {
+          product.images = [product.images[0]]; // Only keep the first image
+        }
+        return item;
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -75,7 +88,22 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-// 👉 GET: Check if product exists in user's cart
+router.get("/fetch/count", async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    const cart = await Cart.findOne({ userId });
+
+    const count = cart?.items?.length || 0; // 👈 handles null cart safely
+
+    res.json({ success: true, cartLength: count });
+  } catch (error) {
+    console.error("Error checking item in cart:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 router.get("/check", async (req, res) => {
   const { userId, productId } = req.query;
 
