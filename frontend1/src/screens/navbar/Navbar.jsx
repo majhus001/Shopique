@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Navbar.css";
 import API_BASE_URL from "../../api";
-import Sidebar from "../sidebar/Sidebar";
+import BlurText from "../../utils/BlurText";
 import ValidUserData from "../../utils/ValidUserData";
 
 export default function Navbar() {
@@ -152,7 +152,15 @@ export default function Navbar() {
           className="nav-logo"
           onClick={() => navigate("/home", { state: { user: userDetails } })}
         >
-          <h2>ShopiQue</h2>
+          <h2>
+            <BlurText
+              text="ShopiQue"
+              delay={150}
+              animateBy="words"
+              direction="top"
+              className="text-2xl mb-8"
+            />
+          </h2>
         </div>
 
         <div className="mobile-nav-actions">
@@ -230,7 +238,15 @@ export default function Navbar() {
           className="nav-logo"
           onClick={() => navigate("/home", { state: { user: userDetails } })}
         >
-          <h2>ShopiQue</h2>
+          <h2>
+            <BlurText
+              text="ShopiQue"
+              delay={150}
+              animateBy="words"
+              direction="top"
+              className="text-2xl mb-8"
+            />
+          </h2>
         </div>
         {!isOrderPage && (
           <div className="nav-search-bar" ref={searchRef}>

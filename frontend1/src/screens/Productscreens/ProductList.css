@@ -74,7 +74,7 @@
 
 /* Main Content */
 .product-main-content {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 80px auto ;  
   padding: 2rem 1rem;
 }
@@ -113,7 +113,7 @@
   display: grid;
   grid-template-columns: 1fr 6fr;
   gap: 3rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 /* Product Gallery */
@@ -224,8 +224,10 @@
   line-height: 1.2;
 }
 
-.product-meta {
+.pl-product-meta {
   display: flex;
+  flex: row;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
@@ -254,15 +256,25 @@
   color: #64748b;
 }
 
-.brand-name {
+.pl-brand-name {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   padding: 0.5rem 1rem;
+  margin-left: 20px;
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.875rem;
 }
-
+.pl-mv-brand-name{
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  padding: 0.5rem 1rem;
+  margin-left: 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: none;
+}
 /* Price Section */
 .price-section {
   background: white;
@@ -271,7 +283,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-.current-price{
+.pl-current-price{
   display: flex;
   align-items: center;
   gap: 10px;
@@ -599,7 +611,7 @@
 
 /* Description Content */
 .description-content h3 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 1rem;
@@ -726,7 +738,7 @@
 
 .review-card {
   background: white;
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
@@ -739,7 +751,7 @@
 
 .reviewer-info {
   display: flex;
-  align-items: center;
+  align-items: start;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -768,7 +780,7 @@
   color: #64748b;
   position: relative;
   line-height: 1.6;
-  margin-bottom: 1rem;
+  margin-bottom: 0.3rem;
 }
 .view-more-btn, .view-less-btn {
   background: none;
@@ -868,34 +880,15 @@
     font-size: 1.5rem;
   }
   
-  .current-price {
+  .pl-current-price {
     font-size: 2rem;
   }
-  
-  .pincode-input-group {
-    flex-direction: column;
-  }
-  
-  .check-btn {
-    width: 100%;
-  }
-  
-  .product-meta {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
   .tab-btn {
     text-align: left;
   }
   
   .tab-content {
     padding: 1rem;
-  }
-  
-  .rating-input-container {
-    flex-direction: column;
-    align-items: flex-start;
   }
   
   .submit-review-btn {
@@ -906,7 +899,13 @@
 }
 @media (max-width: 556px) {
   .main-image-container{
-    width: 300px;
+    width: 380px;
+  }
+  .pl-brand-name{
+    display: none;
+  }
+  .pl-mv-brand-name{
+    display: flex;
   }
   .price-section {
     padding: 1rem;
@@ -922,8 +921,8 @@
   .pl-offer-price {
   font-size: 2rem;
 }
-.pl-original-price{
-    font-size: 1rem;
+  .pl-original-price{
+    font-size: 1.2rem;
 
   }
 }
@@ -932,22 +931,13 @@
     padding: 0.8rem;
   }
 
-  .main-image-container{
-    width: 200px;
-    
-  }
-    .thumbnail-item {
-    width: 40px;
-    height: 40px;
-  }
-  .pl-offer-price {
-  font-size: 1.5rem;
-}
-.pl-original-price{
-    font-size: 0.5rem;
 
+  .pl-offer-price {
+    font-size: 1.5rem;
   }
-  
+  .pl-original-price{
+    font-size: 0.9rem;
+  }
   .breadcrumbs {
     font-size: 0.75rem;
     margin-bottom: 1rem;
@@ -965,9 +955,72 @@
   }
   
   .section-heading {
+    font-size: 0.9rem;
+  }
+  .check-btn{
+    font-size: 1rem;
+  }
+  .description-content h3 {
+    font-size: 1rem;
+  }
+  .description-content p{
+    font-size: 0.9rem;
+  }
+  .spec-label{
+    font-size: 0.9rem;
+  }
+  .spec-value{
+    font-size: 0.85rem;
+  }
+
+  .pl-product-meta{
+    gap: 0;
+  }
+  .reviews-list {
+    gap: 0.5rem; 
+  }
+  .star-filled {
+    font-size: 0.75rem;
+  }
+
+  .star-empty {
+    font-size: 0.75rem;
+  }
+  .rating-text {
+    font-size: 0.75rem;
+  }
+  .review-form-card{
+    padding: 1rem;
+  }
+  .review-form-card h3 {
+    font-size: 1rem;
+  }
+  .reviewer-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .review-form-card textarea {
+    min-height: 100px;
+  }
+  .reviewer-details h4 {
+    font-size: 0.8rem;
+  }
+  .review-text p {
+    font-size: 0.9rem;  
+  }
+  .rating-input-container span{
+    font-size: 0.9rem;
+  }
+  .rating-star{
     font-size: 1rem;
   }
 }
+@media (min-width: 300px) and (max-width: 400px) {
+  .main-image-container{
+    width: 300px;
+  }
+}
+
 
 /* Smooth scrolling */
 .thumbnail-scroller {
@@ -1028,7 +1081,6 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
   .loading-spinner {
     animation: none;
     border: 3px solid #3b82f6;

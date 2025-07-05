@@ -28,6 +28,7 @@ import Buynow from "./screens/Productscreens/Buynow";
 import ScrollToTop from "./ScrollToTop";
 import BottomNav from "./screens/Bottom Navbar/BottomNav";
 import AuthRequired from "./screens/Authentication/AuthRequired";
+import NotFound from "./NotFound/NotFound";
 
 const App = () => {
   return (
@@ -44,6 +45,7 @@ const App = () => {
         <Route path="/buynow" element={<Buynow />} />
         <Route path="/botnavbar" element={<BottomNav />} />
         <Route path="/authentication" element={<AuthRequired />} />
+        <Route path="/not-found" element={<NotFound />} />
       
         <Route path="/adprod" element={<ProductAddPage />} />
         <Route path="/ordercheckout" element={<Orderdetails />} />

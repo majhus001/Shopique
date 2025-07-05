@@ -14,7 +14,6 @@ import {
   FiChevronRight,
   FiChevronLeft,
 } from "react-icons/fi";
-import { FaHome, FaListAlt, FaUser, FaShoppingCart } from "react-icons/fa";
 import ValidUserData from "../../utils/ValidUserData";
 import BottomNav from "../Bottom Navbar/BottomNav";
 
@@ -178,7 +177,7 @@ const HomePage = () => {
   }, [bannerImages.length]);
 
   useEffect(() => {
-    const targetDate = new Date("2025-06-30T00:00:00");
+    const targetDate = new Date("2025-07-30T00:00:00");
     const interval = setInterval(() => {
       const now = new Date();
       const diff = targetDate - now;
@@ -318,9 +317,9 @@ const HomePage = () => {
 
                 <motion.div
                   className="countdown-card"
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
+                  transition={{ delay: 0.3 }}
                 >
                   <div className="countdown-content">
                     <div className="countdown-title-timer-cont">

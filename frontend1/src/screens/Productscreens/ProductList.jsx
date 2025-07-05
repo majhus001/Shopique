@@ -252,7 +252,6 @@ const ProductList = () => {
       state: {
         user: userDetails,
         product: productData,
-
       },
     });
   };
@@ -438,21 +437,22 @@ const ProductList = () => {
           <div className="product-info">
             <h1 className="product-title">
               <span className="product-name">{productData.name}</span>
-              <span className="brand-name">{productData.brand}</span>
+              <span className="pl-brand-name">{productData.brand}</span>
             </h1>
 
-            <div className="product-meta">
+            <div className="pl-product-meta">
               <div className="rating-badge">
                 {renderStars(Math.round(productData.rating))}
                 <span className="rating-text">
                   {productData.rating.toFixed(1)} | {totalReviews} Ratings
                 </span>
               </div>
+              <span className="pl-mv-brand-name">{productData.brand}</span>
             </div>
 
             <div className="price-section">
               <div>
-                <div className="current-price">
+                <div className="pl-current-price">
                   {productData.offerPrice &&
                   productData.offerPrice !== productData.price ? (
                     <>
@@ -602,20 +602,14 @@ const ProductList = () => {
                   <div className="spec-item">
                     <span className="spec-label">Category</span>
                     <span className="spec-value">
-
-                      {productData.category.charAt(0).toUpperCase() + productData.category.slice(1) || "-"}
+                      {productData.subCategory.charAt(0).toUpperCase() +
+                        productData.subCategory.slice(1) || "-"}
                     </span>
                   </div>
                   <div className="spec-item">
                     <span className="spec-label">Rating</span>
                     <span className="spec-value">
                       {productData.rating.toFixed(1)} ({totalReviews} reviews)
-                    </span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Delivery Time</span>
-                    <span className="spec-value">
-                      {productData.deliverytime || "Standard delivery"}
                     </span>
                   </div>
                 </div>
@@ -630,7 +624,7 @@ const ProductList = () => {
                     style={{
                       resize: "none",
                       width: "100%",
-                      height: "120px",
+                      height: "100px",
                       padding: "10px",
                       boxSizing: "border-box",
                     }}
@@ -691,6 +685,9 @@ const ProductList = () => {
                                   {renderStars(r.rating)}
                                 </div>
                               </div>
+                              <div className="review-date">
+                                {new Date(r.createdAt).toLocaleDateString()}
+                              </div>
                             </div>
                             <div className="review-text">
                               <p>
@@ -716,9 +713,6 @@ const ProductList = () => {
                                   View Less
                                 </button>
                               )}
-                            </div>
-                            <div className="review-date">
-                              {new Date(r.createdAt).toLocaleDateString()}
                             </div>
                           </div>
                         );

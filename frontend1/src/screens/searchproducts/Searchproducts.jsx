@@ -365,6 +365,21 @@ export default function Searchproducts() {
             </div>
           ) : categoryProducts.length > 0 ? (
             <>
+              {clickedProduct ? (
+                <span className="sp-show-results">
+                  Showing results for {clickedProduct.name}
+                </span>
+              ) : (
+                categoryProducts.length > 0 && (
+                  <span
+                    className="sp-show-results"
+                    key={categoryProducts[0]._id}
+                  >
+                    Showing results for {categoryProducts[0].subCategory}
+                  </span>
+                )
+              )}
+
               <div className="product-grid">
                 {categoryProducts.map((item) => (
                   <div
