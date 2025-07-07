@@ -3,8 +3,13 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import "./Searchproducts.css";
 import axios from "axios";
+import ErrorDisplay from "../../utils/Error/ErrorDisplay";
+import normalizeError from "../../utils/Error/NormalizeError";
+import { useDispatch, useSelector } from "react-redux";
 import ValidUserData from "../../utils/ValidUserData";
 import API_BASE_URL from "../../api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   FiShoppingCart,
   FiShoppingBag,
@@ -19,19 +24,22 @@ import {
 import BottomNav from "../Bottom Navbar/BottomNav";
 
 export default function Searchproducts() {
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
   const { clickedProduct, productCategory, productSubCategory } =
     location.state || {};
 
-  const [userDetails, setUserDetails] = useState(location.state?.user || null);
-  const [userId, setUserId] = useState(location.state?.user?._id || null);
+  const user = useSelector((state) => state.user);
+
+  const [userId, setUserId] = useState(user?._id || null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [maxPrice, setMaxPrice] = useState(100000);
   const [brands, setBrands] = useState([]);
   const [selectedbrands, setSelectedBrands] = useState([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [error, setError] = useState(false);
 
   const [sliderValue, setSliderValue] = useState(130000);
   const [appliedPriceRange, setAppliedPriceRange] = useState([0, 130000]);
@@ -52,7 +60,6 @@ export default function Searchproducts() {
   // Click outside and ESC key handlers
   useEffect(() => {
     const handleOutsideInteraction = (event) => {
-      // Click outside logic
       if (
         event.type === "mousedown" &&
         mobileFiltersOpen &&
@@ -85,9 +92,8 @@ export default function Searchproducts() {
 
   const checkUser = async () => {
     try {
-      const userData = await ValidUserData();
+      const userData = await ValidUserData(dispatch);
       if (userData) {
-        setUserDetails(userData);
         setUserId(userData._id);
       }
     } catch (error) {
@@ -96,8 +102,16 @@ export default function Searchproducts() {
   };
 
   const fetchPaginatedProducts = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
+      setError(null);
+
+      if (!navigator.onLine) {
+        throw new Error(
+          "You appear to be offline. Please check your internet connection."
+        );
+      }
+
       const productId = id;
       const category = clickedProduct?.category || productCategory || "default";
       const subCategory =
@@ -133,13 +147,15 @@ export default function Searchproducts() {
       setBrands(Uniquebrands);
     } catch (error) {
       console.error("Error fetching paginated products:", error);
+      let errorMessage = normalizeError(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!location.state?.user) {
+    if (!user) {
       checkUser();
     }
     fetchPaginatedProducts();
@@ -154,7 +170,7 @@ export default function Searchproducts() {
 
   const handleAddToCart = async (item) => {
     if (!userId) {
-      alert("Please log in to add products to cart.");
+      toast.warn("Please log in to add products to cart.");
       return;
     }
 
@@ -174,32 +190,30 @@ export default function Searchproducts() {
       }
     } catch (error) {
       console.error("Error adding product to cart:", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
   const handleBuyNow = (item) => {
-    if (!userDetails) {
-      alert("Please log in to buy products.");
+    if (!user) {
+      toast.warn("Please log in to buy products.");
       return;
     }
 
     navigate("/buynow", {
       state: {
-        user: userDetails,
         product: item,
       },
     });
   };
 
   const handleGoToCart = () => {
-    navigate("/cart", { state: { user: userDetails } });
+    navigate("/cart");
   };
 
   const handleprodlistnavigation = (item) => {
     navigate(`/prodlist/${item._id}`, {
       state: {
-        user: userDetails,
         product: item,
       },
     });
@@ -225,10 +239,27 @@ export default function Searchproducts() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  if (error) {
+    return (
+      <div>
+        <ErrorDisplay error={error} onRetry={fetchPaginatedProducts} />
+      </div>
+    );
+  }
+
   return (
     <div className="search-page">
       <Navbar />
-
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
       {/* Overlay for mobile filters */}
       {mobileFiltersOpen && (
         <div
@@ -529,7 +560,7 @@ export default function Searchproducts() {
           )}
         </div>
       </div>
-      <BottomNav UserData={userDetails} />
+      <BottomNav UserData={user} />
     </div>
   );
 }

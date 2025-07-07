@@ -4,6 +4,13 @@
   min-height: 100vh;
 }
 
+.ord-notification{
+  position: absolute;
+  top: auto;
+  /* right: 10px; */
+  z-index: 999;
+}
+
 .ord-checkout-title {
   text-align: center;
   margin: 90px 0 10px;
@@ -184,8 +191,6 @@
 .ord-products-list {
   margin-bottom: 20px;
 }
-
-/* Add this to your existing CSS file */
 
 /* Product Image Styles */
 .ord-product-details{

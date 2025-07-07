@@ -3,8 +3,11 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api";
 import "./Login.css";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../Redux/slices/userSlice";
 
 const Login = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -30,6 +33,16 @@ const Login = () => {
       );
       if (response.data.success) {
         setMessage("Login successful! Redirecting...");
+        const data = response.data.user;
+        dispatch(
+          setUserData({
+            _id: data._id,
+            username: data.username,
+            email: data.email,
+            image: data.image,
+            pincode: data.pincode,
+          })
+        );
         setTimeout(() => {
           navigate(response.data.role === "Admin" ? "/adhome" : "/home", {
             state: { user: response.data.user },
@@ -51,7 +64,9 @@ const Login = () => {
     <div className="ecom-login-container">
       <div className="ecom-login-glass-card">
         <div className="ecom-login-brand">
-          <h1 className="ecom-login-logo">SHOP<span>IQUE</span></h1>
+          <h1 className="ecom-login-logo">
+            SHOP<span>IQUE</span>
+          </h1>
           <p className="ecom-login-tagline">Premium E-Commerce Experience</p>
         </div>
 
@@ -86,7 +101,9 @@ const Login = () => {
 
           <button
             type="submit"
-            className={`ecom-login-button ${isHovered ? "ecom-button-hover" : ""}`}
+            className={`ecom-login-button ${
+              isHovered ? "ecom-button-hover" : ""
+            }`}
             disabled={isLoading}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -100,7 +117,13 @@ const Login = () => {
         </form>
 
         {message && (
-          <div className={`ecom-message ${message.includes("success") ? "ecom-message-success" : "ecom-message-error"}`}>
+          <div
+            className={`ecom-message ${
+              message.includes("success")
+                ? "ecom-message-success"
+                : "ecom-message-error"
+            }`}
+          >
             {message}
           </div>
         )}
@@ -110,7 +133,10 @@ const Login = () => {
             Forgot Password?
           </Link>
           <p className="ecom-footer-text">
-            New to SHOPIQUE? <Link to="/signup" className="ecom-footer-link">Create Account</Link>
+            New to SHOPIQUE?{" "}
+            <Link to="/signup" className="ecom-footer-link">
+              Create Account
+            </Link>
           </p>
         </div>
       </div>

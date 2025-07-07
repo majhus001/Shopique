@@ -2,14 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Navbar.css";
+import { useDispatch, useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
-import BlurText from "../../utils/BlurText";
 import ValidUserData from "../../utils/ValidUserData";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(null); // null means not determined yet
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  const [username, setUsername] = useState(user?.username || "");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrderPage, setIsOrderPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -33,54 +36,69 @@ export default function Navbar() {
 
   const fetchCartData = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
-        params: { userId: userDetails?._id },
+      const response = await axios.get(`${API_BASE_URL}/api/cart/fetch/count`, {
+        params: { userId: user?._id },
       });
       if (response.data.success) {
-        setCartLength(response.data.cartItems.length);
+        setCartLength(response.data.cartLength);
       }
     } catch (error) {
       console.error("Error fetching cart data:", error);
     }
-  }, [userDetails?._id]);
+  }, [user?._id]);
 
   const checkUser = useCallback(async () => {
     try {
-      const userData = await ValidUserData();
+      const userData = await ValidUserData(dispatch);
       if (userData) {
-        setUserDetails(userData);
+        setUsername(userData.username);
         setIsLoggedIn(true);
         return true;
       }
       setIsLoggedIn(false);
       return false;
     } catch (error) {
+      console.error("Error validating users:", error);
       setIsLoggedIn(false);
-      console.error("Error validating user:", error);
       return false;
     }
+  }, [dispatch]);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    setIsOrderPage(path.includes("/orders") || path.includes("/checkout"));
   }, []);
 
   useEffect(() => {
     const initialize = async () => {
       setIsLoading(true);
       try {
-        const isUserValid = await checkUser();
-        if (isUserValid) {
+        let shouldFetchCart = false;
+
+        if (!user || !user?._id) {
+          const isUserValid = await checkUser();
+          shouldFetchCart = isUserValid;
+        } else {
+          setIsLoggedIn(true);
+          shouldFetchCart = true;
+        }
+
+        if (shouldFetchCart) {
           await fetchCartData();
         }
+
         await fetchAllProducts();
       } catch (error) {
         console.error("Initialization error:", error);
+        setIsLoggedIn(false);
       } finally {
         setIsLoading(false);
       }
     };
 
     initialize();
-  }, [checkUser, fetchAllProducts, fetchCartData]);
+  }, [user, checkUser, fetchAllProducts, fetchCartData]);
 
-  // Debounced search handler
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
@@ -122,7 +140,6 @@ export default function Navbar() {
   const handleProductClick = (product) => {
     navigate(`/seprodlist/${product._id}`, {
       state: {
-        user: userDetails,
         clickedProduct: product,
       },
     });
@@ -148,32 +165,19 @@ export default function Navbar() {
     <nav className="hm-navbar">
       {/* Mobile header row */}
       <div className="mobile-view-header">
-        <div
-          className="nav-logo"
-          onClick={() => navigate("/home", { state: { user: userDetails } })}
-        >
-          <h2>
-            <BlurText
-              text="ShopiQue"
-              delay={150}
-              animateBy="words"
-              direction="top"
-              className="text-2xl mb-8"
-            />
-          </h2>
+        <div className="nav-logo" onClick={() => navigate("/home")}>
+          <h2>ShopiQue</h2>
         </div>
 
         <div className="mobile-nav-actions">
           {isLoggedIn ? (
             <button
               className="nav-btns profile-btn"
-              onClick={() =>
-                navigate("/profilepage", { state: { user: userDetails } })
-              }
+              onClick={() => navigate("/profilepage")}
               aria-label="Profile"
             >
               <i className="fas fa-user"></i>
-              <span>{userDetails?.username?.split(" ")[0] || " "}</span>
+              <span>{username?.split(" ")[0] || "User"}</span>
             </button>
           ) : (
             <button
@@ -234,19 +238,8 @@ export default function Navbar() {
 
       {/* Desktop layout */}
       <div className="desktop-content">
-        <div
-          className="nav-logo"
-          onClick={() => navigate("/home", { state: { user: userDetails } })}
-        >
-          <h2>
-            <BlurText
-              text="ShopiQue"
-              delay={150}
-              animateBy="words"
-              direction="top"
-              className="text-2xl mb-8"
-            />
-          </h2>
+        <div className="nav-logo" onClick={() => navigate("/home")}>
+          <h2>ShopiQue</h2>
         </div>
         {!isOrderPage && (
           <div className="nav-search-bar" ref={searchRef}>
@@ -293,9 +286,7 @@ export default function Navbar() {
           {!isOrderPage && (
             <button
               className="nav-btns cart-btn"
-              onClick={() =>
-                navigate("/cart", { state: { user: userDetails } })
-              }
+              onClick={() => navigate("/cart")}
             >
               <i className="fas fa-shopping-cart"></i>
               <span className="btn-text">Cart</span>
@@ -308,12 +299,10 @@ export default function Navbar() {
           {isLoggedIn ? (
             <button
               className="nav-btns profile-btn"
-              onClick={() =>
-                navigate("/profilepage", { state: { user: userDetails } })
-              }
+              onClick={() => navigate("/profilepage")}
             >
               <i className="fas fa-user"></i>
-              <span>{userDetails?.username?.split(" ")[0] || " "}</span>
+              <span>{username?.split(" ")[0] || " "}</span>
             </button>
           ) : (
             <button

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
-import { FiLogIn, FiAlertCircle } from "react-icons/fi";
+import { FiAlertCircle } from "react-icons/fi";
 import ValidUserData from "../../utils/ValidUserData";
 import { motion } from "framer-motion";
 import BottomNav from "../Bottom Navbar/BottomNav";
@@ -23,21 +24,23 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
       Math.cos(lat2 * (Math.PI / 180)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return Math.round(R * c); // Distance in km
-    };
-    
-    const Cart = () => {
-      const location = useLocation();
-      const navigate = useNavigate();
-      
-      const [userDetails, setUserDetails] = useState(location.state?.user || null);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c); // Distance in km
+};
+
+const Cart = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  const [userDetails, setUserDetails] = useState(user || null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updateMessage, setUpdateMessage] = useState("");
-  const [pincode, setPincode] = useState(userDetails?.pincode || "");
+  const [pincode, setPincode] = useState(user?.pincode || "");
   const [isPincodeTouched, setIsPincodeTouched] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
@@ -49,7 +52,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
   const [isPincodeDone, setIsPincodeDone] = useState(false);
   const warehousePincode = "641008";
-  
+
   // Skeleton Loading Component
   const CartSkeletonLoading = () => (
     <div className="cart-skeleton">
@@ -86,7 +89,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
   const checkUser = async () => {
     try {
-      const userData = await ValidUserData();
+      const userData = await ValidUserData(dispatch);
       if (userData) {
         setUserDetails(userData);
         setIsLoggedIn(true);
@@ -99,13 +102,13 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
     }
   };
 
-  const fetchCartData = async () => {
+  const fetchCartData = async (userId) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await axios.get(`${API_BASE_URL}/api/cart/fetch`, {
-        params: { userId: userDetails?._id },
+        params: { userId: userId },
       });
 
       if (response.data.success) {
@@ -137,15 +140,20 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
-    if (!location.state?.user) {
-      console.log("llll")
-      checkUser();
-    }
-    fetchCartData();
-    setIsLoggedIn(true);
-  }, []);
+      const initialize = async () => {
+        if (user?._id) {
+          setIsLoggedIn(true);
+          await fetchCartData(user._id);
+          setLoading(false);
+        } else {
+          await checkUser();
+        }
+      };
+  
+      initialize();
+    }, [user]);
 
   const handleQuantityChange = async (cartItemId, change) => {
     const updatedCartItems = cartItems.map((item) =>
@@ -220,7 +228,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
         totalPrice: calculateSubtotal(),
         deliveryfee: deliveryfee,
         statePincode: pincode,
-        path: "cart"
+        path: "cart",
       },
     });
   };
@@ -501,7 +509,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
         </div>
       )}
 
-      <BottomNav UserData={userDetails} />
+      <BottomNav />
     </div>
   );
 };

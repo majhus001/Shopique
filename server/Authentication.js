@@ -134,10 +134,18 @@ router.post("/login", async (req, res) => {
       sameSite: "none",
     });
 
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      image: user.image,
+      pincode: user.pincode,
+    };
+
     res.status(200).json({
       success: true,
       message: "Login successful!",
-      user,
+      user: userData,
       role,
     });
   } catch (error) {
@@ -238,7 +246,6 @@ router.post("/logout", (req, res) => {
     res.json({ success: true, message: "Logged out successfully!" });
   } catch {
     res.json({ success: false, message: "Logged out error!" });
-
   }
 });
 
@@ -308,14 +315,54 @@ router.get("/fetch/:userId", async (req, res) => {
     const user = await User.findOne({ _id: userId });
 
     if (!user) {
+      console.log("no");
       return res.status(404).json({ message: "User not found" });
     }
+
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      image: user.image,
+      pincode: user.pincode,
+    };
 
     res.status(200).json({
       success: true,
       message: "User fetched successfully",
-      data: user,
+      data: userData,
     });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+router.get("/profile/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      mobile: user.mobile,
+      address: user.address,
+      image: user.image,
+      pincode: user.pincode,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      user: userData,
+    });
+
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Server error", error });
@@ -352,7 +399,6 @@ const upload = multer({ storage });
 
 router.put("/update/:userId", upload.single("image"), async (req, res) => {
   try {
-    console.log("llll");
     const userId = req.params.userId;
     const { name, email, password, mobile, address, pincode } = req.body;
 
@@ -364,12 +410,15 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
 
     // Update fields only if they exist in req.body
     if (name !== undefined) user.username = name;
-    if (email !== undefined) user.email = email;
-    if (password !== undefined) user.password = password;
+    if (email !== undefined) {
+      user.email = email;
+    }
+    if (password !== "undefined") {
+      user.password = password;
+    }
     if (mobile !== undefined) user.mobile = mobile;
     if (address !== undefined) user.address = address;
     if (pincode !== undefined) {
-      // Convert empty string to null for pincode
       user.pincode =
         pincode === "" || pincode === "null" ? null : Number(pincode);
     }
@@ -394,11 +443,18 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
         .end(file.buffer);
     } else {
       const updatedUser = await user.save();
-      console.log("profile updated....");
+
+      const userData = {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        image: updatedUser.image,
+        pincode: updatedUser.pincode,
+      };
       res.status(200).json({
         success: true,
         message: "User details updated successfully",
-        user: updatedUser,
+        user: userData,
       });
     }
   } catch (error) {
@@ -462,7 +518,6 @@ router.put(
 router.delete("/delete/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log(userId);
 
     const deletedUser = await User.findByIdAndDelete(userId);
 

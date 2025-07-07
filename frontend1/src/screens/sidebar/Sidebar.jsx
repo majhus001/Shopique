@@ -2,8 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Sidebar.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import handleLogout from "../../utils/Logout";
+import userimg from "../../assets/users/user.png";
 import {
   FaUser,
   FaHeart,
@@ -14,9 +18,12 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
-const Sidebar = ({ user }) => {
+const Sidebar = () => {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState(null);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  const [userDetails, setUserDetails] = useState(user || null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const memoizedUser = useMemo(() => user, [user?._id]);
@@ -43,7 +50,7 @@ const Sidebar = ({ user }) => {
         );
 
         if (isMounted && response.data.success) {
-          setUserDetails(response.data.data);
+          setUserDetails(response.data.user);
         }
       } catch (err) {
         if (isMounted) {
@@ -70,11 +77,11 @@ const Sidebar = ({ user }) => {
   };
 
   const handleLogoutUser = async () => {
-    const logout = handleLogout();
-    if(logout){
-      navigate("/home", {state:{user: userDetails}})
-    }else{
-      alert("unable to logout");
+    const logout = handleLogout(dispatch);
+    if (logout) {
+      navigate("/home", { state: { user: userDetails } });
+    } else {
+      toast.error("unable to logout");
     }
   };
 
@@ -91,15 +98,16 @@ const Sidebar = ({ user }) => {
   return (
     <>
       <div className="sidebar">
-        {error && (
-          <div className="sidebar-error">
-            {error}
-            <button onClick={() => setError(null)}>
-              <FaTimes />
-            </button>
-          </div>
-        )}
-
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="colored"
+        />
         {!displayUser ? (
           <div className="sidebar-auth-prompt">
             <p>Please login to access your account</p>
@@ -112,7 +120,7 @@ const Sidebar = ({ user }) => {
           <>
             <div className="sidebar-user">
               <img
-                src={displayUser.image || "/default-profile.png"}
+                src={displayUser.image || userimg}
                 alt="profile"
                 className="sidebar-user-img"
                 onError={(e) => {

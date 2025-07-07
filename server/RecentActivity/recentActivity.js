@@ -9,15 +9,15 @@ router.post("/add", async (req, res) => {
     const { name, activity } = req.body;
     if (!name || !activity) {
       return res
-        .status(400)
-        .json({ message: "Name and Activity are required." });
+      .status(400)
+      .json({ message: "Name and Activity are required." });
     }
-
+    
     const newActivity = new RecentActivity({
       username: name,
       activity: activity,
     });
-
+    
     await newActivity.save();
 
     res

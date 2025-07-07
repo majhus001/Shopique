@@ -1,15 +1,18 @@
 import axios from "axios";
 import API_BASE_URL from "../api";
+import { logoutUser } from "../Redux/slices/userSlice";
 
-const handleLogout = async () => {
+const handleLogout = async (dispatch) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/api/auth/logout`,
       {},
       { withCredentials: true }
     );
+
     if (response.data.success) {
-      console.log("logingg out");
+      dispatch(logoutUser());
+      localStorage.removeItem("userState"); 
       return true;
     } else {
       return false;

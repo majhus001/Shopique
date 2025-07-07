@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FaShoppingCart,
   FaStar,
+  FaStarHalf,
   FaRegStar,
   FaTruck,
   FaMapMarkerAlt,
@@ -11,6 +12,11 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
+import normalizeError from "../../utils/Error/NormalizeError";
+import ErrorDisplay from "../../utils/Error/ErrorDisplay";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
 import ValidUserData from "../../utils/ValidUserData";
 import { RiFlashlightFill } from "react-icons/ri";
 import { IoIosArrowForward } from "react-icons/io";
@@ -35,13 +41,90 @@ const useScreenSize = () => {
   return { isMobile };
 };
 
+const SkeletonBreadcrumbs = () => (
+  <div className="breadcrumbs skeleton">
+    <span className="skeleton-text" style={{ width: "40px" }}></span>
+    <IoIosArrowForward className="breadcrumb-arrow" />
+    <span className="skeleton-text" style={{ width: "80px" }}></span>
+    <IoIosArrowForward className="breadcrumb-arrow" />
+    <span className="skeleton-text" style={{ width: "120px" }}></span>
+  </div>
+);
+
+const SkeletonImageGallery = () => (
+  <div className="product-gallery skeleton">
+    <div className="main-image-container">
+      <div className="skeleton-image"></div>
+    </div>
+    <div className="thumbnail-scroller">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="thumbnail-item">
+          <div className="skeleton-thumbnail"></div>
+        </div>
+      ))}
+    </div>
+    <div className="action-buttons">
+      <div className="skeleton-button"></div>
+      <div className="skeleton-button"></div>
+    </div>
+  </div>
+);
+
+const SkeletonProductInfo = () => (
+  <div className="product-info skeleton">
+    <div className="skeleton-title"></div>
+    <div className="skeleton-meta"></div>
+
+    <div className="price-section">
+      <div className="skeleton-price"></div>
+      <div className="skeleton-price-meta"></div>
+    </div>
+
+    <div className="product-highlights">
+      <div className="skeleton-section-heading"></div>
+      <div className="skeleton-highlight-list">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="skeleton-highlight-item"></div>
+        ))}
+      </div>
+    </div>
+
+    <div className="delivery-section">
+      <div className="skeleton-section-heading"></div>
+      <div className="skeleton-stock-status"></div>
+      <div className="skeleton-delivery-checker">
+        <div className="skeleton-pincode-input"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const SkeletonTabs = () => (
+  <div className="product-details-tabs skeleton">
+    <div className="tab-header">
+      <div className="skeleton-tab"></div>
+      <div className="skeleton-tab"></div>
+    </div>
+    <div className="tab-content">
+      <div className="skeleton-description">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="skeleton-description-line"></div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 const ProductList = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
 
   // State for product data
   const [productData, setProductData] = useState(location.state?.product || {});
+  const [relatedProds, setRelatedProds] = useState({});
   const [loading, setLoading] = useState(true);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [pincode, setPincode] = useState("");
@@ -51,10 +134,11 @@ const ProductList = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const warehousePincode = "641008";
 
-  const [userId, setUserId] = useState(location.state?.user?._id || null);
-  const [userDetails, setUserDetails] = useState(location.state?.user || null);
+  const [userId, setUserId] = useState(user?._id || null);
+  const [userDetails, setUserDetails] = useState(user || null);
   const [isProdAdded, setProdAdded] = useState(false);
-  const [updateMessage, setUpdateMessage] = useState("");
+  const [error, setError] = useState(null);
+
   const [review, setReview] = useState("");
   const [urating, setRating] = useState("");
   const [reviews, setReviews] = useState([]);
@@ -82,34 +166,64 @@ const ProductList = () => {
     expanded: expandedReviews[r._id] || false,
   }));
 
+  const productContainerRefs = useRef({});
+
+  const scrollLeft = (product) => {
+    const container = productContainerRefs.current[product];
+    if (container) {
+      container.scrollBy({ left: -500, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = (product) => {
+    const container = productContainerRefs.current[product];
+    if (container) {
+      container.scrollBy({ left: 500, behavior: "smooth" });
+    }
+  };
+
   const checkUser = async () => {
     try {
-      const userData = await ValidUserData();
+      const userData = await ValidUserData(dispatch);
       if (userData) {
         setUserDetails(userData);
         setUserId(userData._id);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error validating user:", error);
     }
   };
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
+      if (!navigator.onLine) {
+        throw new Error(
+          "You appear to be offline. Please check your internet connection."
+        );
+      }
+
       const response = await axios.get(
         `${API_BASE_URL}/api/products/fetch/${id}`
       );
+
       setProductData(response.data.data);
+      setRelatedProds(response.data.relatedProducts);
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+      let errorMessage = normalizeError(err);
+
+      setError(errorMessage);
+    } finally {
       setLoading(false);
-    } catch (error) {
-      console.error("Error fetching product data:", error);
-      setLoading(false);
-      navigate("/not-found");
     }
   };
 
   const checkIfItemInCart = async () => {
-    if (!userDetails) return;
+    if (!user) return;
 
     try {
       const response = await axios.get(`${API_BASE_URL}/api/cart/check`, {
@@ -162,20 +276,18 @@ const ProductList = () => {
   };
 
   useEffect(() => {
-    if (!location.state?.user) {
+    if (!user) {
       checkUser();
-      fetchData();
-    } else {
-      setLoading(false);
     }
+    fetchData();
     fetchReviews();
-  }, [id, location.state, navigate]);
+  }, [id, user, navigate]);
 
   useEffect(() => {
-    if (userDetails) {
+    if (user) {
       checkIfItemInCart();
     }
-  }, [userDetails, id, productData.category]);
+  }, [id, productData.category]);
 
   // Handle page change for reviews
   const handlePageChange = (newPage) => {
@@ -185,7 +297,7 @@ const ProductList = () => {
 
   const handleSubmit = async () => {
     if (!review || !urating) {
-      alert("Please enter both review and rating");
+      toast.error("Please enter both review and rating");
       return;
     }
 
@@ -196,15 +308,14 @@ const ProductList = () => {
         review,
         rating: parseInt(urating),
       });
-      alert("Review submitted successfully!");
+      toast.info("Review submitted successfully!");
       setReview("");
       setRating("");
-      // Refresh reviews and reset to first page
       fetchReviews(1);
       setCurrentPage(1);
     } catch (error) {
       console.error("Error submitting review:", error);
-      alert("Failed to submit review. Try again later.");
+      toast.error("Failed to submit review. Try again later.");
     }
   };
 
@@ -214,7 +325,7 @@ const ProductList = () => {
 
   const handleAddToCart = async () => {
     if (!userId) {
-      alert("Please log in to add products to cart.");
+      toast.error("Please log in to add products to cart.");
       return;
     }
 
@@ -230,27 +341,25 @@ const ProductList = () => {
         productDetails
       );
       if (response.data.success) {
-        setUpdateMessage("Product successfully added to the cart!");
+        toast.success("Product added to the cart!");
         setProdAdded(true);
-        setTimeout(() => setUpdateMessage(""), 3000);
       } else {
-        alert(response.data.message || "Failed to add product to cart.");
+        toast.warn(response.data.message || "Failed to add product to cart.");
       }
     } catch (error) {
       console.error("Error adding product to cart:", error);
-      alert("Something went wrong. Please try again.");
+      toast.warn("Something went wrong. Please try again.");
     }
   };
 
   const handleBuyNow = () => {
     if (!userDetails) {
-      alert("Please log in to buy products.");
+      toast.warn("Please log in to buy products.");
       return;
     }
 
     navigate("/buynow", {
       state: {
-        user: userDetails,
         product: productData,
       },
     });
@@ -333,10 +442,24 @@ const ProductList = () => {
     return (
       <div className="product-page-container">
         <Navbar user={userDetails} />
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading product details...</p>
+        <div className="product-main-content">
+          <SkeletonBreadcrumbs />
+          <div className="product-section">
+            <SkeletonImageGallery />
+            <SkeletonProductInfo />
+          </div>
+          <SkeletonTabs />
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <Navbar />
+        <ErrorDisplay error={error} onRetry={fetchData} />
+        <BottomNav />
       </div>
     );
   }
@@ -344,14 +467,16 @@ const ProductList = () => {
   return (
     <div className="product-page-container">
       <Navbar />
-      {updateMessage && (
-        <div className="notification-banner success">
-          {updateMessage}
-          <span className="close-btn" onClick={() => setUpdateMessage("")}>
-            &times;
-          </span>
-        </div>
-      )}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
 
       <div className="product-main-content">
         {/* Breadcrumbs */}
@@ -404,7 +529,7 @@ const ProductList = () => {
                 className={`pl-cart-btn ${isProdAdded ? "go-to-cart" : ""}`}
                 onClick={() => {
                   if (productData.stock <= 0) {
-                    alert("Sorry, Out of Stock");
+                    toast.error("Sorry, Out of Stock");
                   } else if (isProdAdded) {
                     navigate("/cart", {
                       state: { user: userDetails },
@@ -444,7 +569,7 @@ const ProductList = () => {
               <div className="rating-badge">
                 {renderStars(Math.round(productData.rating))}
                 <span className="rating-text">
-                  {productData.rating.toFixed(1)} | {totalReviews} Ratings
+                  {productData.rating?.toFixed(1)} | {totalReviews} Ratings
                 </span>
               </div>
               <span className="pl-mv-brand-name">{productData.brand}</span>
@@ -465,7 +590,7 @@ const ProductList = () => {
                     </>
                   ) : (
                     <span className="pl-offer-price">
-                      ₹{productData.price.toLocaleString()}
+                      ₹{productData.price?.toLocaleString()}
                     </span>
                   )}
                 </div>
@@ -602,14 +727,14 @@ const ProductList = () => {
                   <div className="spec-item">
                     <span className="spec-label">Category</span>
                     <span className="spec-value">
-                      {productData.subCategory.charAt(0).toUpperCase() +
-                        productData.subCategory.slice(1) || "-"}
+                      {productData.subCategory?.charAt(0).toUpperCase() +
+                        productData.subCategory?.slice(1) || "-"}
                     </span>
                   </div>
                   <div className="spec-item">
                     <span className="spec-label">Rating</span>
                     <span className="spec-value">
-                      {productData.rating.toFixed(1)} ({totalReviews} reviews)
+                      {productData.rating?.toFixed(1)} ({totalReviews} reviews)
                     </span>
                   </div>
                 </div>
@@ -631,7 +756,7 @@ const ProductList = () => {
                     onChange={(e) => {
                       if (e.target.value.length <= 500) {
                         setReview(e.target.value);
-                      } else alert("Maximum characters reached");
+                      } else toast.warn("Maximum characters reached");
                     }}
                     maxLength={501}
                   />
@@ -782,7 +907,110 @@ const ProductList = () => {
           </div>
         </div>
       </div>
-      <BottomNav UserData={userDetails} />
+
+      <section className="pl-products-section">
+        {relatedProds.length > 0 ? (
+          <div className="pl-related-products-container">
+            <span className="pl-section-title">Related products</span>
+
+            <div className="pl-horizontal-scroll-container">
+              <button
+                className="pl-scroll-button pl-left"
+                onClick={() => scrollLeft("related")}
+                aria-label="pl-Scroll pl-left"
+              >
+                <FaChevronLeft />
+              </button>
+
+              <div
+                className="pl-product-horizontal-scroll"
+                ref={(el) => (productContainerRefs.current["related"] = el)}
+              >
+                {relatedProds.map((item) => (
+                  <div
+                    className="pl-product-card-horizontal"
+                    key={item._id}
+                    onClick={() =>
+                      navigate(`/prodlist/${item._id}`, {
+                        state: { product: item },
+                      })
+                    }
+                  >
+                    <div className="pl-product-image-container">
+                      <img
+                        src={item.images?.[0] || ""}
+                        alt={item.name}
+                        className="pl-product-image"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src = "";
+                          e.target.alt = "Image not available";
+                          e.target.className = "product-image-error";
+                        }}
+                      />
+                      {item.offerPrice && item.price > item.offerPrice && (
+                        <div className="pl-discount-badge">
+                          {Math.round(
+                            ((item.price - item.offerPrice) / item.price) * 100
+                          )}
+                          % OFF
+                        </div>
+                      )}
+                    </div>
+                    <div className="pl-product-details">
+                      <h4 className="pl-product-name">{item.name}</h4>
+                      <div className="pl-price-container">
+                        {item.offerPrice ? (
+                          <>
+                            <span className="pl-rp-offer-price">
+                              ₹{item.offerPrice.toLocaleString()}
+                            </span>
+                            <span className="pl-rp-original-price">
+                              ₹{item.price.toLocaleString()}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="pl-rp-price">
+                            ₹{item.price.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="pl-product-meta">
+                        {item.rating > 0 && (
+                          <div className="pl-rating">
+                            <FaStar className="pl-star-icon" />
+                            <span>{item.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+                        {item.stock > 0 && (
+                          <div className="pl-stock-status">
+                            <span>{item.stock} in stock</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className="pl-scroll-button pl-right"
+                onClick={() => scrollRight("related")}
+                aria-label="pl-Scroll pl-right"
+              >
+                <FaChevronRight />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="pl-empty-state">
+            <RiFlashlightFill className="pl-empty-icon" />
+            <h3>No related products found</h3>
+          </div>
+        )}
+      </section>
+
+      <BottomNav />
     </div>
   );
 };

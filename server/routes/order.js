@@ -15,8 +15,6 @@ router.post("/add", async (req, res) => {
     paymentMethod,
   } = req.body;
 
-  console.log(cartItems)
-
   if (
     !userId ||
     !cartItems ||

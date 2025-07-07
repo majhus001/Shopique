@@ -185,9 +185,21 @@ router.get("/fetch/:id", async (req, res) => {
         error: "Product not found",
       });
     }
+
+    const subcat = productItem.subCategory;
+    let finalsubcatprods = [];
+    
+    const subCatProducts = await product.find({ subCategory: subcat });
+    if (subCatProducts.length > 0) {
+      finalsubcatprods = subCatProducts.filter(
+        (p) => !p._id.equals(productItem._id)
+      );
+    }
+
     res.status(200).json({
       success: true,
       data: productItem,
+      relatedProducts: finalsubcatprods,
     });
   } catch (error) {
     console.error("Error fetching product:", error);
@@ -216,7 +228,7 @@ router.get("/paginated", async (req, res) => {
     const parsedMaxPrice = Number(maxPrice);
 
     let category,
-    subCategory,
+      subCategory,
       clickedProduct = null;
 
     if (productId) {
@@ -255,10 +267,10 @@ router.get("/paginated", async (req, res) => {
       ...(category && { category }),
       ...(subCategory && { subCategory }),
     };
-    
+
     const finalFilter = selectedbrands
-    ? { ...baseFilter, brand: { $in: selectedbrands } } // Changed to $in operator
-    : baseFilter;
+      ? { ...baseFilter, brand: { $in: selectedbrands } } // Changed to $in operator
+      : baseFilter;
 
     const [Uniquebrands, total, maxPriceResult] = await Promise.all([
       product.distinct("brand", sidebarFilter),
@@ -275,8 +287,8 @@ router.get("/paginated", async (req, res) => {
 
     let skip = (parsedPage - 1) * parsedLimit;
     const clickedProductInserted =
-    clickedProduct &&
-    clickedProduct.offerPrice <= parsedMaxPrice &&
+      clickedProduct &&
+      clickedProduct.offerPrice <= parsedMaxPrice &&
       (!selectedbrands || clickedProduct.brand === selectedbrands);
 
     if (parsedPage > 1 && clickedProductInserted) {
@@ -285,13 +297,15 @@ router.get("/paginated", async (req, res) => {
 
     // Get paginated products with all necessary fields
     let products = await product
-    .find(finalFilter)
-    .select("category subCategory name description price brand stock salesCount offerPrice images rating")
-    .skip(skip)
-    .limit(parsedLimit)
-    .sort({ createdAt: -1 })
-    .lean();
-    
+      .find(finalFilter)
+      .select(
+        "category subCategory name description price brand stock salesCount offerPrice images rating"
+      )
+      .skip(skip)
+      .limit(parsedLimit)
+      .sort({ createdAt: -1 })
+      .lean();
+
     if (clickedProduct) {
       // First check if clicked product matches all current filters
       const clickedProductMatchesFilters =
@@ -308,7 +322,6 @@ router.get("/paginated", async (req, res) => {
       if (parsedPage === 1 && clickedProductMatchesFilters) {
         const fullClickedProduct = {
           ...clickedProduct,
-          
         };
 
         // Insert without reducing total count

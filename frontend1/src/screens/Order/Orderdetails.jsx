@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import axios from "axios";
 import "./Orderdetails.css";
 import API_BASE_URL from "../../api";
 import { motion } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
 
 const Orderdetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
 
   const {
     cartItems = [],
@@ -20,35 +24,54 @@ const Orderdetails = () => {
     path,
   } = location.state || {};
 
-  const user = location.state?.user || null;
-
-  const [isLoggedIn, setIsLoggedIn] = useState(!!user);
-  const [mobileNumber, setMobileNumber] = useState(user?.mobile || "");
-  const [pincode, setPincode] = useState(statePincode);
-  const [deliveryAddress, setDeliveryAddress] = useState(user?.address || "");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [isMobileDone, setIsMobileDone] = useState(false);
   const [isAddressDone, setIsAddressDone] = useState(false);
   const [isPincodeDone, setIsPincodeDone] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [placingOrder, setPlacingOrder] = useState(false);
 
+  // Initialize user data and check authentication
   useEffect(() => {
-    if (!user) {
-      navigate(-1);
-      return;
-    }
+    const initialize = async () => {
+      try {
+        if (!user?._id) {
+          setIsLoggedIn(false);
+          return;
+        }
+        const response = await axios.get(
+          `${API_BASE_URL}/api/auth/profile/${user._id}`
+        );
+        const userData = response.data.user;
 
-    // Auto-mark done if fields are already filled
-    if (user.mobile?.length === 10) {
-      setIsMobileDone(true);
-    }
-    if (statePincode?.length === 6) {
-      setIsPincodeDone(true);
-    }
-    if (user.address) {
-      setIsAddressDone(true);
-    }
+        setIsLoggedIn(true);
+        setMobileNumber(userData.mobile || "");
+        setPincode(statePincode || user.pincode || "");
+        setDeliveryAddress(userData.address || "");
+
+        // Auto-mark fields as done if they're valid
+        if (userData.mobile?.length === 10) {
+          setIsMobileDone(true);
+        }
+        if (statePincode?.length === 6 || user.pincode?.length === 6) {
+          setIsPincodeDone(true);
+        }
+        if (userData.address) {
+          setIsAddressDone(true);
+        }
+      } catch (err) {
+        toast.error("Failed to initialize order details");
+        console.error("Initialization error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initialize();
   }, [user, navigate, statePincode]);
 
   const handleMobileChange = (e) => {
@@ -64,31 +87,37 @@ const Orderdetails = () => {
     setIsAddressDone(!!e.target.value.trim());
   };
 
-  const handlePlaceOrder = async () => {
+  const validateForm = useCallback(() => {
     if (!isLoggedIn) {
-      alert("Please login to place an order");
-      return;
+      toast.warn("Please login to place an order");
+      return false;
     }
 
     if (!mobileNumber || mobileNumber.length !== 10) {
-      alert("Please enter a valid 10-digit mobile number.");
-      return;
+      toast.warn("Please enter a valid 10-digit mobile number");
+      return false;
     }
 
     if (!pincode || pincode.length !== 6) {
-      alert("Please enter a valid 6-digit pincode.");
-      return;
+      toast.warn("Please enter a valid 6-digit pincode");
+      return false;
     }
 
     if (!deliveryAddress.trim()) {
-      alert("Please enter your delivery address.");
-      return;
+      toast.warn("Please enter your delivery address");
+      return false;
     }
 
     if (cartItems.length === 0) {
-      alert("Your cart is empty. Please add items before placing an order.");
-      return;
+      toast.warn("Your cart is empty");
+      return false;
     }
+
+    return true;
+  }, [isLoggedIn, mobileNumber, pincode, deliveryAddress, cartItems]);
+
+  const handlePlaceOrder = useCallback(async () => {
+    if (!validateForm()) return;
 
     setPlacingOrder(true);
 
@@ -103,65 +132,74 @@ const Orderdetails = () => {
         paymentMethod,
       };
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/orders/add`,
-        orderData
-      );
+      const [orderResponse] = await Promise.all([
+        axios.post(`${API_BASE_URL}/api/orders/add`, orderData),
+        path === "cart" ? clearCart() : Promise.resolve(),
+      ]);
 
-      if (response.data.success) {
-        if (path == "cart") {
-          await clearCart();
-        }
-
+      if (orderResponse.data.success) {
         await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
           name: user.username,
           activity: "has Placed an order",
         });
-
-        alert("Order placed successfully!");
-        navigate("/home", { state: { user } });
+        toast.success("Order Placed Successfully!");
+        setTimeout(() => {
+          navigate("/myorders");
+        }, 3000);
       } else {
-        throw new Error(response.data.message || "Failed to place order.");
+        throw new Error(orderResponse.data.message || "Failed to place order");
       }
     } catch (error) {
-      console.error("Error placing order:", error);
-      alert(error.message || "An error occurred. Please try again.");
+      console.error("Order placement error:", error);
+      toast.error(error.message || "An error occurred. Please try again.");
     } finally {
       setPlacingOrder(false);
     }
-  };
+  }, [
+    validateForm,
+    user,
+    cartItems,
+    totalPrice,
+    deliveryfee,
+    platformFee,
+    discount,
+    mobileNumber,
+    pincode,
+    deliveryAddress,
+    paymentMethod,
+    path,
+    navigate,
+  ]);
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     try {
       await axios.delete(`${API_BASE_URL}/api/cart/clear/${user._id}`);
-      console.log("Cart cleared successfully!");
     } catch (error) {
       console.error("Error clearing cart:", error);
+      // Don't block order placement if cart clearing fails
     }
-  };
+  }, [user?._id]);
 
-  const handleprodlistnavigation = (item) => {
+  const handleProductNavigation = (item) => {
     navigate(`/prodlist/${item._id}`);
   };
 
   if (loading) {
     return (
-      <div>
+      <div className="checkout-container">
         <Navbar />
         <div className="ord-container">
           <div className="ord-skeleton-loading">
             <div className="ord-skeleton-header"></div>
-            <div className="ord-skeleton-line"></div>
-            <div className="ord-skeleton-line"></div>
-            <div className="ord-skeleton-line"></div>
-            <div className="ord-skeleton-line"></div>
-            <div className="ord-skeleton-line"></div>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="ord-skeleton-line"></div>
+            ))}
           </div>
           <div className="ord-skeleton-loading">
             <div className="ord-skeleton-header"></div>
-            <div className="ord-skeleton-line"></div>
-            <div className="ord-skeleton-line"></div>
-            <div className="ord-skeleton-line"></div>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="ord-skeleton-line"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -170,18 +208,29 @@ const Orderdetails = () => {
 
   return (
     <div className="checkout-container">
-      <div className="cart-navbar">
-        <Navbar />
-      </div>
+      <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
+
       <motion.h1
         className="ord-checkout-title"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        Your CheckOut
+        Checkout
       </motion.h1>
+
       <div className="ord-container">
+        {/* Address Details Section */}
         <div className="ord-address-details">
           <h3>Address Details</h3>
 
@@ -191,12 +240,9 @@ const Orderdetails = () => {
                 <h4>
                   1. User Login <span className="ord-crossmark">✗</span>
                 </h4>
-                <h5>
-                  You are not logged in. Please log in to place an order.
-                  <Link to="/login" state={{ from: location }}>
-                    <button className="ord-login-btn">Login</button>
-                  </Link>
-                </h5>
+                <Link to="/login" state={{ from: location }}>
+                  <button className="ord-login-btn">Login to Continue</button>
+                </Link>
               </div>
             ) : (
               <div className="ord-step-complete">
@@ -216,29 +262,15 @@ const Orderdetails = () => {
                 <span className="ord-crossmark">✗</span>
               )}
             </h4>
-            {isLoggedIn ? (
-              <>
-                <input
-                  type="text"
-                  name="mobile"
-                  placeholder="Enter your mobile number"
-                  value={mobileNumber}
-                  onChange={handleMobileChange}
-                  maxLength="10"
-                  className="ord-input"
-                />
-                {mobileNumber.length === 10 && !isMobileDone && (
-                  <button
-                    className="ord-done-btn"
-                    onClick={() => setIsMobileDone(true)}
-                  >
-                    Verify
-                  </button>
-                )}
-              </>
-            ) : (
-              <p className="ord-login-required">Please log in to continue.</p>
-            )}
+            <input
+              type="text"
+              placeholder="Enter 10-digit mobile number"
+              value={mobileNumber}
+              onChange={handleMobileChange}
+              maxLength="10"
+              className="ord-input"
+              disabled={!isLoggedIn}
+            />
           </div>
 
           <div className="ord-input-group">
@@ -250,21 +282,21 @@ const Orderdetails = () => {
                 <span className="ord-crossmark">✗</span>
               )}
             </h4>
-            {isMobileDone ? (
-              <>
-                <input
-                  type="text"
-                  name="pincode"
-                  placeholder="Enter your pincode"
-                  value={pincode}
-                  maxLength="6"
-                  className="ord-input"
-                  readOnly
-                />
-              </>
-            ) : (
-              <p className="ord-step-waiting">Complete previous step first.</p>
-            )}
+            <input
+              type="text"
+              placeholder="Enter 6-digit pincode"
+              value={pincode}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                if (value.length <= 6) {
+                  setPincode(value);
+                  setIsPincodeDone(value.length === 6);
+                }
+              }}
+              maxLength="6"
+              className="ord-input"
+              disabled={!isMobileDone}
+            />
           </div>
 
           <div className="ord-input-group">
@@ -276,27 +308,13 @@ const Orderdetails = () => {
                 <span className="ord-crossmark">✗</span>
               )}
             </h4>
-            {isPincodeDone ? (
-              <>
-                <textarea
-                  name="address"
-                  placeholder="Enter your delivery address"
-                  value={deliveryAddress}
-                  onChange={handleAddressChange}
-                  className="ord-textarea"
-                />
-                {deliveryAddress.trim() && !isAddressDone && (
-                  <button
-                    className="ord-done-btn"
-                    onClick={() => setIsAddressDone(true)}
-                  >
-                    Confirm
-                  </button>
-                )}
-              </>
-            ) : (
-              <p className="ord-step-waiting">Complete previous step first.</p>
-            )}
+            <textarea
+              placeholder="Enter complete delivery address"
+              value={deliveryAddress}
+              onChange={handleAddressChange}
+              className="ord-textarea"
+              disabled={!isPincodeDone}
+            />
           </div>
 
           <div className="ord-input-group">
@@ -308,84 +326,103 @@ const Orderdetails = () => {
                 <span className="ord-crossmark">✗</span>
               )}
             </h4>
-            {isAddressDone ? (
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="ord-select"
-              >
-                <option value="Cash on Delivery">Cash on Delivery</option>
-                <option value="Credit/Debit Card">Credit/Debit Card</option>
-                <option value="UPI">UPI</option>
-              </select>
-            ) : (
-              <p className="ord-step-waiting">Complete previous steps first.</p>
-            )}
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="ord-select"
+              disabled={!isAddressDone}
+            >
+              <option value="Cash on Delivery">Cash on Delivery</option>
+              <option value="Credit/Debit Card">Credit/Debit Card</option>
+              <option value="UPI">UPI</option>
+            </select>
           </div>
         </div>
 
+        {/* Order Summary Section */}
         <div className="ord-price-details">
+          <div className="ord-products-list">
+            <h4>Order Summary ({cartItems.length} items)</h4>
+            <ul>
+              {cartItems.map((item) => (
+                <li key={item._id || item.id}>
+                  <img
+                    src={item.image || "/placeholder-product.png"}
+                    alt={item.name}
+                    className="ord-product-img"
+                    onError={(e) => {
+                      e.target.src = "/placeholder-product.png";
+                    }}
+                  />
+                  <div
+                    className="ord-product-details"
+                    onClick={() => handleProductNavigation(item)}
+                  >
+                    <span className="ord-product-name">{item.name}</span>
+                    <span className="ord-product-price">
+                      {item.quantity} × ₹{item.price} = ₹
+                      {item.quantity * item.price}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <div className="ord-price-breakdown">
-            <div className="ord-products-list">
-              <h4>Products in Cart:</h4>
-              <ul>
-                {cartItems.map((item) => (
-                  <li key={item._id || item.id}>
-                    <img src={item.image} className="ord-product-img" />
-                    <div
-                      onClick={() => handleprodlistnavigation(item)}
-                      className="ord-product-details"
-                    >
-                      <span className="ord-product-item-name">{item.name}</span>
-                      <span>
-                        {item.quantity} × ₹{item.price} ={" "}
-                        {item.quantity + item.price}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <h3>Price Details</h3>
-            <div className="ord-price-row">
-              <span>Total items:</span>
-              <span>{cartItems.length}</span>
-            </div>
+            <h4>Price Breakdown</h4>
             <div className="ord-price-row">
               <span>Subtotal:</span>
-              <span>₹{totalPrice}</span>
+              <span>₹{totalPrice.toFixed(2)}</span>
             </div>
-            <div className="ord-price-row">
-              <span>Discount:</span>
-              <span>-₹{discount}</span>
-            </div>
-
+            {discount > 0 && (
+              <div className="ord-price-row">
+                <span>Discount:</span>
+                <span>-₹{discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="ord-price-row">
               <span>Delivery Fee:</span>
-              <span>₹{deliveryfee}</span>
+              <span>₹{deliveryfee.toFixed(2)}</span>
             </div>
+            {platformFee > 0 && (
+              <div className="ord-price-row">
+                <span>Platform Fee:</span>
+                <span>₹{platformFee.toFixed(2)}</span>
+              </div>
+            )}
           </div>
 
           <div className="ord-total-section">
             <div className="ord-price-row ord-total">
-              <span>Total Price:</span>
-              <span>₹{totalPrice + platformFee + deliveryfee - discount}</span>
+              <span>Total Amount:</span>
+              <span>
+                ₹
+                {(totalPrice + deliveryfee + platformFee - discount).toFixed(2)}
+              </span>
             </div>
 
             <button
               className={`ord-buy-now-btn ${
-                !(isMobileDone && isPincodeDone && isAddressDone) ||
-                placingOrder
+                !(isMobileDone && isPincodeDone && isAddressDone)
                   ? "ord-disabled"
                   : ""
               }`}
               onClick={handlePlaceOrder}
               disabled={
                 !(isMobileDone && isPincodeDone && isAddressDone) ||
-                placingOrder
+                placingOrder ||
+                cartItems.length === 0
               }
             >
-              {placingOrder ? "Placing Order..." : "Place Order"}
+              {placingOrder ? (
+                <>
+                  <span className="ord-spinner"></span>
+                  Processing...
+                </>
+              ) : (
+                "Place Order"
+              )}
             </button>
           </div>
         </div>

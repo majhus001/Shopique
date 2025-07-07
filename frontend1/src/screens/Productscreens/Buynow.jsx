@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import Navbar from "../navbar/Navbar";
-import API_BASE_URL from "../../api";
+import { useSelector } from "react-redux";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { FiAlertCircle } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import BottomNav from "../Bottom Navbar/BottomNav";
 import "./Cart.css";
 import getCoordinates from "../../utils/Geolocation";
@@ -28,13 +29,12 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 const Buynow = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const { user, product } = location.state || {};
+  const user = useSelector((state) => state.user);
+  const { product } = location.state || {};
 
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [updateMessage, setUpdateMessage] = useState("");
+
   const [pincode, setPincode] = useState(user?.pincode || "");
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
@@ -47,7 +47,7 @@ const Buynow = () => {
   const platformFee = 50;
 
   useEffect(() => {
-    if (location.state) {
+    if (product) {
       setCartItems([
         {
           _id: product._id,
@@ -62,8 +62,10 @@ const Buynow = () => {
           category: product.category,
         },
       ]);
+    } else {
+      navigate("/");
     }
-  }, [location.state]);
+  }, [user]);
 
   const calculateSubtotal = () => {
     return cartItems.reduce(
@@ -79,19 +81,18 @@ const Buynow = () => {
 
   const handleBuyNow = () => {
     if (user && cartItems.length > 0) {
-      console.log(cartItems);
+    
       navigate("/ordercheckout", {
         state: {
           cartItems,
-          user,
           totalPrice: calculateSubtotal(),
           deliveryfee,
           statePincode: pincode,
-          path : "buynow"
+          path: "buynow",
         },
       });
     } else {
-      alert("Please log in and add items to proceed with the purchase.");
+      toast.error("Please log in and add items to proceed with the purchase.");
     }
   };
 
@@ -102,12 +103,12 @@ const Buynow = () => {
         : item
     );
     setCartItems(updatedCartItems);
-    setUpdateMessage(
+    toast.success(
       `Quantity updated to ${
         updatedCartItems.find((item) => item.itemId === itemId).quantity
       }`
     );
-    setTimeout(() => setUpdateMessage(""), 3000);
+    
   };
 
   const handleCheckDelivery = async (value) => {
@@ -169,8 +170,18 @@ const Buynow = () => {
   return (
     <div className="cart-page">
       <div className="cart-navbar">
-        <Navbar user={user} />
+        <Navbar />
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
 
       {!user ? (
         <div className="cart-error-message">
@@ -181,10 +192,6 @@ const Buynow = () => {
           {/* Skeleton loading similar to Cart page */}
           <div className="cart-skeleton-header"></div>
           <div className="cart-skeleton-content">{/* Skeleton items */}</div>
-        </div>
-      ) : error ? (
-        <div className="cart-error-message">
-          <FiAlertCircle /> {error}
         </div>
       ) : (
         <div className="cart-container">
@@ -197,16 +204,7 @@ const Buynow = () => {
             Check Out
           </motion.h1>
 
-          {updateMessage && (
-            <motion.div
-              className="cart-update-message"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {updateMessage}
-            </motion.div>
-          )}
+          
 
           {cartItems?.length > 0 ? (
             <div className="cart-content">
@@ -373,7 +371,7 @@ const Buynow = () => {
         </div>
       )}
 
-      <BottomNav UserData={user} />
+      <BottomNav />
     </div>
   );
 };

@@ -3,24 +3,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Orderhistory.css";
 import "../../App.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import Navbar from "../navbar/Navbar";
 import Sidebar from "../sidebar/Sidebar";
-import {
-  FaHome,
-  FaListAlt,
-  FaUser,
-  FaShoppingCart,
-  FaTimes,
-  FaArrowRight,
-  FaRedo,
-} from "react-icons/fa";
-import {
-  FiLogIn,
-  FiAlertCircle,
-  FiChevronDown,
-  FiChevronUp,
-} from "react-icons/fi";
+import { FaTimes, FaArrowRight, FaRedo } from "react-icons/fa";
+import { FiLogIn, FiAlertCircle } from "react-icons/fi";
 import {
   MdDeliveryDining,
   MdPendingActions,
@@ -34,10 +24,11 @@ import BottomNav from "../Bottom Navbar/BottomNav";
 const Orderhistory = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = location.state || {};
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
 
-  const [userDetails, setUserDetails] = useState(location.state?.user);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userDetails, setUserDetails] = useState(user);
+  const [isLoggedIn, setIsLoggedIn] = useState(user?.isLoggedIn);
   const [orders, setOrders] = useState([]);
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,14 +43,14 @@ const Orderhistory = () => {
           <div className="ordhis-skeleton-title"></div>
           <div className="ordhis-skeleton-subtitle"></div>
         </div>
-        
+
         {/* Filter skeletons */}
         <div className="ordhis-skeleton-filters">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="ordhis-skeleton-filter"></div>
           ))}
         </div>
-        
+
         {/* Order skeletons */}
         <div className="ordhis-skeleton-orders">
           {[...Array(3)].map((_, i) => (
@@ -84,38 +75,30 @@ const Orderhistory = () => {
 
   const checkUser = async () => {
     try {
-      const userData = await ValidUserData();
+      const userData = await ValidUserData(dispatch);
       if (userData) {
-        setUserDetails(userData);
         setIsLoggedIn(true);
-        return true;
+        await fetchOrders(userData._id);
+      } else {
+        setIsLoggedIn(false);
       }
-      setIsLoggedIn(false);
-      return false;
     } catch (error) {
       setIsLoggedIn(false);
       setError("Error validating user session");
       console.error("Error validating user:", error);
-      return false;
     }
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (userId) => {
     try {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `${API_BASE_URL}/api/orders/fetch/${user._id || userDetails._id}`
+        `${API_BASE_URL}/api/orders/fetch/${userId}`
       );
 
-      const result = response.data.data;
-      // result.map((order)=>{
-      //   order.OrderedItems.map((item)=>{
-      //     console.log(item.image)
-      //   })
-      // })
-      if (result) {
-        setOrders(result);
+      if (response.data.success) {
+        setOrders(response.data.data || []);
       } else {
         setOrders([]);
       }
@@ -129,11 +112,13 @@ const Orderhistory = () => {
 
   useEffect(() => {
     const initialize = async () => {
-      const isUserValid = await checkUser();
-      if (isUserValid) {
-        await fetchOrders();
+      if (!user?._id) {
+        await checkUser();
+      } else {
+        await fetchOrders(user._id);
       }
     };
+
     initialize();
   }, [user]);
 
@@ -157,11 +142,11 @@ const Orderhistory = () => {
           )
         );
       } else {
-        alert("Failed to cancel the order. Please try again.");
+        toast.error("Failed to cancel the order. Please try again.");
       }
     } catch (error) {
       console.error("Error canceling order:", error);
-      alert("An error occurred while canceling the order.");
+      toast.error("An error occurred while canceling the order.");
     }
   };
 
@@ -193,7 +178,7 @@ const Orderhistory = () => {
   };
 
   const handleNavigation = (path) => {
-    navigate(`/${path}`, { state: { user: userDetails } });
+    navigate(`/${path}`);
   };
 
   const formatDate = (dateString) => {
@@ -227,7 +212,16 @@ const Orderhistory = () => {
       <div className="usprof-nav">
         <Navbar />
       </div>
-
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
       {!isLoggedIn ? (
         <motion.div
           className="auth-required"
@@ -251,7 +245,7 @@ const Orderhistory = () => {
       ) : (
         <div className="orderhis-main-cont">
           <div className="sidebar-cont">
-            <Sidebar user={userDetails} />
+            <Sidebar />
           </div>
           <div className="order-history-content">
             {loading ? (
@@ -283,20 +277,24 @@ const Orderhistory = () => {
                   <p>View and manage your recent purchases</p>
 
                   <div className="order-filters">
-                    {["All", "Pending", "Accepted", "Completed", "Cancelled"].map(
-                      (status) => (
-                        <button
-                          key={status}
-                          className={`filter-btn ${
-                            filter === status ? "active" : ""
-                          }`}
-                          onClick={() => setFilter(status)}
-                        >
-                          {status}{" "}
-                          {orderCounts[status] ? `(${orderCounts[status]})` : ""}
-                        </button>
-                      )
-                    )}
+                    {[
+                      "All",
+                      "Pending",
+                      "Accepted",
+                      "Completed",
+                      "Cancelled",
+                    ].map((status) => (
+                      <button
+                        key={status}
+                        className={`filter-btn ${
+                          filter === status ? "active" : ""
+                        }`}
+                        onClick={() => setFilter(status)}
+                      >
+                        {status}{" "}
+                        {orderCounts[status] ? `(${orderCounts[status]})` : ""}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -334,7 +332,9 @@ const Orderhistory = () => {
                               }}
                             >
                               {statusConfig[order.OrderStatus]?.icon}
-                              <span>{statusConfig[order.OrderStatus]?.text}</span>
+                              <span>
+                                {statusConfig[order.OrderStatus]?.text}
+                              </span>
                             </div>
                           </div>
 
@@ -441,10 +441,12 @@ const Orderhistory = () => {
                         alt="No orders found"
                       />
                       <h2>No Orders Found</h2>
-                      <p>You don't have any {filter.toLowerCase()} orders yet</p>
+                      <p>
+                        You don't have any {filter.toLowerCase()} orders yet
+                      </p>
                       <button
                         className="shop-now-btn"
-                        onClick={() => handleNavigation("products")}
+                        onClick={() => handleNavigation("home")}
                       >
                         Browse Products <FaArrowRight className="arrow-icon" />
                       </button>
@@ -457,7 +459,7 @@ const Orderhistory = () => {
         </div>
       )}
 
-      <BottomNav UserData={userDetails} />
+      <BottomNav />
     </div>
   );
 };

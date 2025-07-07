@@ -116,14 +116,13 @@
 }
 
 /* Responsive Styles */
-@media (min-width: 481px) and (max-width: 780px) {
+/* @media (min-width: 481px) and (max-width: 780px) {
   .sidebar {
     max-width: 260px;
     width: auto;
     transform: translateX(-100%);
   }
-
-}
+} */
 
 @media (min-width: 780px) {
   .sidebar {

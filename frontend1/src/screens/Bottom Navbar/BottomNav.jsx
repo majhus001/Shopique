@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 import "./Bottomnav.css";
 import { useEffect, useState } from "react";
 
-export default function BottomNav({ UserData }) {
+export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("home");
 
   const handleNavigation = (path) => {
-    navigate(`/${path}`, { state: { user: UserData } });
+    navigate(`/${path}`);
     setActiveTab(path);
   };
 
