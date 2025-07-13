@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import normalizeError from "../../utils/Error/NormalizeError";
+import ErrorDisplay from "../../utils/Error/ErrorDisplay";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
 import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
-import { FiAlertCircle } from "react-icons/fi";
 import ValidUserData from "../../utils/ValidUserData";
 import { motion } from "framer-motion";
 import BottomNav from "../Bottom Navbar/BottomNav";
@@ -29,9 +32,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 };
 
 const Cart = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
   const [userDetails, setUserDetails] = useState(user || null);
@@ -39,7 +40,6 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updateMessage, setUpdateMessage] = useState("");
   const [pincode, setPincode] = useState(user?.pincode || "");
   const [isPincodeTouched, setIsPincodeTouched] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
@@ -87,21 +87,6 @@ const Cart = () => {
     </div>
   );
 
-  const checkUser = async () => {
-    try {
-      const userData = await ValidUserData(dispatch);
-      if (userData) {
-        setUserDetails(userData);
-        setIsLoggedIn(true);
-        await fetchCartData();
-      }
-      setIsLoggedIn(false);
-    } catch (error) {
-      setIsLoggedIn(false);
-      console.error("Error validating user:", error);
-    }
-  };
-
   const fetchCartData = async (userId) => {
     try {
       setLoading(true);
@@ -124,36 +109,39 @@ const Cart = () => {
         });
 
         setCartItems(itemsWithDetails);
-      } else {
-        setCartItems([]);
-        if (
-          response.data.message !== "No items found in the cart for this user."
-        ) {
-          setError(response.data.message);
-        }
       }
-    } catch (error) {
-      console.error("Error fetching cart data:", error);
-      setError("Failed to load cart. Please try again.");
+    } catch (err) {
+      console.error("Error fetching cart data:", err);
       setCartItems([]);
+      if (
+        err?.response &&
+        err?.response?.status >= 400 &&
+        err?.response?.status < 500
+      ) {
+        toast.error(err.response.data.message || "Error fetching cart data");
+      } else {
+        let errorMessage = normalizeError(err);
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-      const initialize = async () => {
-        if (user?._id) {
-          setIsLoggedIn(true);
-          await fetchCartData(user._id);
-          setLoading(false);
-        } else {
-          await checkUser();
-        }
-      };
-  
-      initialize();
-    }, [user]);
+    const initialize = async () => {
+      if (user?._id) {
+        setIsLoggedIn(true);
+        await fetchCartData(user._id);
+        setLoading(false);
+      } else {
+        setIsLoggedIn(false);
+        toast.error("Please login to view your Cart");
+      }
+    };
+
+    initialize();
+  }, [user]);
 
   const handleQuantityChange = async (cartItemId, change) => {
     const updatedCartItems = cartItems.map((item) =>
@@ -177,14 +165,13 @@ const Cart = () => {
 
       if (response.status === 200) {
         setCartItems(updatedCartItems);
-        setUpdateMessage(
+        toast.success(
           `${updatedItem.name} quantity updated to ${updatedItem.quantity}`
         );
-        setTimeout(() => setUpdateMessage(""), 3000);
       }
     } catch (error) {
+      toast.warn("Failed to update quantity. Please try again.");
       console.error("Error updating item quantity:", error);
-      setError("Failed to update quantity. Please try again.");
     }
   };
 
@@ -201,7 +188,6 @@ const Cart = () => {
       }
     } catch (error) {
       console.error("Error removing item:", error);
-      setError("Failed to remove item. Please try again.");
     }
   };
 
@@ -218,10 +204,10 @@ const Cart = () => {
   };
 
   const handleShopNow = () =>
-    navigate("/home", { state: { user: userDetails } });
+    navigate("/home");
 
   const handleCheckOut = () => {
-    navigate("/ordercheckout", {
+    navigate(`/user/${user._id}/order/checkout`, {
       state: {
         cartItems,
         user: userDetails,
@@ -280,6 +266,7 @@ const Cart = () => {
 
       setIsPincodeDone(true);
     } catch (error) {
+      toast.error("Failed to Check Delivery Address");
       console.error("Error checking delivery:", error);
       setExpectedDelivery("❌ Error checking delivery for this pincode");
       setExpectedDeliverydist("Please try again or contact support");
@@ -289,23 +276,40 @@ const Cart = () => {
     }
   };
 
+  if (error) {
+    return (
+      <div className="usprof-container">
+        <div className="usprof-nav">
+          <Navbar />
+        </div>
+        <ErrorDisplay
+          error={error}
+          onRetry={() => user?._id && fetchCartData(user._id)}
+        />
+        <BottomNav />
+      </div>
+    );
+  }
+
   return (
     <div className="cart-page">
       <div className="cart-navbar">
         <Navbar />
       </div>
-
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
       {!isLoggedIn ? (
         <AuthRequired message="Please login to view your cart" />
       ) : loading ? (
         <CartSkeletonLoading />
-      ) : error ? (
-        <div className="cart-error-message">
-          <FiAlertCircle /> {error}
-          <button onClick={fetchCartData} className="cart-retry-btn">
-            Retry
-          </button>
-        </div>
       ) : (
         <div className="cart-container">
           <motion.h1
@@ -316,17 +320,6 @@ const Cart = () => {
           >
             Your Shopping Cart
           </motion.h1>
-
-          {updateMessage && (
-            <motion.div
-              className="cart-update-message"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {updateMessage}
-            </motion.div>
-          )}
 
           {cartItems.length > 0 ? (
             <div className="cart-content">

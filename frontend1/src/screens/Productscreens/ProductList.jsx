@@ -41,59 +41,83 @@ const useScreenSize = () => {
   return { isMobile };
 };
 
-const SkeletonBreadcrumbs = () => (
-  <div className="breadcrumbs skeleton">
-    <span className="skeleton-text" style={{ width: "40px" }}></span>
-    <IoIosArrowForward className="breadcrumb-arrow" />
-    <span className="skeleton-text" style={{ width: "80px" }}></span>
-    <IoIosArrowForward className="breadcrumb-arrow" />
-    <span className="skeleton-text" style={{ width: "120px" }}></span>
-  </div>
-);
-
 const SkeletonImageGallery = () => (
   <div className="product-gallery skeleton">
     <div className="main-image-container">
-      <div className="skeleton-image"></div>
+      <div className="skeleton-main-image pulse-animation"></div>
     </div>
     <div className="thumbnail-scroller">
-      {[1, 2, 3].map((i) => (
+      {[1, 2, 3, 4].map((i) => (
         <div key={i} className="thumbnail-item">
-          <div className="skeleton-thumbnail"></div>
+          <div className="skeleton-thumbnail pulse-animation"></div>
         </div>
       ))}
     </div>
     <div className="action-buttons">
-      <div className="skeleton-button"></div>
-      <div className="skeleton-button"></div>
+      <div
+        className="skeleton-button pulse-animation"
+        style={{ width: "45%" }}
+      ></div>
+      <div
+        className="skeleton-button pulse-animation"
+        style={{ width: "45%" }}
+      ></div>
     </div>
   </div>
 );
 
 const SkeletonProductInfo = () => (
   <div className="product-info skeleton">
-    <div className="skeleton-title"></div>
-    <div className="skeleton-meta"></div>
+    <div
+      className="skeleton-title pulse-animation"
+      style={{ width: "80%", height: "32px" }}
+    ></div>
+    <div
+      className="skeleton-meta pulse-animation"
+      style={{ width: "60%", height: "20px", marginTop: "12px" }}
+    ></div>
 
     <div className="price-section">
-      <div className="skeleton-price"></div>
-      <div className="skeleton-price-meta"></div>
+      <div
+        className="skeleton-price pulse-animation"
+        style={{ width: "120px", height: "36px" }}
+      ></div>
+      <div
+        className="skeleton-price-meta pulse-animation"
+        style={{ width: "150px", height: "16px" }}
+      ></div>
     </div>
 
     <div className="product-highlights">
-      <div className="skeleton-section-heading"></div>
+      <div
+        className="skeleton-section-heading pulse-animation"
+        style={{ width: "100px", height: "24px" }}
+      ></div>
       <div className="skeleton-highlight-list">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="skeleton-highlight-item"></div>
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="skeleton-highlight-item pulse-animation"
+            style={{ width: `${80 + Math.random() * 20}%`, height: "16px" }}
+          ></div>
         ))}
       </div>
     </div>
 
     <div className="delivery-section">
-      <div className="skeleton-section-heading"></div>
-      <div className="skeleton-stock-status"></div>
+      <div
+        className="skeleton-section-heading pulse-animation"
+        style={{ width: "120px", height: "24px" }}
+      ></div>
+      <div
+        className="skeleton-stock-status pulse-animation"
+        style={{ width: "200px", height: "20px" }}
+      ></div>
       <div className="skeleton-delivery-checker">
-        <div className="skeleton-pincode-input"></div>
+        <div
+          className="skeleton-pincode-input pulse-animation"
+          style={{ width: "100%", height: "40px" }}
+        ></div>
       </div>
     </div>
   </div>
@@ -102,15 +126,68 @@ const SkeletonProductInfo = () => (
 const SkeletonTabs = () => (
   <div className="product-details-tabs skeleton">
     <div className="tab-header">
-      <div className="skeleton-tab"></div>
-      <div className="skeleton-tab"></div>
+      <div
+        className="skeleton-tab pulse-animation"
+        style={{ width: "120px", height: "40px" }}
+      ></div>
+      <div
+        className="skeleton-tab pulse-animation"
+        style={{ width: "120px", height: "40px" }}
+      ></div>
     </div>
     <div className="tab-content">
       <div className="skeleton-description">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="skeleton-description-line"></div>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            className="skeleton-description-line pulse-animation"
+            style={{ width: `${70 + Math.random() * 30}%`, height: "16px" }}
+          ></div>
         ))}
       </div>
+    </div>
+  </div>
+);
+
+const SkeletonRelatedProducts = () => (
+  <div className="pl-products-section skeleton">
+    <div
+      className="pl-section-title pulse-animation"
+      style={{ width: "200px", height: "28px" }}
+    ></div>
+    <div className="pl-horizontal-scroll-container">
+      <div
+        className="pl-scroll-button pulse-animation"
+        style={{ width: "40px", height: "40px" }}
+      ></div>
+      <div className="pl-product-horizontal-scroll">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div className="pl-product-card-horizontal" key={i}>
+            <div
+              className="pl-product-image-container pulse-animation"
+              style={{ height: "180px" }}
+            ></div>
+            <div className="pl-product-details">
+              <div
+                className="skeleton-line pulse-animation"
+                style={{ width: "80%", height: "18px" }}
+              ></div>
+              <div
+                className="skeleton-line pulse-animation"
+                style={{ width: "60%", height: "22px", marginTop: "8px" }}
+              ></div>
+              <div
+                className="skeleton-line pulse-animation"
+                style={{ width: "40%", height: "16px", marginTop: "8px" }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div
+        className="pl-scroll-button pulse-animation"
+        style={{ width: "40px", height: "40px" }}
+      ></div>
     </div>
   </div>
 );
@@ -119,7 +196,6 @@ const ProductList = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
   // State for product data
@@ -182,19 +258,6 @@ const ProductList = () => {
     }
   };
 
-  const checkUser = async () => {
-    try {
-      const userData = await ValidUserData(dispatch);
-      if (userData) {
-        setUserDetails(userData);
-        setUserId(userData._id);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error("Error validating user:", error);
-    }
-  };
-
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -214,9 +277,19 @@ const ProductList = () => {
       setRelatedProds(response.data.relatedProducts);
     } catch (err) {
       console.error("Error fetching product data:", err);
-      let errorMessage = normalizeError(err);
-
-      setError(errorMessage);
+      if (
+        err.response &&
+        err.response.status >= 400 &&
+        err.response.status < 500
+      ) {
+        toast.error(
+          err.response.data.message || "Error fetching Products data"
+        );
+      } else {
+        let errorMessage = normalizeError(err);
+        setError(errorMessage);
+        setProductsByCategory([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -276,9 +349,6 @@ const ProductList = () => {
   };
 
   useEffect(() => {
-    if (!user) {
-      checkUser();
-    }
     fetchData();
     fetchReviews();
   }, [id, user, navigate]);
@@ -358,7 +428,7 @@ const ProductList = () => {
       return;
     }
 
-    navigate("/buynow", {
+    navigate(`/user/${userId}/product/buynow`, {
       state: {
         product: productData,
       },
@@ -441,14 +511,14 @@ const ProductList = () => {
   if (loading) {
     return (
       <div className="product-page-container">
-        <Navbar user={userDetails} />
+        <Navbar  />
         <div className="product-main-content">
-          <SkeletonBreadcrumbs />
           <div className="product-section">
             <SkeletonImageGallery />
             <SkeletonProductInfo />
           </div>
           <SkeletonTabs />
+          <SkeletonRelatedProducts />
         </div>
       </div>
     );
@@ -484,6 +554,8 @@ const ProductList = () => {
           <span>Home</span>
           <IoIosArrowForward className="breadcrumb-arrow" />
           <span>{productData.category}</span>
+          <IoIosArrowForward className="breadcrumb-arrow" />
+          <span>{productData.subCategory}</span>
           <IoIosArrowForward className="breadcrumb-arrow" />
           <span className="current">{productData.name}</span>
         </div>
@@ -531,9 +603,7 @@ const ProductList = () => {
                   if (productData.stock <= 0) {
                     toast.error("Sorry, Out of Stock");
                   } else if (isProdAdded) {
-                    navigate("/cart", {
-                      state: { user: userDetails },
-                    });
+                    navigate(`/user/${userId}/cart`);
                   } else {
                     handleAddToCart();
                   }
@@ -931,7 +1001,7 @@ const ProductList = () => {
                     className="pl-product-card-horizontal"
                     key={item._id}
                     onClick={() =>
-                      navigate(`/prodlist/${item._id}`, {
+                      navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
                         state: { product: item },
                       })
                     }

@@ -134,7 +134,7 @@ const Login = () => {
           </Link>
           <p className="ecom-footer-text">
             New to SHOPIQUE?{" "}
-            <Link to="/signup" className="ecom-footer-link">
+            <Link to="/auth/signup" className="ecom-footer-link">
               Create Account
             </Link>
           </p>

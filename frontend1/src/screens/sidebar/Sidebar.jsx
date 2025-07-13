@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./Sidebar.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
-import API_BASE_URL from "../../api";
 import handleLogout from "../../utils/Logout";
 import userimg from "../../assets/users/user.png";
 import {
@@ -22,78 +20,34 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-
-  const [userDetails, setUserDetails] = useState(user || null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const memoizedUser = useMemo(() => user, [user?._id]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchUserData = async () => {
-      if (!memoizedUser?._id) {
-        if (isMounted) {
-          setIsLoading(false);
-          setUserDetails(null);
-        }
-        return;
-      }
-
+    if (user) {
+      setIsLoading(false);
+    } else {
       setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/auth/fetch/${memoizedUser._id}`,
-          { withCredentials: true }
-        );
-
-        if (isMounted && response.data.success) {
-          setUserDetails(response.data.user);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error("Error fetching user:", err);
-          setError("Failed to load user data");
-          setUserDetails(memoizedUser);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchUserData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [memoizedUser]);
+    }
+  });
 
   const handleNavigation = (path) => {
-    navigate(path, { state: { user: userDetails || user } });
+    if (path === "profile") {
+      navigate(`/user/${user?._id || "unauthorized"}/profile`);
+    } else if (path === "myorders") {
+      navigate(`/user/${user?._id || "unauthorized"}/myorders`);
+    } else {
+      navigate(`${path}`);
+    }
   };
 
   const handleLogoutUser = async () => {
     const logout = handleLogout(dispatch);
     if (logout) {
-      navigate("/home", { state: { user: userDetails } });
+      navigate("/home");
     } else {
       toast.error("unable to logout");
     }
   };
-
-  const displayUser = userDetails || user;
-
-  if (isLoading) {
-    return (
-      <div className="sidebar">
-        <div className="sidebar-loading">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -108,7 +62,7 @@ const Sidebar = () => {
           draggable
           theme="colored"
         />
-        {!displayUser ? (
+        {!user ? (
           <div className="sidebar-auth-prompt">
             <p>Please login to access your account</p>
             <button className="sidebar-btn" onClick={() => navigate("/login")}>
@@ -118,47 +72,49 @@ const Sidebar = () => {
           </div>
         ) : (
           <>
-            <div className="sidebar-user">
-              <img
-                src={displayUser.image || userimg}
-                alt="profile"
-                className="sidebar-user-img"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/default-profile.png";
-                }}
-              />
-              <h4 className="sidebar-user-name">
-                {displayUser.username || "User"}
-              </h4>
-              <p className="sidebar-user-email">{displayUser.email || ""}</p>
-            </div>
+            {isLoading ? (
+              <div className="sidebar-loading">Loading...</div>
+            ) : (
+              <div className="sidebar-user">
+                <img
+                  src={user?.image || userimg}
+                  alt="profile"
+                  className="sidebar-user-img"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/default-profile.png";
+                  }}
+                />
+                <h4 className="sidebar-user-name">{user.username || "User"}</h4>
+                <p className="sidebar-user-email">{user?.email || ""}</p>
+              </div>
+            )}
 
             <nav className="sidebar-nav">
               <button
                 className="sidebar-btn"
-                onClick={() => handleNavigation("/profilepage")}
+                onClick={() => handleNavigation("profile")}
               >
                 <FaUser />
                 <span>Profile</span>
               </button>
               <button
                 className="sidebar-btn"
-                onClick={() => handleNavigation("/wishlist")}
+                onClick={() => handleNavigation("wishlist")}
               >
                 <FaHeart />
                 <span>Wishlist</span>
               </button>
               <button
                 className="sidebar-btn"
-                onClick={() => handleNavigation("/myorders")}
+                onClick={() => handleNavigation("myorders")}
               >
                 <FaBox />
                 <span>My Orders</span>
               </button>
               <button
                 className="sidebar-btn"
-                onClick={() => handleNavigation("/settings")}
+                onClick={() => handleNavigation("settings")}
               >
                 <FaCog />
                 <span>Settings</span>

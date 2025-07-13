@@ -163,10 +163,19 @@ const HomePage = () => {
       setProductsByCategory(processedData);
     } catch (err) {
       console.error("Error fetching data:", err);
-      let errorMessage = normalizeError(err);
-
-      setError(errorMessage);
-      setProductsByCategory([]);
+      if (
+        err.response &&
+        err.response.status >= 400 &&
+        err.response.status < 500
+      ) {
+        toast.error(
+          err.response.data.message || "Error fetching Products data"
+        );
+      } else {
+        let errorMessage = normalizeError(err);
+        setError(errorMessage);
+        setProductsByCategory([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -218,7 +227,7 @@ const HomePage = () => {
         });
       }
     });
-    navigate(`/seprodlist/${productId}`, {
+    navigate(`/products/search/${prodCategory}/${prodSubCategory}/${productId}`, {
       state: {
         user: userDetails,
         productCategory: prodCategory,
@@ -242,9 +251,8 @@ const HomePage = () => {
   }, []);
 
   const handleprodlistnavigation = (item) => {
-    navigate(`/prodlist/${item._id}`, {
+    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
       state: {
-        user: userDetails,
         product: item,
       },
     });

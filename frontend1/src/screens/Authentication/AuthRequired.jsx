@@ -8,7 +8,7 @@ const AuthRequired = ({ message = "Please login to view this content" }) => {
   const navigate = useNavigate();
 
   const handleNavigation = (path) => {
-    navigate(`/${path}`, { state: { from: window.location.pathname } });
+    navigate(`/auth/${path}`, { state: { from: window.location.pathname } });
   };
 
   return (

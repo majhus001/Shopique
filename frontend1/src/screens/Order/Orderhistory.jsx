@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Orderhistory.css";
 import "../../App.css";
+import normalizeError from "../../utils/Error/NormalizeError";
+import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import Navbar from "../navbar/Navbar";
 import Sidebar from "../sidebar/Sidebar";
@@ -17,22 +19,20 @@ import {
   MdCancel,
   MdCheckCircle,
 } from "react-icons/md";
-import ValidUserData from "../../utils/ValidUserData";
 import { motion, AnimatePresence } from "framer-motion";
 import BottomNav from "../Bottom Navbar/BottomNav";
 
 const Orderhistory = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const hasFetchedOrders = useRef();
   const user = useSelector((state) => state.user);
 
-  const [userDetails, setUserDetails] = useState(user);
+  const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(user?.isLoggedIn);
   const [orders, setOrders] = useState([]);
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("All");
 
   const SkeletonLoading = () => {
@@ -73,22 +73,6 @@ const Orderhistory = () => {
     );
   };
 
-  const checkUser = async () => {
-    try {
-      const userData = await ValidUserData(dispatch);
-      if (userData) {
-        setIsLoggedIn(true);
-        await fetchOrders(userData._id);
-      } else {
-        setIsLoggedIn(false);
-      }
-    } catch (error) {
-      setIsLoggedIn(false);
-      setError("Error validating user session");
-      console.error("Error validating user:", error);
-    }
-  };
-
   const fetchOrders = async (userId) => {
     try {
       setLoading(true);
@@ -102,24 +86,33 @@ const Orderhistory = () => {
       } else {
         setOrders([]);
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      setError("Failed to load orders. Please try again.");
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      if (
+        err?.response &&
+        err?.response?.status >= 400 &&
+        err?.response?.status < 500
+      ) {
+        toast.error(err.response.data.message || "Error fetching order data");
+      } else {
+        let errorMessage = normalizeError(err);
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const initialize = async () => {
-      if (!user?._id) {
-        await checkUser();
-      } else {
-        await fetchOrders(user._id);
-      }
+    const loadData = async () => {
+      if (!user?.isLoggedIn || !user?._id || hasFetchedOrders.current) return;
+
+      setIsLoggedIn(true);
+      hasFetchedOrders.current = true;
+      await fetchOrders(user._id);
     };
 
-    initialize();
+    loadData();
   }, [user]);
 
   const toggleOrderExpand = (orderId) => {
@@ -207,6 +200,21 @@ const Orderhistory = () => {
     { All: orders.length }
   );
 
+  if (error) {
+    return (
+      <div className="usprof-container">
+        <div className="usprof-nav">
+          <Navbar />
+        </div>
+        <ErrorDisplay
+          error={error}
+          onRetry={() => user?._id && fetchOrders(user._id)}
+        />
+        <BottomNav />
+      </div>
+    );
+  }
+
   return (
     <div className="order-history-container">
       <div className="usprof-nav">
@@ -250,19 +258,6 @@ const Orderhistory = () => {
           <div className="order-history-content">
             {loading ? (
               <SkeletonLoading />
-            ) : error ? (
-              <motion.div
-                className="error-state"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <FiAlertCircle className="error-icon" />
-                <p>{error}</p>
-                <button onClick={fetchOrders} className="retry-button">
-                  <FaRedo className="retry-icon" />
-                  Try Again
-                </button>
-              </motion.div>
             ) : (
               <>
                 <div className="order-history-header-container">
@@ -286,7 +281,7 @@ const Orderhistory = () => {
                     ].map((status) => (
                       <button
                         key={status}
-                        className={`filter-btn ${
+                        className={`ord-his-filter-btn ${
                           filter === status ? "active" : ""
                         }`}
                         onClick={() => setFilter(status)}
@@ -385,7 +380,7 @@ const Orderhistory = () => {
                                         }}
                                       />
                                       <div className="item-details-cont">
-                                        <h4>{item.name}</h4>
+                                        <h4 className="ord-his-truncated-name">{item.name}</h4>
                                         <div className="item-details">
                                           <span>Price :</span>
                                           <span className="item-price">

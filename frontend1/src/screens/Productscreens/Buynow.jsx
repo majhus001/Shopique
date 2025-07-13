@@ -10,6 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import BottomNav from "../Bottom Navbar/BottomNav";
 import "./Cart.css";
 import getCoordinates from "../../utils/Geolocation";
+import AuthRequired from "../Authentication/AuthRequired";
 
 // Helper function to calculate distance between two coordinates (Haversine formula)
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -32,19 +33,17 @@ const Buynow = () => {
   const user = useSelector((state) => state.user);
   const { product } = location.state || {};
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [pincode, setPincode] = useState(user?.pincode || "");
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
-  const [deliveryAddress, setDeliveryAddress] = useState(user?.address || "");
   const [expectedDelivery, setExpectedDelivery] = useState("");
-  const [expectedDeliverydist, setExpectedDeliverydist] = useState("");
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
   const [isPincodeDone, setIsPincodeDone] = useState(false);
   const warehousePincode = "641008";
-  const platformFee = 50;
 
   useEffect(() => {
     if (product) {
@@ -60,10 +59,18 @@ const Buynow = () => {
             product.images?.[0] ||
             "https://via.placeholder.com/150?text=No+Image",
           category: product.category,
+          subCategory: product.subCategory,
         },
       ]);
     } else {
-      navigate("/");
+      navigate("/")
+    }
+
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+      toast.error("please login to continue")
     }
   }, [user]);
 
@@ -76,13 +83,12 @@ const Buynow = () => {
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    return subtotal + deliveryfee + platformFee;
+    return subtotal + deliveryfee;
   };
 
   const handleBuyNow = () => {
     if (user && cartItems.length > 0) {
-    
-      navigate("/ordercheckout", {
+      navigate(`/user/${user._id}/order/checkout`, {
         state: {
           cartItems,
           totalPrice: calculateSubtotal(),
@@ -108,7 +114,6 @@ const Buynow = () => {
         updatedCartItems.find((item) => item.itemId === itemId).quantity
       }`
     );
-    
   };
 
   const handleCheckDelivery = async (value) => {
@@ -149,7 +154,6 @@ const Buynow = () => {
         setDeliveryFee(100);
       }
 
-      setDeliveryAddress(userCoords.address);
       setExpectedDelivery(`${userCoords.address}`);
 
       setExpectedDeliverydate(
@@ -160,7 +164,6 @@ const Buynow = () => {
     } catch (error) {
       console.error("Error checking delivery:", error);
       setExpectedDelivery("❌ Error checking delivery for this pincode");
-      setExpectedDeliverydist("Please try again or contact support");
       setIsPincodeDone(false);
     } finally {
       setPincodeLoad(false);
@@ -183,15 +186,12 @@ const Buynow = () => {
         theme="colored"
       />
 
-      {!user ? (
-        <div className="cart-error-message">
-          <FiAlertCircle /> Please login to proceed with your purchase
-        </div>
+      {!isLoggedIn ? (
+        <AuthRequired message="Please login to view your cart" />
       ) : loading ? (
         <div className="cart-skeleton">
-          {/* Skeleton loading similar to Cart page */}
           <div className="cart-skeleton-header"></div>
-          <div className="cart-skeleton-content">{/* Skeleton items */}</div>
+          <div className="cart-skeleton-content"></div>
         </div>
       ) : (
         <div className="cart-container">
@@ -203,8 +203,6 @@ const Buynow = () => {
           >
             Check Out
           </motion.h1>
-
-          
 
           {cartItems?.length > 0 ? (
             <div className="cart-content">

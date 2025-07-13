@@ -206,7 +206,7 @@ const SignUp = () => {
         <div className="ecom-signup-footer">
           <p className="ecom-footer-text">
             Already have an account?{" "}
-            <Link to="/login" className="ecom-footer-link">
+            <Link to="/auth/login" className="ecom-footer-link">
               Login here
             </Link>
           </p>

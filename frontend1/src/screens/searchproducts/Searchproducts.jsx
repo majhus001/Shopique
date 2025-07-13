@@ -24,7 +24,6 @@ import {
 import BottomNav from "../Bottom Navbar/BottomNav";
 
 export default function Searchproducts() {
-  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -41,8 +40,8 @@ export default function Searchproducts() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [error, setError] = useState(false);
 
-  const [sliderValue, setSliderValue] = useState(130000);
-  const [appliedPriceRange, setAppliedPriceRange] = useState([0, 130000]);
+  const [sliderValue, setSliderValue] = useState(1000000);
+  const [appliedPriceRange, setAppliedPriceRange] = useState([0, 1000000]);
 
   const [loading, setLoading] = useState(true);
 
@@ -90,16 +89,6 @@ export default function Searchproducts() {
     };
   }, [mobileFiltersOpen]);
 
-  const checkUser = async () => {
-    try {
-      const userData = await ValidUserData(dispatch);
-      if (userData) {
-        setUserId(userData._id);
-      }
-    } catch (error) {
-      console.error("Error validating user:", error);
-    }
-  };
 
   const fetchPaginatedProducts = async () => {
     try {
@@ -145,19 +134,24 @@ export default function Searchproducts() {
       }
 
       setBrands(Uniquebrands);
-    } catch (error) {
-      console.error("Error fetching paginated products:", error);
-      let errorMessage = normalizeError(err);
-      setError(errorMessage);
+    } catch (err) {
+      console.error("Error fetching paginated products:", err);
+      if (
+        err?.response &&
+        err?.response?.status >= 400 &&
+        err?.response?.status < 500
+      ) {
+        toast.error(err.response.data.message || "Error fetching product data");
+      } else {
+        let errorMessage = normalizeError(err);
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user) {
-      checkUser();
-    }
     fetchPaginatedProducts();
   }, [
     id,
@@ -200,7 +194,7 @@ export default function Searchproducts() {
       return;
     }
 
-    navigate("/buynow", {
+    navigate(`/user/${userId}/product/buynow`, {
       state: {
         product: item,
       },
@@ -208,11 +202,11 @@ export default function Searchproducts() {
   };
 
   const handleGoToCart = () => {
-    navigate("/cart");
+    navigate(`/user/${userId}/cart`);
   };
 
   const handleprodlistnavigation = (item) => {
-    navigate(`/prodlist/${item._id}`, {
+    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
       state: {
         product: item,
       },
@@ -241,8 +235,12 @@ export default function Searchproducts() {
 
   if (error) {
     return (
-      <div>
+      <div className="usprof-container">
+        <div className="usprof-nav">
+          <Navbar />
+        </div>
         <ErrorDisplay error={error} onRetry={fetchPaginatedProducts} />
+        <BottomNav />
       </div>
     );
   }
@@ -542,7 +540,7 @@ export default function Searchproducts() {
             </>
           ) : (
             <div className="no-products">
-              <img src="/no-products.svg" alt="No products found" />
+              <img src="https://cdn-icons-png.flaticon.com/512/5089/5089733.png" alt="No products found" />
               <h3>No products found</h3>
               <p>Try adjusting your filters or search criteria</p>
               <button

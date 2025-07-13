@@ -2,12 +2,129 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import axios from "axios";
+import BottomNav from "../Bottom Navbar/BottomNav";
+import normalizeError from "../../utils/Error/NormalizeError";
+import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import "./Orderdetails.css";
 import API_BASE_URL from "../../api";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
+
+const OrderDetailsSkeleton = () => {
+  return (
+    <div className="checkout-container">
+      <div className="ord-notification"></div>
+
+      <div className="ord-checkout-title ord-skeleton-loading">
+        <div
+          className="ord-skeleton-line"
+          style={{ width: "200px", margin: "0 auto" }}
+        ></div>
+      </div>
+
+      <div className="ord-container">
+        {/* Address Details Skeleton */}
+        <div className="ord-address-details ord-skeleton-loading">
+          <div className="ord-skeleton-header"></div>
+
+          {/* Login Step */}
+          <div className="ord-input-group">
+            <div className="ord-skeleton-line" style={{ width: "70%" }}></div>
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "40px" }}
+            ></div>
+          </div>
+
+          {/* Mobile Step */}
+          <div className="ord-input-group">
+            <div className="ord-skeleton-line" style={{ width: "60%" }}></div>
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "40px" }}
+            ></div>
+          </div>
+
+          {/* Pincode Step */}
+          <div className="ord-input-group">
+            <div className="ord-skeleton-line" style={{ width: "50%" }}></div>
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "40px" }}
+            ></div>
+          </div>
+
+          {/* Address Step */}
+          <div className="ord-input-group">
+            <div className="ord-skeleton-line" style={{ width: "65%" }}></div>
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "100px" }}
+            ></div>
+          </div>
+
+          {/* Payment Step */}
+          <div className="ord-input-group">
+            <div className="ord-skeleton-line" style={{ width: "55%" }}></div>
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "40px" }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Order Summary Skeleton */}
+        <div className="ord-price-details ord-skeleton-loading">
+          <div className="ord-skeleton-header"></div>
+
+          {/* Products List */}
+          <div className="ord-products-list">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="ord-skeleton-product-item">
+                <div className="ord-skeleton-product-img"></div>
+                <div className="ord-skeleton-product-info">
+                  <div
+                    className="ord-skeleton-line"
+                    style={{ width: "80%" }}
+                  ></div>
+                  <div
+                    className="ord-skeleton-line"
+                    style={{ width: "60%" }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Price Breakdown */}
+          <div className="ord-price-breakdown">
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", marginBottom: "15px" }}
+            ></div>
+            <div className="ord-skeleton-line" style={{ width: "90%" }}></div>
+            <div className="ord-skeleton-line" style={{ width: "80%" }}></div>
+            <div className="ord-skeleton-line" style={{ width: "85%" }}></div>
+          </div>
+
+          {/* Total Section */}
+          <div className="ord-total-section">
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "30px", margin: "20px 0" }}
+            ></div>
+            <div
+              className="ord-skeleton-line"
+              style={{ width: "100%", height: "50px" }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Orderdetails = () => {
   const location = useLocation();
@@ -25,6 +142,7 @@ const Orderdetails = () => {
   } = location.state || {};
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [error, setError] = useState(null);
   const [mobileNumber, setMobileNumber] = useState("");
   const [pincode, setPincode] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -35,7 +153,6 @@ const Orderdetails = () => {
   const [loading, setLoading] = useState(true);
   const [placingOrder, setPlacingOrder] = useState(false);
 
-  // Initialize user data and check authentication
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -53,7 +170,6 @@ const Orderdetails = () => {
         setPincode(statePincode || user.pincode || "");
         setDeliveryAddress(userData.address || "");
 
-        // Auto-mark fields as done if they're valid
         if (userData.mobile?.length === 10) {
           setIsMobileDone(true);
         }
@@ -66,12 +182,25 @@ const Orderdetails = () => {
       } catch (err) {
         toast.error("Failed to initialize order details");
         console.error("Initialization error:", err);
+        if (
+          err?.response &&
+          err?.response?.status >= 400 &&
+          err?.response?.status < 500
+        ) {
+          toast.error(err.response.data.message || "Error fetching cart data");
+        } else {
+          let errorMessage = normalizeError(err);
+          setError(errorMessage);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     initialize();
+    if (!location.state?.cartItems) {
+      navigate("/home");
+    }
   }, [user, navigate, statePincode]);
 
   const handleMobileChange = (e) => {
@@ -144,7 +273,7 @@ const Orderdetails = () => {
         });
         toast.success("Order Placed Successfully!");
         setTimeout(() => {
-          navigate("/myorders");
+          navigate(`/user/${user._id}/myorders`,{ replace: true });
         }, 3000);
       } else {
         throw new Error(orderResponse.data.message || "Failed to place order");
@@ -181,27 +310,31 @@ const Orderdetails = () => {
   }, [user?._id]);
 
   const handleProductNavigation = (item) => {
-    navigate(`/prodlist/${item._id}`);
+    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`);
   };
 
   if (loading) {
     return (
-      <div className="checkout-container">
+      <div className="product-page-container">
         <Navbar />
-        <div className="ord-container">
-          <div className="ord-skeleton-loading">
-            <div className="ord-skeleton-header"></div>
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="ord-skeleton-line"></div>
-            ))}
-          </div>
-          <div className="ord-skeleton-loading">
-            <div className="ord-skeleton-header"></div>
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="ord-skeleton-line"></div>
-            ))}
-          </div>
+        <div className="product-main-content">
+          <OrderDetailsSkeleton />
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="usprof-container">
+        <div className="usprof-nav">
+          <Navbar />
+        </div>
+        <ErrorDisplay
+          error={error}
+          onRetry={() => user?._id && fetchCartData(user._id)}
+        />
+        <BottomNav />
       </div>
     );
   }
@@ -427,6 +560,7 @@ const Orderdetails = () => {
           </div>
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 };

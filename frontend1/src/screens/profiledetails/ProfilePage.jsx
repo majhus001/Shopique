@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./ProfilePage.css";
 import Navbar from "../navbar/Navbar";
 import normalizeError from "../../utils/Error/NormalizeError";
@@ -14,7 +14,6 @@ import getCoordinates from "../../utils/Geolocation";
 import Sidebar from "../sidebar/Sidebar";
 import "../../App.css";
 import userimg from "../../assets/users/user.png";
-import ValidUserData from "../../utils/ValidUserData";
 import {
   FaSignOutAlt,
   FaEdit,
@@ -30,36 +29,74 @@ import AuthRequired from "../Authentication/AuthRequired";
 
 const PfSkeletonSidebar = () => (
   <div className="sidebar-cont pf-skeleton">
-    <div className="pf-skeleton-sidebar"></div>
+    <div className="pf-sidebar pf-pulse-animation"></div>
   </div>
 );
 
 const PfSkeletonProfile = () => (
   <div className="usprof-content pf-skeleton">
     <div className="usprof-header">
-      <div className="pf-skeleton-title"></div>
+      <div
+        className="pf-title pf-pulse-animation"
+        style={{ width: "200px", height: "32px" }}
+      ></div>
       <div className="usprof-header-btns">
-        <div className="pf-skeleton-btn"></div>
-        <div className="pf-skeleton-btn"></div>
+        <div
+          className="pf-btn pf-pulse-animation"
+          style={{ width: "100px", height: "40px" }}
+        ></div>
+        <div
+          className="pf-btn pf-pulse-animation"
+          style={{ width: "120px", height: "40px" }}
+        ></div>
       </div>
     </div>
 
     <div className="usprof-details-container">
       <div className="usprof-image-section">
-        <div className="pf-skeleton-image"></div>
-        <div className="pf-skeleton-upload"></div>
+        <div className="pf-profile-image pf-pulse-animation"></div>
+        <div
+          className="pf-upload-btn pf-pulse-animation"
+          style={{ width: "150px", height: "40px" }}
+        ></div>
       </div>
 
       <div className="usprof-form-section">
+        <div
+          className="pf-form-header pf-pulse-animation"
+          style={{ width: "180px", height: "24px", marginBottom: "20px" }}
+        ></div>
+
         <div className="usprof-form-grid">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="usprof-form-group">
-              <div className="pf-skeleton-label"></div>
-              <div className="pf-skeleton-input"></div>
+              <div
+                className="pf-label pf-pulse-animation"
+                style={{ width: "100px", height: "16px", marginBottom: "8px" }}
+              ></div>
+              <div
+                className="pf-input pf-pulse-animation"
+                style={{ width: "100%", height: "40px" }}
+              ></div>
             </div>
           ))}
         </div>
-        <div className="pf-skeleton-save-btn"></div>
+
+        <div className="pf-textarea-container">
+          <div
+            className="pf-label pf-pulse-animation"
+            style={{ width: "120px", height: "16px", marginBottom: "8px" }}
+          ></div>
+          <div
+            className="pf-textarea pf-pulse-animation"
+            style={{ width: "100%", height: "80px" }}
+          ></div>
+        </div>
+
+        <div
+          className="pf-save-btn pf-pulse-animation"
+          style={{ width: "160px", height: "45px", marginTop: "30px" }}
+        ></div>
       </div>
     </div>
   </div>
@@ -68,7 +105,9 @@ const PfSkeletonProfile = () => (
 const ProfilePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { userId } = useParams();
   const user = useSelector((state) => state.user);
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(user?.isLoggedIn);
@@ -83,23 +122,6 @@ const ProfilePage = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  const checkUser = async () => {
-    try {
-      const userData = await ValidUserData(dispatch);
-      if (userData) {
-        setIsLoggedIn(true);
-        await fetchUserData(userData._id);
-      } else {
-        setIsLoggedIn(false);
-      }
-    } catch (error) {
-      setIsLoggedIn(false);
-      console.error("Error validating user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     const initialize = async () => {
       if (user?._id) {
@@ -107,7 +129,8 @@ const ProfilePage = () => {
         await fetchUserData(user._id);
         setLoading(false);
       } else {
-        await checkUser();
+        setIsLoggedIn(false);
+        toast.error("Please login to view your profile");
       }
     };
 
@@ -122,7 +145,7 @@ const ProfilePage = () => {
       if (response.data.success) {
         const userData = response.data.user;
         setUserDetails({
-          image: userData.image || "/default-profile.png",
+          image: userData.image || userimg,
           username: userData.username,
           email: userData.email,
           password: "",
@@ -133,12 +156,19 @@ const ProfilePage = () => {
       }
     } catch (err) {
       console.error("Error fetching profile details:", err);
-      if (err.response && err.response.status >= 400) {
-        toast.error(err.response.data.message || "Error fetching profile data");
-        return;
+
+      if (err?.response) {
+        if (err.response.status === 401) {
+          toast.error("Session expired. Please login again.");
+        } else {
+          toast.error(
+            err.response.data.message || "Error fetching profile data"
+          );
+        }
+      } else {
+        let errorMessage = normalizeError(err);
+        setError(errorMessage);
       }
-      let errorMessage = normalizeError(err);
-      setError(errorMessage);
     }
   };
 
@@ -246,20 +276,6 @@ const ProfilePage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
-        <div className="usprof-main">
-          <PfSkeletonSidebar />
-          <PfSkeletonProfile />
-        </div>
-        <BottomNav />
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -282,7 +298,6 @@ const ProfilePage = () => {
         <Navbar />
       </div>
 
-      {/* ToastContainer moved outside conditional rendering */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -296,10 +311,15 @@ const ProfilePage = () => {
 
       {!isLoggedIn ? (
         <AuthRequired message="Please login to view your profile" />
+      ) : loading ? (
+        <>
+          <PfSkeletonSidebar />
+          <PfSkeletonProfile />
+        </>
       ) : (
         <div className="usprof-main">
           <div className="sidebar-cont">
-            <Sidebar user={userDetails} />
+            <Sidebar />
           </div>
           <div className="usprof-content">
             <div className="usprof-header">
@@ -307,10 +327,6 @@ const ProfilePage = () => {
                 <h2 className="usprof-title">
                   {isEditing ? "Edit Your Profile" : "My Profile"}
                 </h2>
-                <span className="profile-badge">
-                  <span className="verified-icon">✓</span>
-                  Verified User
-                </span>
               </div>
 
               <div className="usprof-header-btns">
@@ -343,12 +359,12 @@ const ProfilePage = () => {
               <div className="usprof-image-section">
                 <div className="profile-image-container">
                   <img
-                    src={user?.image || userimg}
+                    src={userDetails.image}
                     alt="Profile"
                     className="usprof-profile-img"
                     loading="lazy"
                     onError={(e) => {
-                      e.target.src = "/default-profile.png";
+                      e.target.src = userimg;
                     }}
                   />
                   {isEditing && (

@@ -11,7 +11,7 @@ import "./ErrorDisplay.css";
 const ErrorDisplay = ({ error, onRetry }) => {
  
   if (!error) return null;
-
+  console.log(error)
   const errorType = error?.type || "generic";
 
   const errorConfig = {
@@ -66,14 +66,14 @@ const ErrorDisplay = ({ error, onRetry }) => {
 
   return (
     <motion.div
-      className="error-display-container"
+      className="ed-error-display-container"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <div className="error-content">
+      <div className="ed-error-content">
         <motion.div
-          className="error-icon-container"
+          className="ed-error-icon-container"
           animate={{
             rotate: [0, -10, 10, 0],
             scale: [1, 1.1, 1],
@@ -89,7 +89,7 @@ const ErrorDisplay = ({ error, onRetry }) => {
         </motion.div>
 
         <motion.h3
-          className="error-title"
+          className="ed-error-title"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -98,7 +98,7 @@ const ErrorDisplay = ({ error, onRetry }) => {
         </motion.h3>
 
         <motion.p
-          className="error-message"
+          className="ed-error-message"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -107,7 +107,7 @@ const ErrorDisplay = ({ error, onRetry }) => {
         </motion.p>
 
         <motion.div
-          className="error-actions"
+          className="ed-error-actions"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -120,18 +120,18 @@ const ErrorDisplay = ({ error, onRetry }) => {
                 backgroundColor: color,
               }}
               whileTap={{ scale: 0.95 }}
-              className="retry-button"
+              className="ed-retry-button"
               style={{ backgroundColor: color }}
             >
-              <FiRefreshCw className="retry-icon" />
+              <FiRefreshCw className="ed-retry-icon" />
               {buttonText}
             </motion.button>
           )}
 
-          <p className="error-help-text">{helpText}</p>
+          <p className="ed-error-help-text">{helpText}</p>
 
           {errorType === "server" && (
-            <div className="server-error-contact">
+            <div className="ed-server-error-contact">
               <p>Need immediate help?</p>
               <a href="mailto:support@example.com">Contact Support</a>
             </div>

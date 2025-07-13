@@ -1,69 +1,112 @@
 /* Skeleton Loading Styles */
+/* Profile Page Skeleton Loading Styles */
 .pf-skeleton {
   opacity: 0.7;
-  animation: pf-skeleton-loading 1s linear infinite alternate;
 }
 
-@keyframes pf-skeleton-loading {
+.pf-pulse-animation {
+  animation: pf-pulse 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+}
+
+@keyframes pf-pulse {
   0% {
-    background-color: hsl(200, 20%, 70%);
+    background-position: 200% 0;
   }
   100% {
-    background-color: hsl(200, 20%, 95%);
+    background-position: -200% 0;
   }
 }
 
-.pf-skeleton-sidebar {
-  width: 100%;
+/* Sidebar Skeleton */
+.pf-sidebar {
+  width: 280px;
   height: 100%;
+  background-color: #f0f0f0;
   border-radius: 8px;
 }
 
-.pf-skeleton-title {
-  width: 150px;
-  height: 32px;
-  border-radius: 4px;
+/* Profile Header Skeleton */
+.pf-title {
+  background-color: #f0f0f0;
   margin-bottom: 20px;
 }
 
-.pf-skeleton-btn {
-  width: 100px;
-  height: 40px;
+.pf-btn {
+  background-color: #f0f0f0;
   border-radius: 4px;
   margin-left: 10px;
 }
 
-.pf-skeleton-image {
+/* Profile Image Section Skeleton */
+.pf-profile-image {
   width: 150px;
   height: 150px;
   border-radius: 50%;
+  background-color: #f0f0f0;
+  margin: 0 auto 20px;
+}
+
+.pf-upload-btn {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin: 0 auto;
+}
+
+/* Form Section Skeleton */
+.pf-form-header {
+  background-color: #f0f0f0;
   margin-bottom: 15px;
 }
 
-.pf-skeleton-upload {
-  width: 150px;
-  height: 30px;
+.pf-label {
+  background-color: #f0f0f0;
+}
+
+.pf-input {
+  background-color: #f0f0f0;
   border-radius: 4px;
 }
 
-.pf-skeleton-label {
-  width: 100px;
-  height: 16px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+.pf-textarea-container {
+  grid-column: 1 / -1;
+  margin-top: 15px;
 }
 
-.pf-skeleton-input {
-  width: 100%;
-  height: 40px;
+.pf-textarea {
+  background-color: #f0f0f0;
   border-radius: 4px;
 }
 
-.pf-skeleton-save-btn {
-  width: 150px;
-  height: 45px;
+.pf-save-btn {
+  background-color: #f0f0f0;
   border-radius: 4px;
-  margin-top: 20px;
+  margin-left: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .pf-sidebar {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 20px;
+  }
+  
+  .pf-profile-image {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .pf-title {
+    height: 28px;
+  }
+  
+  .pf-btn {
+    height: 36px;
+    margin-bottom: 10px;
+  }
 }
 
 /* Base Styles */
@@ -97,7 +140,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin: 20px auto;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -356,13 +399,9 @@
 /* Responsive Breakpoints */
 @media (max-width: 480px) {
   .usprof-content{
-    padding: 10px 0 0 0;
-    margin: 0;
+    padding: 5px 0 20px;
   }
-  .usprof-details-container{
-    border-radius: 0;
-    background-color: none;
-  }
+  
   .usprof-title {
     font-size: 18px;
   }
@@ -393,7 +432,6 @@
   }
   
   .usprof-content {
-    padding: 20px;
     margin-left: auto;
     width: auto;
   }
@@ -416,7 +454,10 @@
   .usprof-content {
     margin: 60px 20px;
   }
-  
+  .usprof-details-container{
+    border-radius: 0;
+    background-color: none;
+  }
   .usprof-logout {
     display: flex;
     align-items: center;

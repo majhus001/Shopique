@@ -49,6 +49,7 @@ export default function Navbar() {
 
   const checkUser = useCallback(async () => {
     try {
+      console.log("nav check");
       const userData = await ValidUserData(dispatch);
       if (userData) {
         setUsername(userData.username);
@@ -69,9 +70,15 @@ export default function Navbar() {
     setIsOrderPage(path.includes("/orders") || path.includes("/checkout"));
   }, []);
 
+  const hasCheckedUser = useRef(false);
+
   useEffect(() => {
     const initialize = async () => {
+      if (hasCheckedUser.current) return; // prevent double run
+      hasCheckedUser.current = true; // set it immediately
+
       setIsLoading(true);
+
       try {
         let shouldFetchCart = false;
 
@@ -97,7 +104,7 @@ export default function Navbar() {
     };
 
     initialize();
-  }, [user, checkUser, fetchAllProducts, fetchCartData]);
+  }, []);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -138,11 +145,14 @@ export default function Navbar() {
   };
 
   const handleProductClick = (product) => {
-    navigate(`/seprodlist/${product._id}`, {
-      state: {
-        clickedProduct: product,
-      },
-    });
+    navigate(
+      `/products/search/${product.category}/${product.subCategory}/${product._id}`,
+      {
+        state: {
+          clickedProduct: product,
+        },
+      }
+    );
 
     setSearchQuery("");
     setSearchResults([]);
@@ -173,7 +183,9 @@ export default function Navbar() {
           {isLoggedIn ? (
             <button
               className="nav-btns profile-btn"
-              onClick={() => navigate("/profilepage")}
+              onClick={() =>
+                navigate(`/user/${user?._id || "unauthorized"}/profile`)
+              }
               aria-label="Profile"
             >
               <i className="fas fa-user"></i>
@@ -182,7 +194,7 @@ export default function Navbar() {
           ) : (
             <button
               className="nav-btns profile-btn"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/auth/login")}
               aria-label="Login"
             >
               <i className="fas fa-user"></i>
@@ -193,100 +205,99 @@ export default function Navbar() {
       </div>
 
       {/* Search bar - always visible in mobile */}
-      {!isOrderPage && (
-        <div className="mobile-search-container">
-          <div className="nav-search-bar" ref={searchRef}>
-            <input
-              type="text"
-              placeholder="Search for products..."
-              className="nav-searchbar"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
 
-            {searchResults.length > 0 && (
-              <div className="search-results-dropdown">
-                {searchResults.map((product) => (
-                  <div
-                    key={product._id}
-                    className="search-result-item"
-                    onClick={() => handleProductClick(product)}
-                  >
-                    <img
-                      src={product.images?.[0] || ""}
-                      alt={product.name}
-                      onError={(e) => {
-                        e.target.src = "";
-                        e.target.alt = "Image not available";
-                      }}
-                    />
-                    <div>
-                      <p>{product.name}</p>
-                      <span>
-                        {product.offerPrice
-                          ? `₹${product.offerPrice}`
-                          : `₹${product.price}`}
-                      </span>
-                    </div>
+      <div className="mobile-search-container">
+        <div className="nav-search-bar" ref={searchRef}>
+          <input
+            type="text"
+            placeholder="Search for products..."
+            className="nav-searchbar"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+
+          {searchResults.length > 0 && (
+            <div className="search-results-dropdown">
+              {searchResults.map((product) => (
+                <div
+                  key={product._id}
+                  className="search-result-item"
+                  onClick={() => handleProductClick(product)}
+                >
+                  <img
+                    src={product.images?.[0] || ""}
+                    alt={product.name}
+                    onError={(e) => {
+                      e.target.src = "";
+                      e.target.alt = "Image not available";
+                    }}
+                  />
+                  <div>
+                    <p>{product.name}</p>
+                    <span>
+                      {product.offerPrice
+                        ? `₹${product.offerPrice}`
+                        : `₹${product.price}`}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Desktop layout */}
       <div className="desktop-content">
         <div className="nav-logo" onClick={() => navigate("/home")}>
           <h2>ShopiQue</h2>
         </div>
-        {!isOrderPage && (
-          <div className="nav-search-bar" ref={searchRef}>
-            <input
-              type="text"
-              placeholder="Search for products..."
-              className="nav-searchbar"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
+        <div className="nav-search-bar" ref={searchRef}>
+          <input
+            type="text"
+            placeholder="Search for products..."
+            className="nav-searchbar"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
 
-            {searchResults.length > 0 && (
-              <div className="search-results-dropdown">
-                {searchResults.map((product) => (
-                  <div
-                    key={product._id}
-                    className="search-result-item"
-                    onClick={() => handleProductClick(product)}
-                  >
-                    <img
-                      src={product.images?.[0] || ""}
-                      alt={product.name}
-                      onError={(e) => {
-                        e.target.src = "";
-                        e.target.alt = "Image not available";
-                      }}
-                    />
-                    <div>
-                      <p>{product.name}</p>
-                      <span>
-                        {product.offerPrice
-                          ? `₹${product.offerPrice}`
-                          : `₹${product.price}`}
-                      </span>
-                    </div>
+          {searchResults.length > 0 && (
+            <div className="search-results-dropdown">
+              {searchResults.map((product) => (
+                <div
+                  key={product._id}
+                  className="search-result-item"
+                  onClick={() => handleProductClick(product)}
+                >
+                  <img
+                    src={product.images?.[0] || ""}
+                    alt={product.name}
+                    onError={(e) => {
+                      e.target.src = "";
+                      e.target.alt = "Image not available";
+                    }}
+                  />
+                  <div>
+                    <p>{product.name}</p>
+                    <span>
+                      {product.offerPrice
+                        ? `₹${product.offerPrice}`
+                        : `₹${product.price}`}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="nav-actions">
           {!isOrderPage && (
             <button
               className="nav-btns cart-btn"
-              onClick={() => navigate("/cart")}
+              onClick={() =>
+                navigate(`/user/${user?._id || "unauthorized"}/cart`)
+              }
             >
               <i className="fas fa-shopping-cart"></i>
               <span className="btn-text">Cart</span>
@@ -299,7 +310,9 @@ export default function Navbar() {
           {isLoggedIn ? (
             <button
               className="nav-btns profile-btn"
-              onClick={() => navigate("/profilepage")}
+              onClick={() =>
+                navigate(`/user/${user?._id || "unauthorized"}/profile`)
+              }
             >
               <i className="fas fa-user"></i>
               <span>{username?.split(" ")[0] || " "}</span>
@@ -307,7 +320,7 @@ export default function Navbar() {
           ) : (
             <button
               className="nav-btns login-btn"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/auth/login")}
             >
               <i className="fas fa-user"></i>
               <span className="btn-text">Login</span>
