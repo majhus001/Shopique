@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../navbar/Navbar";
+import Navbar from "../../components/navbar/Navbar";
 import { useSelector } from "react-redux";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { FiAlertCircle } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BottomNav from "../Bottom Navbar/BottomNav";
-import "./Cart.css";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
+import "../CartScreen/Cart.css";
 import getCoordinates from "../../utils/Geolocation";
-import AuthRequired from "../Authentication/AuthRequired";
+import AuthRequired from "../../components/Authentication/AuthRequired";
 
 // Helper function to calculate distance between two coordinates (Haversine formula)
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -51,7 +51,8 @@ const Buynow = () => {
         {
           _id: product._id,
           name: product.name,
-          price: product.offerPrice,
+          price: product.price,
+          offerPrice: product.offerPrice,
           brand: product.brand,
           quantity: 1,
           description: product.description,
@@ -76,7 +77,7 @@ const Buynow = () => {
 
   const calculateSubtotal = () => {
     return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + item.offerPrice * item.quantity,
       0
     );
   };
@@ -230,7 +231,7 @@ const Buynow = () => {
                       <h3 className="cart-item-name">{item.name}</h3>
                       <p className="cart-item-brand">{item.brand}</p>
                       <p className="cart-item-price">
-                        ₹{item.price.toLocaleString()}
+                        ₹{item.offerPrice.toLocaleString()}
                       </p>
                       <div className="cart-quantity-controls">
                         <button

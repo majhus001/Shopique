@@ -61,7 +61,7 @@ router.get("/fetch", async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
-      select: "name brand price images description category",
+      select: "name brand price offerPrice images description category subCategory",
     });
 
     if (cart && cart.items.length > 0) {

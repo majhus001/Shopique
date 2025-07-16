@@ -8,7 +8,7 @@ import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import bannerImage from "../../assets/banner1.jpeg";
 import bannerImage1 from "../../assets/banner2.jpeg";
 import bannerImage2 from "../../assets/banner3.jpeg";
-import Navbar from "../navbar/Navbar";
+import Navbar from "../../components/navbar/Navbar";
 import API_BASE_URL from "../../api";
 import {
   FiClock,
@@ -17,7 +17,7 @@ import {
   FiChevronRight,
   FiChevronLeft,
 } from "react-icons/fi";
-import BottomNav from "../Bottom Navbar/BottomNav";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
 
 // Add timeout utility for fetch
 AbortSignal.timeout = function (ms) {

@@ -9,8 +9,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
-import Navbar from "../navbar/Navbar";
-import Sidebar from "../sidebar/Sidebar";
+import Navbar from "../../components/navbar/Navbar";
+import Sidebar from "../../components/sidebar/Sidebar";
 import { FaTimes, FaArrowRight, FaRedo } from "react-icons/fa";
 import { FiLogIn, FiAlertCircle } from "react-icons/fi";
 import {
@@ -20,7 +20,7 @@ import {
   MdCheckCircle,
 } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
-import BottomNav from "../Bottom Navbar/BottomNav";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
 
 const Orderhistory = () => {
   const location = useLocation();

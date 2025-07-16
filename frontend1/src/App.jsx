@@ -3,16 +3,15 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignUp from "./LogSin/SignUp";
 import Login from "./LogSin/Login";
 import Searchproducts from "./screens/searchproducts/Searchproducts";
-import Navbar from "./screens/navbar/Navbar";
 import HomePage from "./screens/Homepage/HomePage";
 import ProductList from "./screens/Productscreens/ProductList";
-import Cart from "./screens/Productscreens/Cart";
-import Orderdetails from "./screens/Order/Orderdetails";
+import Cart from "./screens/CartScreen/Cart";
+import Orderdetails from "./screens/Order/OrderCheckout";
 import ProfilePage from "./screens/profiledetails/ProfilePage";
 import Orderhistory from "./screens/Order/Orderhistory";
-import Buynow from "./screens/Productscreens/Buynow";
+import Buynow from "./screens/BuyNowScreen/Buynow";
 import ScrollToTop from "./ScrollToTop";
-import AuthRequired from "./screens/Authentication/AuthRequired";
+import AuthRequired from "./components/Authentication/AuthRequired";
 import NotFound from "./NotFound/NotFound";
 
 const App = () => {

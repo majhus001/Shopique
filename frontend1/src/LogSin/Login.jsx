@@ -44,9 +44,7 @@ const Login = () => {
           })
         );
         setTimeout(() => {
-          navigate(response.data.role === "Admin" ? "/adhome" : "/home", {
-            state: { user: response.data.user },
-          });
+          navigate("/home");
         }, 1500);
       } else {
         setMessage(response.data.message || "Login failed. Please try again.");

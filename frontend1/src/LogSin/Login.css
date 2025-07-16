@@ -4,7 +4,9 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #fff;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(124, 200, 255, 0.1) 0%, rgba(121, 186, 252, 0.1) 90%),
+    linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
   font-family: 'Inter', sans-serif;
   padding: 20px;
 }

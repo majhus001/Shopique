@@ -74,8 +74,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const initialize = async () => {
-      if (hasCheckedUser.current) return; // prevent double run
-      hasCheckedUser.current = true; // set it immediately
+      if (hasCheckedUser.current) return; 
+      hasCheckedUser.current = true; 
 
       setIsLoading(true);
 

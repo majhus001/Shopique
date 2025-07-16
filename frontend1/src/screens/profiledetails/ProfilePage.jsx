@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "./ProfilePage.css";
-import Navbar from "../navbar/Navbar";
+import Navbar from "../../components/navbar/Navbar";
 import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../../Redux/slices/userSlice";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
-import Sidebar from "../sidebar/Sidebar";
+import Sidebar from "../../components/sidebar/Sidebar";
 import "../../App.css";
 import userimg from "../../assets/users/user.png";
 import {
@@ -24,8 +24,8 @@ import {
 import { IoMdLock } from "react-icons/io";
 import { MdEmail, MdPhone, MdLocationOn, MdPerson } from "react-icons/md";
 import handleLogout from "../../utils/Logout";
-import BottomNav from "../Bottom Navbar/BottomNav";
-import AuthRequired from "../Authentication/AuthRequired";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
+import AuthRequired from "../../components/Authentication/AuthRequired";
 
 const PfSkeletonSidebar = () => (
   <div className="sidebar-cont pf-skeleton">
@@ -246,8 +246,8 @@ const ProfilePage = () => {
       if (response.status === 200) {
         toast.success("Profile updated successfully");
         setIsEditing(false);
-        checkUser();
         const data = response.data.user;
+
         dispatch(
           setUserData({
             _id: data._id,
@@ -275,7 +275,6 @@ const ProfilePage = () => {
       toast.error("Unable to logout");
     }
   };
-
 
   if (error) {
     return (

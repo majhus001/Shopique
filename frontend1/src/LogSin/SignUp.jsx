@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import "./Signup.css";
 import API_BASE_URL from "../api";
+import EmailFunction from "../utils/EmailFunction";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const SignUp = () => {
     password: "",
     mobile: "",
     address: "",
-    image: ""
+    image: "",
   });
 
   const [otp, setOtp] = useState("");
@@ -29,6 +30,10 @@ const SignUp = () => {
 
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
+  };
+
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   const handleSignup = async (e) => {
@@ -48,15 +53,19 @@ const SignUp = () => {
         return;
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/send-verify-otp/`,
-        { email: formData.email }
-      );
+      if (!isValidEmail(formData.email)) {
+        setMessage("Invalid email format");
+      }
+
+      const response = await EmailFunction({
+        path: "signup",
+        email: formData.email,
+      });
 
       if (response.data.success) {
-        setGeneratedOtp(String(response.data.code)); 
+        setGeneratedOtp(String(response.data.code));
         setStep("otp");
-        setMessage("OTP sent successfully! Check your email.");
+        setMessage(response.data.message);
       } else {
         setMessage(response.data.message || "Failed to send OTP.");
       }
@@ -78,10 +87,10 @@ const SignUp = () => {
         await axios.post(`${API_BASE_URL}/api/auth/signup/`, formData);
         setMessage("Account created successfully! Redirecting...");
         await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
-          name: formData.username, 
-          activity: "has created an account"
+          name: formData.username,
+          activity: "has created an account",
         });
-        setTimeout(() => navigate("/login"), 1500);
+        setTimeout(() => navigate("/auth/login"), 1500);
       } catch (error) {
         setMessage(
           error.response?.data?.message || "Failed to complete signup."
@@ -97,17 +106,24 @@ const SignUp = () => {
     <div className="ecom-signup-container">
       <div className="ecom-signup-glass-card">
         <div className="ecom-signup-brand">
-          <h1 className="ecom-signup-logo">SHOP<span>LYST</span></h1>
+          <h1 className="ecom-signup-logo">
+            SHOPI<span>QUE</span>
+          </h1>
           <p className="ecom-signup-tagline">
             {step === "signup" ? "Create Your Account" : "Verify Your Email"}
           </p>
         </div>
 
         {message && (
-          <div className={`ecom-message ${
-            message.includes("success") ? "ecom-message-success" : 
-            message.includes("OTP") ? "ecom-message-info" : "ecom-message-error"
-          }`}>
+          <div
+            className={`ecom-message ${
+              message.includes("success")
+                ? "ecom-message-success"
+                : message.includes("OTP")
+                ? "ecom-message-info"
+                : "ecom-message-error"
+            }`}
+          >
             {message}
           </div>
         )}
@@ -158,7 +174,9 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className={`ecom-signup-button ${isHovered ? "ecom-button-hover" : ""}`}
+              className={`ecom-signup-button ${
+                isHovered ? "ecom-button-hover" : ""
+              }`}
               disabled={isLoading}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
@@ -189,7 +207,9 @@ const SignUp = () => {
 
             <button
               onClick={handleVerifyOtp}
-              className={`ecom-signup-button ${isHovered ? "ecom-button-hover" : ""}`}
+              className={`ecom-signup-button ${
+                isHovered ? "ecom-button-hover" : ""
+              }`}
               disabled={isLoading}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}

@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import Navbar from "../navbar/Navbar";
+import Navbar from "../../components/navbar/Navbar";
 import "./Searchproducts.css";
 import axios from "axios";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import normalizeError from "../../utils/Error/NormalizeError";
-import { useDispatch, useSelector } from "react-redux";
-import ValidUserData from "../../utils/ValidUserData";
+import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,7 +20,7 @@ import {
   FiFilter,
   FiX,
 } from "react-icons/fi";
-import BottomNav from "../Bottom Navbar/BottomNav";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
 
 export default function Searchproducts() {
   const location = useLocation();

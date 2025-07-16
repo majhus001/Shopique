@@ -52,7 +52,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/product/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/reports", reportgen);
-app.use("/api/auth/send-verify-otp", sendVerificationotp);
+app.use("/api/auth/send-otp", sendVerificationotp);
 app.use("/api/user/reactivity", recentActivityRoute);
 app.use("/api/customers", customerRoutes);
 app.use("/api/billing", billingRoutes);

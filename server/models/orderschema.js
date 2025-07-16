@@ -64,6 +64,10 @@ const orderSchema = new mongoose.Schema({
     enum: ["Cash on Delivery", "Online"],
     required: true,
   },
+  deliveryfee: {
+    type: Number,
+    required: true,
+  },
   OrderStatus: {
     type: String,
     enum: ["Pending", "Accepted", "Shipped", "Delivered", "Cancelled"],

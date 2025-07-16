@@ -12,7 +12,7 @@ const handleLogout = async (dispatch) => {
 
     if (response.data.success) {
       dispatch(logoutUser());
-      localStorage.removeItem("userState"); 
+      localStorage.removeItem("shopiqueUser"); 
       return true;
     } else {
       return false;

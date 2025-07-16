@@ -13,32 +13,32 @@ export default function BottomNav() {
 
   const handleNavigation = (path) => {
     setActiveTab(path);
-    if(path === "profile"){
+    if (path === "profile") {
       navigate(`/user/${user?._id || "unauthorized"}/profile`);
-    }else if(path === "cart"){
+    } else if (path === "cart") {
       navigate(`/user/${user?._id || "unauthorized"}/cart`);
-    }else if(path === "myorders"){
+    } else if (path === "myorders") {
       navigate(`/user/${user?._id || "unauthorized"}/myorders`);
-    }else if(path === "home"){
+    } else if (path === "home") {
       navigate(`/home`);
-    }else{
+    } else {
       navigate(`${path}`);
     }
   };
-  
-  useEffect(() => {
-    // Extract the current path from location
-    const path = location.pathname.substring(1); // remove the leading '/'
 
-    // Set active tab based on current path
-    if (path === "home" || path === "") {
-      setActiveTab("home");
-    } else if (path === "myorders") {
-      setActiveTab("myorders");
-    } else if (path === "profilepage") {
-      setActiveTab("profilepage");
-    } else if (path === "cart") {
+  useEffect(() => {
+    const path = location.pathname;
+
+    if (path.includes("/profile")) {
+      setActiveTab("profile");
+    } else if (path.includes("/cart")) {
       setActiveTab("cart");
+    } else if (path.includes("/myorders")) {
+      setActiveTab("myorders");
+    } else if (path === "/" || path.includes("/home")) {
+      setActiveTab("home");
+    } else {
+      setActiveTab(""); // optional default
     }
   }, [location.pathname]);
 
@@ -76,14 +76,12 @@ export default function BottomNav() {
 
       <motion.button
         whileTap={{ scale: 0.9 }}
-        className={`bot-nav-btn ${
-          activeTab === "profilepage" ? "bot-active" : ""
-        }`}
+        className={`bot-nav-btn ${activeTab === "profile" ? "bot-active" : ""}`}
         onClick={() => handleNavigation("profile")}
       >
         <div className="icon-wrapper">
           <FaUser className="nav-icon" />
-          {activeTab === "profilepage" && (
+          {activeTab === "profile" && (
             <motion.span layoutId="indicator" className="active-indicator" />
           )}
         </div>

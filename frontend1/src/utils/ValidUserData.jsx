@@ -14,7 +14,6 @@ const ValidUserData = async (dispatch) => {
     );
 
     if (response.status == 401) {
-        console.log("ggg")
       throw new Error("No valid user found");
     }
     
@@ -25,6 +24,12 @@ const ValidUserData = async (dispatch) => {
         withCredentials: true,
       }
     );
+
+    if(!userRes.data.success){
+      console.log("removing..user...")
+      localStorage.removeItem("shopiqueUser");
+      throw new Error("User logged out");
+    }
 
     if (!userRes.data.data) {
       throw new Error("User data not found");

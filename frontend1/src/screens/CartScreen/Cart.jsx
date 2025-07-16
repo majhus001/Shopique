@@ -6,13 +6,12 @@ import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
-import Navbar from "../navbar/Navbar";
 import API_BASE_URL from "../../api";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
-import ValidUserData from "../../utils/ValidUserData";
 import { motion } from "framer-motion";
-import BottomNav from "../Bottom Navbar/BottomNav";
-import AuthRequired from "../Authentication/AuthRequired";
+import Navbar from "../../components/navbar/Navbar";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
+import AuthRequired from "../../components/Authentication/AuthRequired";
 import "./Cart.css";
 import getCoordinates from "../../utils/Geolocation";
 
@@ -193,7 +192,7 @@ const Cart = () => {
 
   const calculateSubtotal = () => {
     return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + item.offerPrice * item.quantity,
       0
     );
   };
@@ -203,8 +202,7 @@ const Cart = () => {
     return subtotal + deliveryfee;
   };
 
-  const handleShopNow = () =>
-    navigate("/home");
+  const handleShopNow = () => navigate("/home");
 
   const handleCheckOut = () => {
     navigate(`/user/${user._id}/order/checkout`, {
@@ -276,6 +274,10 @@ const Cart = () => {
     }
   };
 
+  const handleProductNavigation = (item) => {
+    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`);
+  };
+
   if (error) {
     return (
       <div className="usprof-container">
@@ -341,13 +343,19 @@ const Cart = () => {
                           e.target.src =
                             "https://via.placeholder.com/150?text=No+Image";
                         }}
+                        onClick={() => handleProductNavigation(item)}
                       />
                     </div>
                     <div className="cart-item-details">
-                      <h3 className="cart-item-name">{item.name}</h3>
+                      <h3
+                        className="cart-item-name"
+                        onClick={() => handleProductNavigation(item)}
+                      >
+                        {item.name}
+                      </h3>
                       <p className="cart-item-brand">{item.brand}</p>
                       <p className="cart-item-price">
-                        ₹{item.price.toLocaleString()}
+                        ₹{item.offerPrice.toLocaleString()}
                       </p>
                       <div className="cart-quantity-controls">
                         <button

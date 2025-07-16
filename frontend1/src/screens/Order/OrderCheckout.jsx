@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import Navbar from "../navbar/Navbar";
+import Navbar from "../../components/navbar/Navbar";
 import axios from "axios";
-import BottomNav from "../Bottom Navbar/BottomNav";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
-import "./Orderdetails.css";
+import "./OrderCheckout.css";
 import API_BASE_URL from "../../api";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
+import EmailFunction from "../../utils/EmailFunction";
 
 const OrderDetailsSkeleton = () => {
   return (
@@ -135,8 +136,6 @@ const Orderdetails = () => {
     cartItems = [],
     totalPrice = 0,
     deliveryfee = 0,
-    platformFee = 0,
-    discount = 0,
     statePincode = "",
     path,
   } = location.state || {};
@@ -254,9 +253,10 @@ const Orderdetails = () => {
       const orderData = {
         userId: user._id,
         cartItems,
-        totalPrice: totalPrice + deliveryfee + platformFee - discount,
+        totalPrice: totalPrice + deliveryfee,
         mobileNumber,
         pincode,
+        deliveryfee,
         deliveryAddress,
         paymentMethod,
       };
@@ -267,13 +267,19 @@ const Orderdetails = () => {
       ]);
 
       if (orderResponse.data.success) {
+        await EmailFunction({
+          path: "orderplaced",
+          email: user.email,
+          data: orderData,
+          orderId: orderResponse.data.orderId
+        });
         await axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
           name: user.username,
           activity: "has Placed an order",
         });
         toast.success("Order Placed Successfully!");
         setTimeout(() => {
-          navigate(`/user/${user._id}/myorders`,{ replace: true });
+          navigate(`/user/${user._id}/myorders`, { replace: true });
         }, 3000);
       } else {
         throw new Error(orderResponse.data.message || "Failed to place order");
@@ -290,8 +296,6 @@ const Orderdetails = () => {
     cartItems,
     totalPrice,
     deliveryfee,
-    platformFee,
-    discount,
     mobileNumber,
     pincode,
     deliveryAddress,
@@ -373,7 +377,7 @@ const Orderdetails = () => {
                 <h4>
                   1. User Login <span className="ord-crossmark">✗</span>
                 </h4>
-                <Link to="/login" state={{ from: location }}>
+                <Link to="/auth/login" state={{ from: location }}>
                   <button className="ord-login-btn">Login to Continue</button>
                 </Link>
               </div>
@@ -493,8 +497,8 @@ const Orderdetails = () => {
                   >
                     <span className="ord-product-name">{item.name}</span>
                     <span className="ord-product-price">
-                      {item.quantity} × ₹{item.price} = ₹
-                      {item.quantity * item.price}
+                      {item.quantity} × ₹{item.offerPrice} = ₹
+                      {item.quantity * item.offerPrice}
                     </span>
                   </div>
                 </li>
@@ -504,26 +508,22 @@ const Orderdetails = () => {
 
           <div className="ord-price-breakdown">
             <h4>Price Breakdown</h4>
+
             <div className="ord-price-row">
               <span>Subtotal:</span>
               <span>₹{totalPrice.toFixed(2)}</span>
             </div>
-            {discount > 0 && (
+            {/* {discount > 0 && (
               <div className="ord-price-row">
                 <span>Discount:</span>
                 <span>-₹{discount.toFixed(2)}</span>
               </div>
-            )}
+            )} */}
             <div className="ord-price-row">
               <span>Delivery Fee:</span>
               <span>₹{deliveryfee.toFixed(2)}</span>
             </div>
-            {platformFee > 0 && (
-              <div className="ord-price-row">
-                <span>Platform Fee:</span>
-                <span>₹{platformFee.toFixed(2)}</span>
-              </div>
-            )}
+            
           </div>
 
           <div className="ord-total-section">
@@ -531,7 +531,7 @@ const Orderdetails = () => {
               <span>Total Amount:</span>
               <span>
                 ₹
-                {(totalPrice + deliveryfee + platformFee - discount).toFixed(2)}
+                {(totalPrice + deliveryfee ).toFixed(2)}
               </span>
             </div>
 

@@ -11,10 +11,12 @@ router.post("/add", async (req, res) => {
     totalPrice,
     mobileNumber,
     pincode,
+    deliveryfee,
     deliveryAddress,
     paymentMethod,
   } = req.body;
 
+  console.log(deliveryfee)
   if (
     !userId ||
     !cartItems ||
@@ -23,6 +25,7 @@ router.post("/add", async (req, res) => {
     !totalPrice ||
     !mobileNumber ||
     !pincode ||
+    !deliveryfee ||
     !deliveryAddress ||
     !paymentMethod
   ) {
@@ -70,6 +73,7 @@ router.post("/add", async (req, res) => {
       totalPrice,
       mobileNumber,
       pincode,
+      deliveryfee,
       deliveryAddress,
       paymentMethod,
     });

@@ -128,6 +128,9 @@ router.post("/login", async (req, res) => {
     console.log("Login success");
     const role = user.email === AdminEmail ? "Admin" : "User";
 
+    user.lastLogin = new Date();
+    await user.save();
+
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -153,6 +156,48 @@ router.post("/login", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "An error occurred. Please try again.",
+    });
+  }
+});
+
+router.post("/login/check/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    const user = await User.findById(userId); // FIX: findById is case-sensitive
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const lastLogin = user.lastLogin;
+    const today = new Date();
+
+    const diffInMs = today - lastLogin;
+
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays > 5) {
+      return res.status(200).json({
+        success: false,
+        message: `Login denied. Last login was ${diffInDays} days ago.`,
+        daysSinceLastLogin: diffInDays,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Login allowed. Last login was ${diffInDays} days ago.`,
+      daysSinceLastLogin: diffInDays,
+    });
+  } catch (error) {
+    console.error("Error during last login check:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error occurred",
     });
   }
 });
@@ -319,6 +364,23 @@ router.get("/fetch/:userId", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const lastLogin = user.lastLogin;
+    const today = new Date();
+
+    const diffInMs = today - lastLogin;
+
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    console.log(`User last logged in ${diffInDays} days ago.`);
+
+    if (diffInDays > 5) {
+      return res.status(200).json({
+        success: false,
+        message: `Login denied. Last login was ${diffInDays} days ago.`,
+        daysSinceLastLogin: diffInDays,
+      });
+    }
+
     const userData = {
       _id: user._id,
       username: user.username,
@@ -362,7 +424,6 @@ router.get("/profile/:userId", async (req, res) => {
       message: "User fetched successfully",
       user: userData,
     });
-
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Server error", error });

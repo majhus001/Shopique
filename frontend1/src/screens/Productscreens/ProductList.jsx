@@ -16,15 +16,14 @@ import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch, useSelector } from "react-redux";
-import ValidUserData from "../../utils/ValidUserData";
+import { useSelector } from "react-redux";
 import { RiFlashlightFill } from "react-icons/ri";
 import { IoIosArrowForward } from "react-icons/io";
-import Navbar from "../navbar/Navbar";
+import Navbar from "../../components/navbar/Navbar";
+import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/Geolocation";
 import "./ProductList.css";
-import BottomNav from "../Bottom Navbar/BottomNav";
 
 const useScreenSize = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
