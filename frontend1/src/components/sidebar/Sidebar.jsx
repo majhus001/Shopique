@@ -8,12 +8,11 @@ import handleLogout from "../../utils/Logout";
 import userimg from "../../assets/users/user.png";
 import {
   FaUser,
-  FaHeart,
+  FaMoneyCheck,
   FaBox,
-  FaCog,
   FaSignOutAlt,
   FaSignInAlt,
-  FaTimes,
+  FaShoppingCart,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -35,6 +34,8 @@ const Sidebar = () => {
       navigate(`/user/${user?._id || "unauthorized"}/profile`);
     } else if (path === "myorders") {
       navigate(`/user/${user?._id || "unauthorized"}/myorders`);
+    } else if (path === "cart") {
+      navigate(`/user/${user?._id || "unauthorized"}/cart`);
     } else {
       navigate(`${path}`);
     }
@@ -100,10 +101,10 @@ const Sidebar = () => {
               </button>
               <button
                 className="sidebar-btn"
-                onClick={() => handleNavigation("wishlist")}
+                onClick={() => handleNavigation("cart")}
               >
-                <FaHeart />
-                <span>Wishlist</span>
+                <FaShoppingCart />
+                <span>Cart</span>
               </button>
               <button
                 className="sidebar-btn"
@@ -116,8 +117,8 @@ const Sidebar = () => {
                 className="sidebar-btn"
                 onClick={() => handleNavigation("settings")}
               >
-                <FaCog />
-                <span>Settings</span>
+                <FaMoneyCheck />
+                <span>Payments</span>
               </button>
               <button
                 className="sidebar-btn sidebar-logout"

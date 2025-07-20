@@ -164,6 +164,7 @@ const Login = () => {
         {(step === "forgetpwd" || step === "otp" || step === "resetpwd") && (
           <div className="forgetpwd-back-btn" onClick={() => {
             setMessage("")
+            setOtp("")
             setStep("login")}}>
             <FiChevronLeft size={20} />
             <span>back</span>
