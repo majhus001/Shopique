@@ -233,7 +233,6 @@ const SignUp = () => {
                 text="signin_with"
                 width="310"
                 height="100"
-                locale="ta"
               />
             </div>
           </div>

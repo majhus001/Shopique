@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import API_BASE_URL from "../api";
+import API_BASE_URL  from "../api";
 import { FiChevronLeft } from "react-icons/fi";
 import "./Login.css";
 import handleGoogleLogin from "../utils/GoogleLogin/GoogleLogin";
@@ -263,7 +263,6 @@ const Login = () => {
                 text="signin_with"
                 width="310"
                 height="100"
-                locale="ta"
               />
             </div>
 
