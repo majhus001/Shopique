@@ -7,6 +7,8 @@ const User = require("./models/userschema");
 const Employee = require("./models/EmployeeSchema");
 const jwt = require("jsonwebtoken");
 const AdminEmail = require("./Admin/AdminEmail");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); 
 
 const router = express.Router();
 
@@ -624,5 +626,58 @@ router.get("/users/details", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+router.post("/google-login", async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    // Verify the token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload.email;
+    const username = payload.name;
+    const picture = payload.picture;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        username,
+        email,
+        image: picture,
+        password: "google-oauth", 
+        pincode: "",
+      });
+      await user.save();
+      console.log("✅ Google Signup success");
+    }
+    
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      image: user.image,
+      pincode: user.pincode,
+    };
+    
+    console.log("llll");
+    res.status(200).json({
+      success: true,
+      message: "Login successful!",
+      user: userData,
+      role: "user", 
+    });
+  } catch (error) {
+    console.error("❌ Google Login Error:", error);
+    res.status(500).json({ success: false, message: "Google login failed." });
+  }
+});
+
+
 
 module.exports = router;

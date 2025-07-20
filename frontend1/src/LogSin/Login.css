@@ -31,7 +31,11 @@
     0 12px 40px rgba(31, 38, 135, 0.15),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
-
+.forgetpwd-back-btn{
+  cursor:default;
+  display: flex;
+  align-items: center;
+}
 /* ===== Branding ===== */
 .ecom-login-brand {
   text-align: center;
@@ -209,6 +213,9 @@
   text-align: center;
   margin-top: 30px;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .ecom-footer-text {
@@ -222,17 +229,20 @@
   text-decoration: none;
   transition: all 0.2s ease;
   position: relative;
+  padding: 0;
+  width: fit-content;
 }
 
 .ecom-footer-link:hover {
   color: #805ad5;
+  cursor: pointer;
 }
 
 .ecom-footer-link::after {
   content: '';
   position: absolute;
   bottom: -2px;
-  left: 0;
+  left: 10;
   width: 0;
   height: 1px;
   background: #6b46c1;
@@ -242,7 +252,31 @@
 .ecom-footer-link:hover::after {
   width: 100%;
 }
+/* Google Login Styles */
+.ecom-login-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
 
+.ecom-divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: rgba(90, 89, 89, 0.3);
+}
+
+.ecom-divider-text {
+  padding: 0 10px;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+}
+
+.ecom-google-login {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 20px;
+}
 /* ===== Responsive Design ===== */
 @media (max-width: 480px) {
   .ecom-login-glass-card {

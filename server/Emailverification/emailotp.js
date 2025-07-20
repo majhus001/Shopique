@@ -136,7 +136,6 @@ router.post("/signup", async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "OTP sent successfully! Check your email.",
-      code: verificationCode,
     });
   } catch (error) {
     console.error(
@@ -147,6 +146,51 @@ router.post("/signup", async (req, res) => {
       .status(500)
       .json({ success: false, message: "Failed to send OTP. Try again." });
   }
+});
+
+router.get("/verify-otp/:otp", (req, res) => {
+  const { otp } = req.params;
+  const { email } = req.query;
+
+  if (!email || !otp) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing email or OTP",
+    });
+  }
+
+  const stored = verificationCodes[email];
+
+  if (!stored) {
+    return res.status(404).json({
+      success: false,
+      message: "No verification request found for this email",
+    });
+  }
+
+  const currentTime = Date.now();
+
+  if (currentTime > stored.expiresAt) {
+    delete verificationCodes[email];
+    return res.status(400).json({
+      success: false,
+      message: "OTP has expired. Please request a new one.",
+    });
+  }
+
+  if (parseInt(otp) !== stored.code) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid OTP. Please try again.",
+    });
+  }
+
+  delete verificationCodes[email];
+
+  return res.status(200).json({
+    success: true,
+    message: "OTP verified successfully",
+  });
 });
 
 const generateOrderEmailHTML = (username, data, orderId) => {
@@ -326,6 +370,219 @@ router.post("/orderplaced", async (req, res) => {
       .status(500)
       .json({ success: false, message: "Could not send confirmation email." });
   }
+});
+
+const generateForgetPasswordEmailHTML = (verificationCode) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Password Reset - Shopique</title>
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .header {
+          text-align: center;
+          padding: 20px 0;
+          background-color: #f8f9fa;
+          border-radius: 8px 8px 0 0;
+        }
+        .logo {
+          font-size: 24px;
+          font-weight: bold;
+          color: #4a00e0;
+        }
+        .content {
+          padding: 30px;
+          background-color: #fff;
+          border-radius: 0 0 8px 8px;
+          border: 1px solid #e9ecef;
+        }
+        .otp-container {
+          margin: 25px 0;
+          text-align: center;
+        }
+        .otp-code {
+          display: inline-block;
+          padding: 15px 30px;
+          font-size: 24px;
+          font-weight: bold;
+          letter-spacing: 3px;
+          color: #4a00e0;
+          background-color: #f8f9fa;
+          border-radius: 5px;
+          border: 1px dashed #4a00e0;
+        }
+        .footer {
+          margin-top: 30px;
+          font-size: 12px;
+          text-align: center;
+          color: #6c757d;
+        }
+        .button {
+          display: inline-block;
+          padding: 12px 24px;
+          background-color: #4a00e0;
+          color: white !important;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+          margin-top: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="logo">SHOPIQUE</div>
+      </div>
+      <div class="content">
+        <h2>Password Reset Request</h2>
+        <p>We received a request to reset your password. Use the following OTP to proceed:</p>
+        
+        <div class="otp-container">
+          <div class="otp-code">${verificationCode}</div>
+        </div>
+        
+        <p>This code is valid for 10 minutes. If you didn't request this, please ignore this email.</p>
+        
+        <p>Need help? <a href="mailto:support@shopique.com">Contact our support team</a></p>
+        
+        <p>Thanks,<br>The Shopique Team</p>
+      </div>
+      <div class="footer">
+        © ${new Date().getFullYear()} Shopique. All rights reserved.
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+module.exports = { generateForgetPasswordEmailHTML };
+
+router.post("/forget-pwd", async (req, res) => {
+  const { email } = req.body;
+
+  const existingUser = await User.findOne({email});
+
+  if (!existingUser) {
+    return res.status(200).json({
+      success: true,
+      type: 100,
+      message: "Looks like u have not created an Account",
+    });
+  }
+
+  const verificationCode = Math.floor(100000 + Math.random() * 900000);
+
+  const msg = {
+    to: email,
+    from: {
+      email: "majidsmart7@gmail.com",
+      name: "Shopique",
+    },
+    subject: "✅ Shopique - Password Reset Confirmation",
+    html: generateForgetPasswordEmailHTML(verificationCode),
+  };
+
+  try {
+    await sgMail.send(msg);
+
+    verificationCodes[email] = {
+      code: verificationCode,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+
+    console.log(`✅ OTP sent to ${email}: ${verificationCode}`);
+    return res.status(200).json({
+      success: true,
+      type: 200,
+      message: "OTP sent successfully! Check your email.",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Could not send Verification email." });
+  
+  }
+});
+
+router.post("/verify-otp", async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and OTP code are required",
+    });
+  }
+
+  const storedCode = verificationCodes[email];
+
+  if (!storedCode) {
+    return res.status(400).json({
+      success: false,
+      message: "OTP not found or expired. Please request a new one.",
+    });
+  }
+
+  if (Date.now() > storedCode.expiresAt) {
+    delete verificationCodes[email];
+    return res.status(400).json({
+      success: false,
+      message: "OTP expired. Please request a new one.",
+    });
+  }
+
+  if (parseInt(code) !== storedCode.code) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid OTP code. Please try again.",
+    });
+  }
+
+  delete verificationCodes[email];
+
+  console.log("Otp verified....")
+  return res.status(200).json({
+    success: true,
+    message: "OTP verified successfully",
+  });
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and Password are required",
+    });
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: "User not found",
+  });
+  }
+  user.password = newPassword;
+  await user.save();
+
+
+  console.log("Password reseted successfully..")
+  return res.status(200).json({
+    success: true,
+    message: "Password Reset successfully",
+  });
 });
 
 module.exports = router;
