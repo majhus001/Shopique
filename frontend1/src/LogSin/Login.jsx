@@ -111,7 +111,7 @@ const Login = () => {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setMessage("Verifying OTP...");
+    setMessage("Verifying OTP....");
     try {
       const res = await axios.get(
         `${API_BASE_URL}/api/auth/send-otp/verify-otp/${otp}?email=${formData.email}`
