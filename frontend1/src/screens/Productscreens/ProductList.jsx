@@ -202,7 +202,8 @@ const ProductList = () => {
   const [relatedProds, setRelatedProds] = useState({});
   const [loading, setLoading] = useState(true);
   const [pincodeload, setPincodeLoad] = useState(false);
-  const [pincode, setPincode] = useState("");
+  const [pincode, setPincode] = useState(user?.pincode || "");
+  const [isPincodeFocused, setIsPincodeFocused] = useState(false);
   const [expectedDelivery, setExpectedDelivery] = useState("");
   const [expectedDeliverydist, setExpectedDeliverydist] = useState("");
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
@@ -450,6 +451,7 @@ const ProductList = () => {
   };
 
   const handleCheckDelivery = async () => {
+    
     if (pincode.length !== 6) {
       setExpectedDelivery("Please enter a valid 6-digit pincode.");
       return;
@@ -510,7 +512,7 @@ const ProductList = () => {
   if (loading) {
     return (
       <div className="product-page-container">
-        <Navbar  />
+        <Navbar />
         <div className="product-main-content">
           <div className="product-section">
             <SkeletonImageGallery />
@@ -723,10 +725,15 @@ const ProductList = () => {
                     <FaMapMarkerAlt className="input-icon" />
                     <input
                       type="text"
-                      placeholder="Enter Delivery Pincode"
+                      placeholder={!pincode ? "Enter Delivery Pincode" : ""} 
                       maxLength="6"
                       value={pincode}
                       onChange={(e) => setPincode(e.target.value)}
+                      onFocus={() => setIsPincodeFocused(true)}
+                      onBlur={() => setIsPincodeFocused(false)}
+                      className={
+                        !isPincodeFocused && !pincode ? "faded-input" :  "normal-input"
+                      }
                     />
                   </div>
                   <button
@@ -1000,9 +1007,12 @@ const ProductList = () => {
                     className="pl-product-card-horizontal"
                     key={item._id}
                     onClick={() =>
-                      navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
-                        state: { product: item },
-                      })
+                      navigate(
+                        `/products/${item.category}/${item.subCategory}/${item._id}`,
+                        {
+                          state: { product: item },
+                        }
+                      )
                     }
                   >
                     <div className="pl-product-image-container">

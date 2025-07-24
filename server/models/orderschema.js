@@ -61,8 +61,11 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Cash on Delivery", "Online"],
+    enum: ["Cash on Delivery", "Online Payment"],
     required: true,
+  },
+  paymentId: {
+    type: String,
   },
   deliveryfee: {
     type: Number,
@@ -70,7 +73,7 @@ const orderSchema = new mongoose.Schema({
   },
   OrderStatus: {
     type: String,
-    enum: ["Pending", "Accepted", "Shipped", "Delivered", "Cancelled"],
+    enum: ["Pending", "Accepted", "Completed", "Delivered", "Cancelled"],
     default: "Pending",
   },
   createdAt: {

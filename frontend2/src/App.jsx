@@ -29,6 +29,7 @@ import ScrollToTop from "./ScrollToTop";
 import EmployeeHistory from "./Admin/Employees/EmployeeHistory";
 import ViewProductsDetails from "./Admin/homepage/ProductDetails/ViewProductsDetails";
 import ViewDailySales from "./Admin/homepage/Dailysales/ViewDailySales";
+import AddCategoryList from "./Admin/AdminProducts/AddCategoryList";
 const App = () => {
   return (
     <Router>
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="/userman" element={<UserManagement />} />
         <Route path="/aduserhis" element={<Userhistory />} />
         <Route path="/adprodlist" element={<AdproductsList />} />
+        <Route path="/addcategorylist" element={<AddCategoryList />} />
         <Route path="/recentactivity" element={<RecentActivity />} />
         <Route path="/generateuserreport" element={<GenerateUserReport />} />
         <Route path="/reports" element={<Reports />} />

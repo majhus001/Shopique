@@ -24,10 +24,10 @@ const AddProducts = () => {
     images: [""],
     category: "",
     subCategory: "",
+    displayName: "",
     description: "",
     stock: "",
     rating: "",
-    deliveryTime: "",
     offerPrice: "",
     isFeatured: false,
     tags: [""],
@@ -50,6 +50,7 @@ const AddProducts = () => {
   ]);
   const [products, setProducts] = useState([{ key: "", value: "" }]);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [tagInput, setTagInput] = useState("");
   const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -174,16 +175,17 @@ const AddProducts = () => {
       images: selectedProduct.images || [""],
       category: selectedProduct.category || "",
       subCategory: selectedProduct.subCategory || "",
+      displayName: selectedProduct.displayName || "",
       description: selectedProduct.description || "",
       stock: selectedProduct.stock || "",
       rating: selectedProduct.rating || "",
-      deliveryTime: selectedProduct.deliveryTime || "",
       offerPrice: selectedProduct.offerPrice || "",
       isFeatured: selectedProduct.isFeatured || false,
       tags: selectedProduct.tags || [""],
       specifications: selectedProduct.specifications || {},
     };
 
+    setTagInput(selectedProduct.tags || " ")
     setProduct(productData);
     setCurrentProductId(selectedProduct._id);
     setIsEditMode(true);
@@ -214,10 +216,10 @@ const AddProducts = () => {
       images: [""],
       category: "",
       subCategory: "",
+      displayName: "",
       description: "",
       stock: "",
       rating: "",
-      deliveryTime: "",
       offerPrice: "",
       isFeatured: false,
       tags: [""],
@@ -412,10 +414,13 @@ const AddProducts = () => {
   };
 
   const handleTagsChange = (e) => {
-    const tagsArray = e.target.value
+    const value = e.target.value;
+    setTagInput(value);
+    const tagsArray = value
       .split(",")
       .map((tag) => tag.trim())
-      .filter((tag) => tag);
+      .filter((tag) => tag.length > 0);
+
     setProduct({ ...product, tags: tagsArray });
   };
 
@@ -518,13 +523,15 @@ const AddProducts = () => {
       });
 
       if (response.data.success) {
-        const sellerRes = await axios.put(
-          `${API_BASE_URL}/api/sellers/update`,
-          {
-            sellerId,
-            products,
-          }
-        );
+        if (method == "post") {
+          const sellerRes = await axios.put(
+            `${API_BASE_URL}/api/sellers/update`,
+            {
+              sellerId,
+              products,
+            }
+          );
+        }
         setMessage({
           text: `Product ${isEditMode ? "updated" : "added"} successfully!`,
           type: "success",
@@ -597,7 +604,7 @@ const AddProducts = () => {
                     onChange={
                       activeTab === "product" ? handleSearch : undefined
                     }
-                    className="search-input"
+                    className="ad-prod-search-input"
                   />
 
                   {showSuggestions && searchResults.length > 0 && (
@@ -780,6 +787,17 @@ const AddProducts = () => {
                   </div>
 
                   <div className="form-group">
+                    <label htmlFor="subCategory">DisplayName</label>
+                    <input
+                      id="displayName"
+                      name="displayName"
+                      value={product.displayName}
+                      onChange={handleChange}
+                      placeholder="DisplayName"
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label htmlFor="stock">Stock</label>
                     <input
                       id="stock"
@@ -809,17 +827,6 @@ const AddProducts = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="deliveryTime">Delivery Time</label>
-                    <input
-                      id="deliveryTime"
-                      name="deliveryTime"
-                      value={product.deliveryTime}
-                      onChange={handleChange}
-                      placeholder="e.g. 2-3 days"
-                    />
-                  </div>
-
-                  <div className="form-group">
                     <label htmlFor="offerPrice">Offer Price</label>
                     <input
                       id="offerPrice"
@@ -838,7 +845,7 @@ const AddProducts = () => {
                     <input
                       id="tags"
                       name="tags"
-                      value={product.tags.join(",")}
+                      value={tagInput}
                       onChange={handleTagsChange}
                       placeholder="e.g. bestseller, eco-friendly"
                     />

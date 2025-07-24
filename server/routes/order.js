@@ -14,9 +14,10 @@ router.post("/add", async (req, res) => {
     deliveryfee,
     deliveryAddress,
     paymentMethod,
+    paymentId
   } = req.body;
 
-  console.log(deliveryfee)
+
   if (
     !userId ||
     !cartItems ||
@@ -27,7 +28,8 @@ router.post("/add", async (req, res) => {
     !pincode ||
     !deliveryfee ||
     !deliveryAddress ||
-    !paymentMethod
+    !paymentMethod ||
+    !paymentId 
   ) {
     return res.status(400).json({ message: "All fields are required." });
   }
@@ -58,7 +60,7 @@ router.post("/add", async (req, res) => {
       formattedItems.push({
         productId: item._id,
         name: item.name,
-        price: item.price,
+        price: item.offerPrice,
         brand: item.brand,
         quantity: item.quantity,
         description: item.description,
@@ -76,6 +78,7 @@ router.post("/add", async (req, res) => {
       deliveryfee,
       deliveryAddress,
       paymentMethod,
+      paymentId
     });
 
     await newOrder.save();

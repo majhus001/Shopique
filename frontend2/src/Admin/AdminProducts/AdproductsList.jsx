@@ -340,8 +340,14 @@ const AdproductsList = () => {
     }));
   };
 
+  const handleaddcatlistnav = () => {
+    try {
+      navigate("/addcategorylist", { state: { user, orders } });
+    } catch (error) {
+      console.error("Navigation error:", error);
+    }
+  };
   const handleaddprodnav = () => {
-    console.log("Navigating to AddProducts page");
     try {
       navigate("/addproducts", { state: { user, orders } });
     } catch (error) {
@@ -378,6 +384,17 @@ const AdproductsList = () => {
               <p className="subtitle">Manage and monitor Inventory Products</p>
             </div>
             <div className="admin-info">
+              <button
+                className="ad-add-product-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleaddcatlistnav();
+                }}
+              >
+                <i className="fas fa-plus-circle"></i>
+                <span>Add New Categories</span>
+              </button>
               <button
                 className="ad-add-product-btn"
                 onClick={(e) => {

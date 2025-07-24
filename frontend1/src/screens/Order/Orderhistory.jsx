@@ -359,6 +359,10 @@ const Orderhistory = () => {
                                   <span>Delivery to:</span>
                                   <strong>{order.deliveryAddress}</strong>
                                 </div>
+                                <div className="delivery-info">
+                                  <span>Delivery fee:</span>
+                                  <strong>{order.deliveryfee}</strong>
+                                </div>
                                 <div className="payment-info">
                                   <span>Payment:</span>
                                   <strong>{order.paymentMethod}</strong>

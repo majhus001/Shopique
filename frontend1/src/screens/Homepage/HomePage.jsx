@@ -142,7 +142,7 @@ const HomePage = () => {
 
       const response = await fetch(
         `${API_BASE_URL}/api/products/fetchByCategories`,
-        { signal: AbortSignal.timeout(8000) } // 8 second timeout
+        { signal: AbortSignal.timeout(8000) }
       );
 
       if (!response.ok) {
@@ -160,6 +160,7 @@ const HomePage = () => {
         subCategory:
           category.subCategory || capitalizeWords(category.subCategory || ""),
       }));
+
       setProductsByCategory(processedData);
     } catch (err) {
       console.error("Error fetching data:", err);

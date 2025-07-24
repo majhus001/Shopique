@@ -10,6 +10,7 @@ const productSchema = new mongoose.Schema(
     images: [{ type: String }],                          
     category: { type: String, required: true },          
     subCategory: { type: String },                      
+    displayName: { type: String },                      
 
     description: { type: String, required: true },
     stock: { type: Number, required: true, set: v => Number(v) },

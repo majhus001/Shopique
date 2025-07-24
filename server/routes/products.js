@@ -27,6 +27,7 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       brand,
       category,
       subCategory,
+      displayName,
       description,
       stock,
       rating,
@@ -38,13 +39,13 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       sellerId,
     } = req.body;
 
-    // Create product data object with proper type conversion
     const productData = {
       name,
       price: Number(price),
       brand,
       category,
       subCategory,
+      displayName,
       description,
       stock: Number(stock),
       rating: rating ? Number(rating) : 0,
@@ -127,7 +128,6 @@ router.get("/fetchAll", async (req, res) => {
 
 router.get("/fetchByCategories", async (req, res) => {
   try {
-    // Get active categories sorted by priority
     const categories = await Category.find({ isActive: true })
       .sort({ priority: -1 })
       .lean();
@@ -136,30 +136,30 @@ router.get("/fetchByCategories", async (req, res) => {
       categories.map(async (category) => {
         const products = await product
           .find({
-            subCategory: category.name,
+            _id: { $in: category.featuredProducts },
           })
           .sort({
             rating: -1,
             salesCount: -1,
             createdAt: -1,
           })
-          .limit(10)
           .select(
             "_id name price offerPrice images category subCategory rating salesCount brand description stock deliveryTime"
           )
           .lean();
 
         return {
-          subCategory: category.name,
+          _id: category._id,
+          subCategory: category.subCategory,
           displayName: category.displayName,
           products,
         };
       })
     );
 
-    // Filter out empty categories
+    // Filter out categories with no products
     const filteredCategories = categoriesWithProducts.filter(
-      (category) => category.products.length > 0
+      (category) => category.products && category.products.length > 0
     );
 
     res.status(200).json({
@@ -171,6 +171,7 @@ router.get("/fetchByCategories", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to fetch products",
+      details: error.message,
     });
   }
 });
@@ -188,7 +189,7 @@ router.get("/fetch/:id", async (req, res) => {
 
     const subcat = productItem.subCategory;
     let finalsubcatprods = [];
-    
+
     const subCatProducts = await product.find({ subCategory: subcat });
     if (subCatProducts.length > 0) {
       finalsubcatprods = subCatProducts.filter(
@@ -367,53 +368,6 @@ router.get("/paginated", async (req, res) => {
   }
 });
 
-// router.get("/fetchbycategory/:category", async (req, res) => {
-//   try {
-//     const { category } = req.params;
-//     const products = await product.find({ category: category });
-//     if (!products) {
-//       return res.status(404).json({
-//         success: false,
-//         error: "Product not found",
-//       });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: products,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching product:", error);
-//     res.status(500).json({
-//       success: false,
-//       error: "Failed to fetch product",
-//     });
-//   }
-// });
-
-// router.get("/fetchbysubCategory/:productSubCategory", async (req, res) => {
-//   try {
-//     const { productSubCategory } = req.params;
-//     const products = await product.find({ subCategory: productSubCategory });
-//     if (!products) {
-//       return res.status(404).json({
-//         success: false,
-//         error: "Product not found",
-//       });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: products,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching product:", error);
-//     res.status(500).json({
-//       success: false,
-//       error: "Failed to fetch product",
-//     });
-//   }
-// });
 
 // Update product
 router.put("/update/:id", upload.array("images", 5), async (req, res) => {
@@ -425,6 +379,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
       brand,
       category,
       subCategory,
+      displayName,
       description,
       stock,
       rating,
@@ -451,6 +406,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
       brand,
       category,
       subCategory,
+      displayName,
       description,
       stock: Number(stock),
       rating: rating ? Number(rating) : 0,
@@ -494,6 +450,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
 
         // Add new image URLs to update data
         updateData.images = imageUrls;
+        
         console.log(
           `Successfully uploaded ${imageUrls.length} new images for product ${id}`
         );
@@ -568,13 +525,13 @@ router.get("/search", async (req, res) => {
         error: "Search query is required",
       });
     }
-
     const products = await product.find({
       $or: [
         { name: { $regex: query, $options: "i" } },
         { brand: { $regex: query, $options: "i" } },
         { category: { $regex: query, $options: "i" } },
         { subCategory: { $regex: query, $options: "i" } },
+        { displayName: { $regex: query, $options: "i" } },
         { tags: { $in: [new RegExp(query, "i")] } },
       ],
     });

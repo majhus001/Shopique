@@ -1,0 +1,414 @@
+/* Add Category List Styles */
+.ad-catlist-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
+.ad-catlist-title {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 2px solid #f1f3f5;
+  padding-bottom: 1rem;
+}
+
+.ad-catlist-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.ad-catlist-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ad-catlist-label {
+  font-size: 0.95rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.ad-catlist-input {
+  padding: 0.8rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.ad-catlist-input:focus {
+  border-color: #4dabf7;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.15);
+}
+
+.ad-catlist-input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.ad-catlist-checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ad-catlist-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #4dabf7;
+  cursor: pointer;
+}
+
+.ad-catlist-checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.ad-catlist-product-search {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+}
+
+.ad-catlist-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+}
+
+.ad-catlist-close-results {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+}
+
+.ad-catlist-close-results:hover {
+  color: #333;
+}
+
+.ad-catlist-search-input {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.ad-catlist-search-btn {
+  padding: 0 1.5rem;
+  background-color: #4dabf7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.ad-catlist-search-btn:hover:not(:disabled) {
+  background-color: #339af0;
+}
+
+.ad-catlist-search-btn:disabled {
+  background-color: #a5d8ff;
+  cursor: not-allowed;
+}
+
+.ad-catlist-search-results {
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ad-catlist-search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.ad-catlist-search-item:hover {
+  background-color: #f8f9fa;
+}
+
+.ad-catlist-search-item:last-child {
+  border-bottom: none;
+}
+
+.ad-catlist-add-btn {
+  padding: 0.3rem 1rem;
+  background-color: #40c057;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.ad-catlist-add-btn:hover:not(:disabled) {
+  background-color: #37b24d;
+}
+
+.ad-catlist-add-btn:disabled {
+  background-color: #b2f2bb;
+  cursor: not-allowed;
+}
+
+.ad-catlist-selected-products {
+  margin-top: 1.5rem;
+}
+
+.ad-catlist-selected-title {
+  font-size: 1rem;
+  color: #495057;
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+}
+
+.ad-catlist-product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ad-catlist-product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ad-catlist-product-item:last-child {
+  border-bottom: none;
+}
+
+.ad-catlist-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ad-catlist-product-name {
+  font-weight: 500;
+}
+
+.ad-catlist-product-price {
+  font-size: 0.85rem;
+  color: #868e96;
+}
+
+.ad-catlist-remove-btn {
+  background: none;
+  border: none;
+  color: #fa5252;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.ad-catlist-remove-btn:hover:not(:disabled) {
+  color: #f03e3e;
+}
+
+.ad-catlist-remove-btn:disabled {
+  color: #ffc9c9;
+  cursor: not-allowed;
+}
+
+.ad-catlist-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f3f5;
+}
+
+.ad-catlist-cancel-btn {
+  padding: 0.8rem 1.8rem;
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.ad-catlist-cancel-btn:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.ad-catlist-cancel-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ad-catlist-submit-btn {
+  padding: 0.8rem 1.8rem;
+  background-color: #4dabf7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.ad-catlist-submit-btn:hover:not(:disabled) {
+  background-color: #339af0;
+}
+
+.ad-catlist-submit-btn:disabled {
+  background-color: #a5d8ff;
+  cursor: not-allowed;
+}
+
+/* Loading overlay styles */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #4dabf7;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+/* Add these styles to your existing CSS file */
+
+.ad-catlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.ad-catlist-new-btn {
+  padding: 0.5rem 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.ad-catlist-new-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.ad-catlist-new-btn:disabled {
+  background-color: #b2f2bb;
+  cursor: not-allowed;
+}
+
+.ad-catlist-category-search {
+  margin-bottom: 2rem;
+}
+
+.ad-catlist-search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ad-catlist-category-results {
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ad-catlist-category-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ad-catlist-category-item:hover {
+  background-color: #f8f9fa;
+}
+
+.ad-catlist-category-item:last-child {
+  border-bottom: none;
+}
+
+.ad-catlist-category-products {
+  font-size: 0.85rem;
+  color: #868e96;
+}
+
+/* Existing styles remain the same */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ad-catlist-container {
+    padding: 1.5rem;
+  }
+  
+  .ad-catlist-product-search {
+    flex-direction: column;
+  }
+  
+  .ad-catlist-form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .ad-catlist-cancel-btn,
+  .ad-catlist-submit-btn {
+    width: 100%;
+  }
+}

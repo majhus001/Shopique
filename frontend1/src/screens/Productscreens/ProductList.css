@@ -536,6 +536,7 @@
   z-index: 1;
 }
 
+
 .input-with-icon input {
   width: 100%;
   padding: 0.875rem 1rem 0.875rem 2.5rem;
@@ -546,10 +547,28 @@
   background: white;
 }
 
+/* Faded State (Initial) */
+.faded-input {
+  color: #999 !important; /* Force faded color */
+  font-weight: 500;
+}
+
+.normal-input {
+  color: #000; /* Full visibility */
+  font-weight: normal;
+}
+
+/* Focus State */
 .input-with-icon input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Placeholder (Only shows when empty) */
+.input-with-icon input::placeholder {
+  color: #999;
+  font-weight: 500;
 }
 
 .check-btn {

@@ -262,7 +262,7 @@ const Login = () => {
                 type="standard"
                 size="large"
                 text="signin_with"
-                width="310"
+                width="250"
                 height="100"
               />
             </div>

@@ -17,22 +17,10 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [cartlength, setCartLength] = useState(0);
-  const [allProducts, setAllProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const debounceTimeout = useRef(null);
   const searchRef = useRef(null);
-
-  // Memoized fetch functions to prevent unnecessary recreations
-  const fetchAllProducts = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/products/fetchAll`);
-      if (response.data.success) {
-        setAllProducts(response.data.data || []);
-      }
-    } catch (error) {
-      console.error("Error fetching all products:", error);
-    }
-  }, []);
 
   const fetchCartData = useCallback(async () => {
     try {
@@ -49,7 +37,6 @@ export default function Navbar() {
 
   const checkUser = useCallback(async () => {
     try {
-      console.log("nav check");
       const userData = await ValidUserData(dispatch);
       if (userData) {
         setUsername(userData.username);
@@ -93,8 +80,6 @@ export default function Navbar() {
         if (shouldFetchCart) {
           await fetchCartData();
         }
-
-        await fetchAllProducts();
       } catch (error) {
         console.error("Initialization error:", error);
         setIsLoggedIn(false);
@@ -104,44 +89,54 @@ export default function Navbar() {
     };
 
     initialize();
+  }, [checkUser, fetchCartData, user]);
+
+  const searchProducts = useCallback(async (query) => {
+    if (!query || query.trim().length < 1) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const response = await axios.get(`${API_BASE_URL}/api/products/search`, {
+        params: { query: query.trim() }
+      });
+      
+      if (response.data.success) {
+        setSearchResults(response.data.data.slice(0, 5)); // Limit to 5 results
+      }
+    } catch (error) {
+      console.error("Error searching products:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
   }, []);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
 
+    // Clear previous timeout if it exists
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
+    // Set new timeout
     debounceTimeout.current = setTimeout(() => {
-      if (value.trim().length > 0) {
-        filterProducts(value.trim());
-      } else {
-        setSearchResults([]);
-      }
-    }, 300);
+      searchProducts(value);
+    }, 300); // 300ms debounce delay
   };
 
-  const filterProducts = (query) => {
-    if (!query || query.length < 1) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      // If user presses Enter with a search query, navigate to search page
+      e.preventDefault();
+      navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
       setSearchResults([]);
-      return;
     }
-
-    const lowerCaseQuery = query.toLowerCase();
-    const filtered = allProducts.filter(
-      (product) =>
-        product.name.toLowerCase().includes(lowerCaseQuery) ||
-        (product.description &&
-          product.description.toLowerCase().includes(lowerCaseQuery)) ||
-        (product.category &&
-          product.category.toLowerCase().includes(lowerCaseQuery)) ||
-        (product.subCategory &&
-          product.subCategory.toLowerCase().includes(lowerCaseQuery))
-    );
-
-    setSearchResults(filtered.slice(0, 5));
   };
 
   const handleProductClick = (product) => {
@@ -153,12 +148,24 @@ export default function Navbar() {
         },
       }
     );
-
     setSearchQuery("");
     setSearchResults([]);
   };
 
-  // Don't render anything until we know the auth state
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   if (isLoading || isLoggedIn === null) {
     return (
       <nav className="hm-navbar">
@@ -205,7 +212,6 @@ export default function Navbar() {
       </div>
 
       {/* Search bar - always visible in mobile */}
-
       <div className="mobile-search-container">
         <div className="nav-search-bar" ref={searchRef}>
           <input
@@ -214,9 +220,12 @@ export default function Navbar() {
             className="nav-searchbar"
             value={searchQuery}
             onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
           />
-
-          {searchResults.length > 0 && (
+          {isSearching && (
+            <div className="search-loading">Searching...</div>
+          )}
+          {searchResults.length > 0 && !isSearching && (
             <div className="search-results-dropdown">
               {searchResults.map((product) => (
                 <div
@@ -242,6 +251,16 @@ export default function Navbar() {
                   </div>
                 </div>
               ))}
+              <div 
+                className="search-view-all"
+                onClick={() => {
+                  navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }}
+              >
+                View all results for "{searchQuery}"
+              </div>
             </div>
           )}
         </div>
@@ -259,9 +278,12 @@ export default function Navbar() {
             className="nav-searchbar"
             value={searchQuery}
             onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
           />
-
-          {searchResults.length > 0 && (
+          {isSearching && (
+            <div className="search-loading">Searching...</div>
+          )}
+          {searchResults.length > 0 && !isSearching && (
             <div className="search-results-dropdown">
               {searchResults.map((product) => (
                 <div
@@ -287,6 +309,16 @@ export default function Navbar() {
                   </div>
                 </div>
               ))}
+              <div 
+                className="search-view-all"
+                onClick={() => {
+                  navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }}
+              >
+                View all results for "{searchQuery}"
+              </div>
             </div>
           )}
         </div>

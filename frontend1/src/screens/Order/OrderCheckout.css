@@ -285,6 +285,20 @@
   border-top: 2px solid #eee;
   color: #2c3e50;
 }
+.ord-pay-now-btn{
+  width: 100%;
+  padding: 16px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.ord-pay-now-btn:hover {
+  background-color: #27ae60;
+  transform: scale(1.005);
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
 
 /* Products List */
 .ord-products-list {

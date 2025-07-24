@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema({
-  name: {
+  category: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  subCategory: {
     type: String,
     required: true,
     unique: true,  
@@ -22,7 +27,7 @@ const categorySchema = new mongoose.Schema({
   },
   featuredProducts: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
+    ref: 'products'
   }],
   createdAt: {
     type: Date,
@@ -33,7 +38,6 @@ const categorySchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  // Schema options
   autoIndex: true 
 });
 
