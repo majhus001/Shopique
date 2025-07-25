@@ -144,7 +144,7 @@ router.get("/fetchByCategories", async (req, res) => {
             createdAt: -1,
           })
           .select(
-            "_id name price offerPrice images category subCategory rating salesCount brand description stock deliveryTime"
+            "_id name price offerPrice images rating salesCount"
           )
           .lean();
 
@@ -210,6 +210,73 @@ router.get("/fetch/:id", async (req, res) => {
     });
   }
 });
+
+// GET /admin/paginated?page=1&limit=10
+router.get("/admin/paginated", async (req, res) => {
+  try {
+    // Validate and parse query parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (isNaN(page) || isNaN(limit)){
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pagination parameters"
+      });
+    }
+
+    // Build the query object
+    const query = {};
+    
+    // Category filter
+    if (req.query.category && req.query.category !== 'all') {
+      query.category = req.query.category;
+    }
+    
+    // Search filter
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { brand: searchRegex },
+        { description: searchRegex },
+        { category: searchRegex }
+      ];
+    }
+
+    // Execute queries in parallel
+    const [products, total] = await Promise.all([
+      product.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      product.countDocuments(query)
+    ]);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).json({
+      success: true,
+      products,
+      total,
+      page: Math.min(page, totalPages), // Ensure page doesn't exceed totalPages
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    });
+  } catch (error) {
+    console.error("Error in paginated products:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Server error while fetching products",
+      error: error.message 
+    });
+  }
+});
+
 
 router.get("/paginated", async (req, res) => {
   try {
@@ -534,7 +601,7 @@ router.get("/search", async (req, res) => {
         { displayName: { $regex: query, $options: "i" } },
         { tags: { $in: [new RegExp(query, "i")] } },
       ],
-    });
+    }).limit(10);
 
     res.status(200).json({
       success: true,

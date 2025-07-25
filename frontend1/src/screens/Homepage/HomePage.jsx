@@ -411,7 +411,7 @@ const HomePage = () => {
           <section className="featured-section">
             <div className="featured-scroll-wrapper">
               <div className="featured-category-cont">
-                {productsByCategory.slice(0, 10).map((category) => (
+                {productsByCategory.slice(0, 8).map((category) => (
                   <motion.div
                     key={category._id}
                     className="featured-category-card"
@@ -479,7 +479,7 @@ const HomePage = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
                     >
-                      <h4>{capitalizeWords(displayName)}</h4>
+                      <h4>{capitalizeWords(subCategory)}</h4>
                       <span
                         onClick={() => handlecategoryClick(subCategory)}
                         className="view-all-link"
