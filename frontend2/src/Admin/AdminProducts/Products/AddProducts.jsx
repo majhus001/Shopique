@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import API_BASE_URL from "../../api";
-import QRCodeModal from "../Qrcode/QRCodeModal";
-import QRCodeScanner from "../Qrcode/QRCodeScanner";
-import Adnavbar from "../Adnavbar/Adnavbar";
-import Sidebar from "../sidebar/Sidebar";
+import API_BASE_URL from "../../../api";
+import QRCodeModal from "../../Qrcode/QRCodeModal";
+import QRCodeScanner from "../../Qrcode/QRCodeScanner";
+import Adnavbar from "../../Adnavbar/Adnavbar";
+import Sidebar from "../../sidebar/Sidebar";
 import "./AddProducts.css";
 
 const AddProducts = () => {

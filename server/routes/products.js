@@ -143,9 +143,7 @@ router.get("/fetchByCategories", async (req, res) => {
             salesCount: -1,
             createdAt: -1,
           })
-          .select(
-            "_id name price offerPrice images rating salesCount"
-          )
+          .select("_id name price offerPrice images rating salesCount")
           .lean();
 
         return {
@@ -214,38 +212,39 @@ router.get("/fetch/:id", async (req, res) => {
 // GET /admin/paginated?page=1&limit=10
 router.get("/admin/paginated", async (req, res) => {
   try {
-    // Validate and parse query parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
     const skip = (page - 1) * limit;
 
-    if (isNaN(page) || isNaN(limit)){
-      return res.status(400).json({
-        success: false,
-        message: "Invalid pagination parameters"
-      });
-    }
-
-    // Build the query object
     const query = {};
-    
+
     // Category filter
-    if (req.query.category && req.query.category !== 'all') {
+    if (req.query.category && req.query.category !== "all") {
       query.category = req.query.category;
     }
-    
+
     // Search filter
     if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search, 'i');
+      const searchRegex = new RegExp(escapeRegex(req.query.search), "i");
       query.$or = [
         { name: searchRegex },
         { brand: searchRegex },
         { description: searchRegex },
-        { category: searchRegex }
+        { category: searchRegex },
+        { tags: searchRegex }
       ];
     }
 
-    // Execute queries in parallel
+    // Additional filters can be added here (e.g., price range, stock status)
+    if (req.query.minPrice) {
+      query.price = { ...query.price, $gte: parseFloat(req.query.minPrice) };
+    }
+    if (req.query.maxPrice) {
+      query.price = { ...query.price, $lte: parseFloat(req.query.maxPrice) };
+    }
+
+    // Execute queries in parallel for better performance
     const [products, total] = await Promise.all([
       product.find(query)
         .skip(skip)
@@ -257,26 +256,32 @@ router.get("/admin/paginated", async (req, res) => {
 
     // Calculate total pages
     const totalPages = Math.ceil(total / limit);
+    const currentPage = Math.min(page, totalPages || 1);
 
     res.status(200).json({
       success: true,
       products,
       total,
-      page: Math.min(page, totalPages), // Ensure page doesn't exceed totalPages
+      page: currentPage,
       totalPages,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasNextPage: currentPage < totalPages,
+      hasPrevPage: currentPage > 1,
+      limit
     });
   } catch (error) {
     console.error("Error in paginated products:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: "Server error while fetching products",
-      error: error.message 
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
+// Helper function to escape regex characters
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
 
 router.get("/paginated", async (req, res) => {
   try {
@@ -435,7 +440,6 @@ router.get("/paginated", async (req, res) => {
   }
 });
 
-
 // Update product
 router.put("/update/:id", upload.array("images", 5), async (req, res) => {
   try {
@@ -517,7 +521,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
 
         // Add new image URLs to update data
         updateData.images = imageUrls;
-        
+
         console.log(
           `Successfully uploaded ${imageUrls.length} new images for product ${id}`
         );
@@ -592,16 +596,53 @@ router.get("/search", async (req, res) => {
         error: "Search query is required",
       });
     }
-    const products = await product.find({
-      $or: [
-        { name: { $regex: query, $options: "i" } },
-        { brand: { $regex: query, $options: "i" } },
-        { category: { $regex: query, $options: "i" } },
-        { subCategory: { $regex: query, $options: "i" } },
-        { displayName: { $regex: query, $options: "i" } },
-        { tags: { $in: [new RegExp(query, "i")] } },
-      ],
-    }).limit(10);
+    const products = await product
+      .find({
+        $or: [
+          { name: { $regex: query, $options: "i" } },
+          { brand: { $regex: query, $options: "i" } },
+          { category: { $regex: query, $options: "i" } },
+          { subCategory: { $regex: query, $options: "i" } },
+          { displayName: { $regex: query, $options: "i" } },
+          { tags: { $in: [new RegExp(query, "i")] } },
+        ],
+      })
+      .limit(10);
+
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to search products",
+      details: error.message,
+    });
+  }
+});
+
+router.get("/admin/search", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: "Search query is required",
+      });
+    }
+    const products = await product
+      .find({
+        $or: [
+          { name: { $regex: query, $options: "i" } },
+          { brand: { $regex: query, $options: "i" } },
+          { category: { $regex: query, $options: "i" } },
+          { subCategory: { $regex: query, $options: "i" } },
+          { displayName: { $regex: query, $options: "i" } },
+        ],
+      })
+      .limit(10);
 
     res.status(200).json({
       success: true,

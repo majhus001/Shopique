@@ -29,7 +29,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.7rem ;
+  width: 200px;
   background-color: var(--success-color);
   color: white;
   border: none;
@@ -794,7 +795,111 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Pagination Container */
+.ad-prodlist-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+  padding: 1.25rem 0;
+  font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 
+/* Pagination Buttons */
+.ad-prodlist-pagination-btn {
+  background-color: #4a6cf7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(74, 108, 247, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ad-prodlist-pagination-btn:hover:not(:disabled) {
+  background-color: #3a5bd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(74, 108, 247, 0.35);
+}
+
+.ad-prodlist-pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(74, 108, 247, 0.25);
+}
+
+.ad-prodlist-pagination-btn:disabled {
+  background-color: #e9ecef;
+  color: #adb5bd;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Page Info */
+.ad-prodlist-pagination-info {
+  font-size: 1.05rem;
+  color: #495057;
+  font-weight: 500;
+  min-width: 140px;
+  text-align: center;
+}
+
+/* Icons */
+.ad-prodlist-pagination-btn .fa-chevron-left,
+.ad-prodlist-pagination-btn .fa-chevron-right {
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.ad-prodlist-pagination-prev:hover:not(:disabled) .fa-chevron-left {
+  transform: translateX(-2px);
+}
+
+.ad-prodlist-pagination-next:hover:not(:disabled) .fa-chevron-right {
+  transform: translateX(2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ad-prodlist-pagination {
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  
+  .ad-prodlist-pagination-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .ad-prodlist-pagination-info {
+    font-size: 0.95rem;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ad-prodlist-pagination {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .ad-prodlist-pagination-info {
+    order: -1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .ad-prodlist-pagination-btn {
+    width: 100%;
+    max-width: 200px;
+    justify-content: center;
+  }
+}
 
 @keyframes spin {
   0% { transform: rotate(0deg); }

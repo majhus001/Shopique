@@ -17,7 +17,7 @@ import RecentBills from "./Admin/Billing/RecentBills";
 
 import Login from "./LogSin/Login";
 import SignUp from "./LogSin/SignUp";
-import AddProducts from "./Admin/AdminProducts/AddProducts";
+import AddProducts from "./Admin/AdminProducts/Products/AddProducts";
 import Customers from "./Admin/Customers/Customers";
 import Employees from "./Admin/Employees/Employees";
 import AddEmployee from "./Admin/Employees/AddEmployee";
@@ -29,7 +29,8 @@ import ScrollToTop from "./ScrollToTop";
 import EmployeeHistory from "./Admin/Employees/EmployeeHistory";
 import ViewProductsDetails from "./Admin/homepage/ProductDetails/ViewProductsDetails";
 import ViewDailySales from "./Admin/homepage/Dailysales/ViewDailySales";
-import AddCategoryList from "./Admin/AdminProducts/AddCategoryList";
+import AddCategoryList from "./Admin/AdminProducts/Category/AddCategoryList";
+import Banner from "./Admin/Banners/Banner";
 const App = () => {
   return (
     <Router>
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/aduserhis" element={<Userhistory />} />
         <Route path="/adprodlist" element={<AdproductsList />} />
         <Route path="/addcategorylist" element={<AddCategoryList />} />
+        <Route path="/banner" element={<Banner />} />
         <Route path="/recentactivity" element={<RecentActivity />} />
         <Route path="/generateuserreport" element={<GenerateUserReport />} />
         <Route path="/reports" element={<Reports />} />

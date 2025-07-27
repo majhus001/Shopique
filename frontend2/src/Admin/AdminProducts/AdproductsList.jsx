@@ -26,15 +26,22 @@ const AdproductsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [expandedProducts, setExpandedProducts] = useState({});
+  const [expandedProducts, setExpandedProducts] = useState({}); // Track expanded state for each product
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalProducts: 0,
+    limit: 12,
+  });
 
-  const [isEmployee, setisEmployee] = useState(false);
+  const [isEmployee, setIsEmployee] = useState(false);
 
   useEffect(() => {
-    if (user.role == "Employee") {
-      setisEmployee(true);
+    if (user?.role === "Employee") {
+      setIsEmployee(true);
     }
-  }, []);
+  }, [user]);
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -97,154 +104,98 @@ const AdproductsList = () => {
     return Array.from(categorySet);
   };
 
-  const generateCategoryMetadata = (categories) => {
-    const metadata = {};
+  // Fetch paginated products
+  const fetchProducts = async (
+    page = 1,
+    limit = 12,
+    category = "all",
+    searchQuery = ""
+  ) => {
+    setLoading(true);
+    try {
+      let url = `${API_BASE_URL}/api/products/admin/paginated?page=${page}&limit=${limit}`;
 
-    const iconMap = {
-      mobile: "fa-mobile-alt",
-      phone: "fa-mobile-alt",
-      smartphone: "fa-mobile-alt",
-      clothing: "fa-tshirt",
-      apparel: "fa-tshirt",
-      fashion: "fa-tshirt",
-      appliance: "fa-blender",
-      electronic: "fa-tv",
-      computer: "fa-laptop",
-      laptop: "fa-laptop",
-      accessory: "fa-headphones",
-      furniture: "fa-couch",
-      book: "fa-book",
-      toy: "fa-gamepad",
-      food: "fa-utensils",
-      grocery: "fa-shopping-basket",
-      beauty: "fa-spa",
-      health: "fa-heartbeat",
-      sport: "fa-running",
-      outdoor: "fa-hiking",
-      tool: "fa-tools",
-      home: "fa-home",
-      garden: "fa-leaf",
-      pet: "fa-paw",
-      jewelry: "fa-gem",
-      watch: "fa-clock",
-      gift: "fa-gift",
-      art: "fa-paint-brush",
-      music: "fa-music",
-      instrument: "fa-guitar",
-      camera: "fa-camera",
-      video: "fa-video",
-      game: "fa-gamepad",
-      software: "fa-code",
-      office: "fa-briefcase",
-      stationery: "fa-pen",
-      travel: "fa-plane",
-      luggage: "fa-suitcase",
-      car: "fa-car",
-      motorcycle: "fa-motorcycle",
-      bicycle: "fa-bicycle",
-      baby: "fa-baby",
-      kid: "fa-child",
-    };
+      // Add category filter if not "all"
+      if (category !== "all") {
+        url += `&category=${category}`;
+      }
 
-    // Process each category
-    categories.forEach((category) => {
-      // Default values
-      let icon = "fa-box";
-      let label = category.charAt(0).toUpperCase() + category.slice(1);
+      // Add search query if provided
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
 
-      // Try to find a matching icon based on category name
-      const lowerCategory = category.toLowerCase();
+      const response = await axios.get(url);
 
-      // Check if the category name contains any of the keys in our icon map
-      for (const [key, value] of Object.entries(iconMap)) {
-        if (lowerCategory.includes(key)) {
-          icon = value;
-          break;
+      if (response.data.success) {
+        const {
+          products,
+          totalPages,
+          page: currentPage,
+          total: totalProducts,
+          hasNextPage,
+          hasPrevPage,
+        } = response.data;
+
+        setProducts(products);
+        setPagination({
+          currentPage,
+          totalPages,
+          totalProducts,
+          limit,
+          hasNextPage,
+          hasPrevPage,
+        });
+
+        // Only update categories if not searching (to maintain all categories)
+        if (!searchQuery) {
+          const uniqueCategories = getUniqueCategories(products);
+          setCategories(uniqueCategories);
         }
+
+        return products;
+      } else {
+        console.error("Failed to fetch products:", response.data);
+        setProducts([]);
+        return [];
       }
-
-      // Special case handling for legacy categories
-      if (category === "mobiles") {
-        icon = "fa-mobile-alt";
-        label = "Mobiles";
-      } else if (category === "clothings") {
-        icon = "fa-tshirt";
-        label = "Clothing";
-      } else if (category === "hoappliances") {
-        icon = "fa-blender";
-        label = "Home Appliances";
-      }
-
-      // Store the metadata
-      metadata[category] = {
-        icon,
-        label,
-      };
-    });
-
-    return metadata;
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+      setProducts([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Fetch all products using the unified API endpoint
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchProducts(
+        newPage,
+        pagination.limit,
+        selectedCategory === "all" ? "all" : selectedCategory
+      );
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        console.log("Fetching products from API...");
-        // Use the unified products API endpoint
-        const response = await axios.get(
-          `${API_BASE_URL}/api/products/fetchAll`
-        );
-
-        console.log("API response:", response.data);
-
-        if (response.data.success && response.data.data) {
-          const allProducts = response.data.data;
-
-          // Log a sample product to see its structure
-          if (allProducts.length > 0) {
-            console.log("Sample product structure:", allProducts[0]);
-          }
-
-          setProducts(allProducts);
-
-          // Extract unique categories from products
-          const uniqueCategories = getUniqueCategories(allProducts);
-          console.log("Unique categories:", uniqueCategories);
-          setCategories(uniqueCategories);
-
-          // Generate and set category metadata
-          if (uniqueCategories.length > 0) {
-            const metadata = generateCategoryMetadata(uniqueCategories);
-            console.log("Generated category metadata:", metadata);
-            setCategoryMetadata(metadata);
-          } else {
-            setCategoryMetadata({});
-          }
-
-          console.log(
-            `Fetched ${allProducts.length} products with ${uniqueCategories.length} categories`
-          );
-        } else {
-          console.error("Failed to fetch products:", response.data);
-          setProducts([]);
-          setCategories([]);
-          setCategoryMetadata({});
-        }
-      } catch (err) {
-        console.error("Error fetching product data:", err);
-        setProducts([]);
-        setCategories([]);
-        setCategoryMetadata({});
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchProducts(1, 12);
   }, []);
 
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchProducts(
+        1,
+        pagination.limit,
+        selectedCategory === "all" ? "all" : selectedCategory
+      );
+    }
+  }, [selectedCategory]);
+
   const handleCategoryChange = (category) => {
-    setSelectedCategory(category); // Set the selected category on toggle
+    setSelectedCategory(category);
+    setExpandedProducts({}); // Reset expanded products when changing category
   };
 
   // Handle sidebar collapse state change
@@ -253,7 +204,7 @@ const AdproductsList = () => {
   };
 
   // Handle search functionality
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     const query = e.target.value.toLowerCase().trim();
     setSearchQuery(e.target.value);
 
@@ -261,34 +212,19 @@ const AdproductsList = () => {
       console.log("Empty query, clearing search results");
       setIsSearching(false);
       setSearchResults([]);
+      setExpandedProducts({}); // Reset expanded products when clearing search
       return;
     }
 
     setIsSearching(true);
 
     try {
-      const filteredResults = products.filter((product) => {
-        const name = (product.name || "").toLowerCase();
-        const brand = (product.brand || "").toLowerCase();
-        const description = (product.description || "").toLowerCase();
-        const category = (product.category || "").toLowerCase();
+      const res = await axios.get(
+        `${API_BASE_URL}/api/products/admin/search?query=${query}`
+      );
 
-        const categoryLabel =
-          product.category && categoryMetadata[product.category]
-            ? categoryMetadata[product.category].label.toLowerCase()
-            : "";
-
-        const nameMatch = name.startsWith(query) || name.includes(query);
-        const brandMatch = brand.startsWith(query) || brand.includes(query);
-        const descMatch =
-          description.startsWith(query) || description.includes(query);
-        const catMatch = category.startsWith(query) || category.includes(query);
-        const labelMatch =
-          categoryLabel.startsWith(query) || categoryLabel.includes(query);
-
-        return nameMatch || brandMatch || descMatch || catMatch || labelMatch;
-      });
-      setSearchResults(filteredResults);
+      setSearchResults(res.data.data);
+      setExpandedProducts({}); // Reset expanded products when searching
     } catch (error) {
       console.error("Error during search:", error);
       setSearchResults([]);
@@ -300,6 +236,7 @@ const AdproductsList = () => {
     setSearchQuery("");
     setIsSearching(false);
     setSearchResults([]);
+    setExpandedProducts({}); // Reset expanded products when clearing search
 
     // Focus back on the search input after clearing
     setTimeout(() => {
@@ -332,22 +269,30 @@ const AdproductsList = () => {
     }
   };
 
-  // Toggle product details expansion
+  // Toggle product details expansion for a specific product
   const toggleProductExpansion = (productId) => {
     setExpandedProducts((prev) => ({
       ...prev,
-      [productId]: !prev[productId],
+      [productId]: !prev[productId], // Toggle only the clicked product's state
     }));
   };
 
-  const handleaddcatlistnav = () => {
+  const handleAddBannerNav = () => {
+    try {
+      navigate("/banner", { state: { user, orders } });
+    } catch (error) {
+      console.error("Navigation error:", error);
+    }
+  };
+  const handleAddCatListNav = () => {
     try {
       navigate("/addcategorylist", { state: { user, orders } });
     } catch (error) {
       console.error("Navigation error:", error);
     }
   };
-  const handleaddprodnav = () => {
+
+  const handleAddProdNav = () => {
     try {
       navigate("/addproducts", { state: { user, orders } });
     } catch (error) {
@@ -378,9 +323,7 @@ const AdproductsList = () => {
         <div className="main-content">
           <header className="admin-header-box">
             <div className="header-greeting">
-              <h1>
-                 Product Management
-              </h1>
+              <h1>Product Management</h1>
               <p className="subtitle">Manage and monitor Inventory Products</p>
             </div>
             <div className="admin-info">
@@ -389,22 +332,33 @@ const AdproductsList = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleaddcatlistnav();
+                  handleAddBannerNav();
                 }}
               >
                 <i className="fas fa-plus-circle"></i>
-                <span>Add New Categories</span>
+                <span> New Banners</span>
               </button>
               <button
                 className="ad-add-product-btn"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleaddprodnav();
+                  handleAddCatListNav();
                 }}
               >
                 <i className="fas fa-plus-circle"></i>
-                <span>Add New Product</span>
+                <span> New Categories</span>
+              </button>
+              <button
+                className="ad-add-product-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAddProdNav();
+                }}
+              >
+                <i className="fas fa-plus-circle"></i>
+                <span> New Product</span>
               </button>
               <button className="logout-btn" onClick={handleLogout}>
                 <FiLogOut /> Logout
@@ -447,16 +401,11 @@ const AdproductsList = () => {
                 }`}
                 onClick={() => handleCategoryChange("all")}
               >
-                <i className="fas fa-boxes"></i> All Products ({products.length}
-                )
+                <i className="fas fa-boxes"></i> All Products (
+                {pagination.totalProducts})
               </button>
 
               {categories.map((category) => {
-                const metadata = categoryMetadata[category] || {
-                  icon: "fa-box",
-                  label: category.charAt(0).toUpperCase() + category.slice(1),
-                };
-
                 const categoryCount = products.filter(
                   (p) => p.category === category
                 ).length;
@@ -469,8 +418,8 @@ const AdproductsList = () => {
                     }`}
                     onClick={() => handleCategoryChange(category)}
                   >
-                    <i className={`fas ${metadata.icon}`}></i> {metadata.label}{" "}
-                    ({categoryCount})
+                    {category.charAt(0).toUpperCase() + category.slice(1)} (
+                    {categoryCount})
                   </button>
                 );
               })}
@@ -529,8 +478,7 @@ const AdproductsList = () => {
                                     className={`fas ${
                                       product.category &&
                                       categoryMetadata[product.category]
-                                        ? categoryMetadata[product.category]
-                                            .icon
+                                        ? categoryMetadata[product.category].icon
                                         : "fa-box"
                                     }`}
                                   ></i>
@@ -649,8 +597,7 @@ const AdproductsList = () => {
                   <div className="no-results">
                     <i className="fas fa-search"></i>
                     <p>
-                      No products found matching "<strong>{searchQuery}</strong>
-                      "
+                      No products found matching "<strong>{searchQuery}</strong>"
                     </p>
                     <p className="search-tips">
                       Try checking your spelling or using more general terms.
@@ -667,178 +614,207 @@ const AdproductsList = () => {
             )}
 
             {!isSearching && (
-              <div className="ad-prod-list">
-                {(() => {
-                  const filteredProducts =
-                    selectedCategory === "all"
-                      ? products
-                      : products.filter((p) => p.category === selectedCategory);
+              <>
+                <div className="ad-prod-list">
+                  {products.length === 0 ? (
+                    <p>No products available in this category.</p>
+                  ) : (
+                    products.map((product, index) => {
+                      const categoryIcon =
+                        product.category && categoryMetadata[product.category]
+                          ? categoryMetadata[product.category].icon
+                          : "fa-box";
 
-                  if (filteredProducts.length === 0) {
-                    return <p>No products available in this category.</p>;
-                  }
-
-                  return filteredProducts.map((product, index) => {
-                    // Get icon from category metadata
-                    const categoryIcon =
-                      product.category && categoryMetadata[product.category]
-                        ? categoryMetadata[product.category].icon
-                        : "fa-box";
-
-                    return (
-                      <div
-                        key={product._id || product.id}
-                        className="product-card"
-                        style={{ "--animation-order": index }}
-                      >
+                      return (
                         <div
-                          className="product-summary"
-                          onClick={() =>
-                            toggleProductExpansion(product._id || product.id)
-                          }
+                          key={product._id || product.id}
+                          className="product-card"
+                          style={{ "--animation-order": index }}
                         >
-                          <div className="ad-prodlist-img-cat">
-                            <div className="product-thumbnail">
-                              {product.images && product.images.length > 0 ? (
-                                <img
-                                  src={product.images[0]}
-                                  alt={product.name}
-                                  className="thumbnail-image"
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src =
-                                      "https://via.placeholder.com/150?text=No+Image";
-                                  }}
-                                />
-                              ) : product.image ? (
-                                <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="thumbnail-image"
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src =
-                                      "https://via.placeholder.com/150?text=No+Image";
-                                  }}
-                                />
-                              ) : (
-                                <div className="thumbnail-placeholder">
-                                  <i className={`fas ${categoryIcon}`}></i>
+                          <div
+                            className="product-summary"
+                            onClick={() =>
+                              toggleProductExpansion(product._id || product.id)
+                            }
+                          >
+                            <div className="ad-prodlist-img-cat">
+                              <div className="product-thumbnail">
+                                {product.images && product.images.length > 0 ? (
+                                  <img
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    className="thumbnail-image"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src =
+                                        "https://via.placeholder.com/150?text=No+Image";
+                                    }}
+                                  />
+                                ) : product.image ? (
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="thumbnail-image"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src =
+                                        "https://via.placeholder.com/150?text=No+Image";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="thumbnail-placeholder">
+                                    <i className={`fas ${categoryIcon}`}></i>
+                                  </div>
+                                )}
+                              </div>
+                              {selectedCategory === "all" && (
+                                <div className="category-badge">
+                                  {product.category
+                                    ? categoryMetadata[product.category]
+                                      ? categoryMetadata[product.category].label
+                                      : product.category
+                                          .charAt(0)
+                                          .toUpperCase() +
+                                        product.category.slice(1)
+                                    : "Unknown"}
                                 </div>
                               )}
                             </div>
-                            {selectedCategory === "all" && (
-                              <div className="category-badge">
-                                {product.category
-                                  ? categoryMetadata[product.category]
-                                    ? categoryMetadata[product.category].label
-                                    : product.category.charAt(0).toUpperCase() +
-                                      product.category.slice(1)
-                                  : "Unknown"}
-                              </div>
-                            )}
-                          </div>
-                          <div className="product-brief">
-                            <h3 className="product-name">{product.name}</h3>
-                            <div className="product-brief-info">
-                              <span className="brief-brand">
-                                {product.brand}
-                              </span>
-                              <span className="brief-price">
-                                ₹{product.price}
-                              </span>
-                              <span className="brief-stock">
-                                Stock: {product.stock}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="expand-toggle">
-                            <i
-                              className={`fas ${
-                                expandedProducts[product._id || product.id]
-                                  ? "fa-chevron-up"
-                                  : "fa-chevron-down"
-                              }`}
-                            ></i>
-                          </div>
-                        </div>
-
-                        {expandedProducts[product._id || product.id] && (
-                          <div className="product-details">
-                            <div className="details-grid">
-                              <div className="detail-column">
-                                <div className="detail-item">
-                                  <span className="detail-label">
-                                    <i className="fas fa-tag"></i> Brand:
-                                  </span>
-                                  <span className="detail-value">
-                                    {product.brand}
-                                  </span>
-                                </div>
-                                <div className="detail-item">
-                                  <span className="detail-label">
-                                    <i className="fas fa-rupee-sign"></i> Price:
-                                  </span>
-                                  <span className="detail-value price">
-                                    ₹{product.price}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="detail-column">
-                                <div className="detail-item">
-                                  <span className="detail-label">
-                                    <i className="fas fa-cubes"></i> Stock:
-                                  </span>
-                                  <span className="detail-value">
-                                    {product.stock}
-                                  </span>
-                                </div>
-                                <div className="detail-item">
-                                  <span className="detail-label">
-                                    <i className="fas fa-star"></i> Rating:
-                                  </span>
-                                  <span className="detail-value">
-                                    {product.rating}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            {product.description && (
-                              <div className="product-description">
-                                <span className="description-label">
-                                  <i className="fas fa-info-circle"></i>{" "}
-                                  Description:
+                            <div className="product-brief">
+                              <h3 className="product-name">{product.name}</h3>
+                              <div className="product-brief-info">
+                                <span className="brief-brand">
+                                  {product.brand}
                                 </span>
-                                <p className="description-text">
-                                  {product.description}
-                                </p>
+                                <span className="brief-price">
+                                  ₹{product.price}
+                                </span>
+                                <span className="brief-stock">
+                                  Stock: {product.stock}
+                                </span>
                               </div>
-                            )}
-                            <div className="product-actions">
-                              <button
-                                className="ad-prodlist-edit"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate("/addproducts", {
-                                    state: {
-                                      user,
-                                      orders,
-                                      editProduct: product,
-                                    },
-                                  });
-                                }}
-                              >
-                                <FiEdit />
-                                Edit
-                              </button>
+                            </div>
+                            <div className="expand-toggle">
+                              <i
+                                className={`fas ${
+                                  expandedProducts[product._id || product.id]
+                                    ? "fa-chevron-up"
+                                    : "fa-chevron-down"
+                                }`}
+                              ></i>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
+
+                          {expandedProducts[product._id || product.id] && (
+                            <div className="product-details">
+                              <div className="details-grid">
+                                <div className="detail-column">
+                                  <div className="detail-item">
+                                    <span className="detail-label">
+                                      <i className="fas fa-tag"></i> Brand:
+                                    </span>
+                                    <span className="detail-value">
+                                      {product.brand}
+                                    </span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <span className="detail-label">
+                                      <i className="fas fa-rupee-sign"></i>{" "}
+                                      Price:
+                                    </span>
+                                    <span className="detail-value price">
+                                      ₹{product.price}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="detail-column">
+                                  <div className="detail-item">
+                                    <span className="detail-label">
+                                      <i className="fas fa-cubes"></i> Stock:
+                                    </span>
+                                    <span className="detail-value">
+                                      {product.stock}
+                                    </span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <span className="detail-label">
+                                      <i className="fas fa-star"></i> Rating:
+                                    </span>
+                                    <span className="detail-value">
+                                      {product.rating}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              {product.description && (
+                                <div className="product-description">
+                                  <span className="description-label">
+                                    <i className="fas fa-info-circle"></i>{" "}
+                                    Description:
+                                  </span>
+                                  <p className="description-text">
+                                    {product.description}
+                                  </p>
+                                </div>
+                              )}
+                              <div className="product-actions">
+                                <button
+                                  className="ad-prodlist-edit"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate("/addproducts", {
+                                      state: {
+                                        user,
+                                        orders,
+                                        editProduct: product,
+                                      },
+                                    });
+                                  }}
+                                >
+                                  <FiEdit />
+                                  Edit
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {products.length > 0 && (
+                  <div className="ad-prodlist-pagination">
+                    <button
+                      className="ad-prodlist-pagination-btn ad-prodlist-pagination-prev"
+                      onClick={() =>
+                        handlePageChange(pagination.currentPage - 1)
+                      }
+                      disabled={pagination.currentPage === 1}
+                    >
+                      <i className="fas fa-chevron-left"></i>
+                      Previous
+                    </button>
+
+                    <span className="ad-prodlist-pagination-info">
+                      Page {pagination.currentPage} of {pagination.totalPages}
+                    </span>
+
+                    <button
+                      className="ad-prodlist-pagination-btn ad-prodlist-pagination-next"
+                      onClick={() =>
+                        handlePageChange(pagination.currentPage + 1)
+                      }
+                      disabled={
+                        pagination.currentPage === pagination.totalPages
+                      }
+                    >
+                      Next
+                      <i className="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./HomeStyle.css";
-
+import axios from "axios";
 import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import bannerImage from "../../assets/banner1.jpeg";
@@ -104,7 +104,8 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState(null);
-  const bannerImages = [bannerImage, bannerImage1, bannerImage2];
+  // const bannerImages = [bannerImage, bannerImage1, bannerImage2];
+  const [bannerImages, setBannerImages] = useState([]);
   const [currentImage, setCurrentImage] = useState(0);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -187,11 +188,32 @@ const HomePage = () => {
   }, [fetchData]);
 
   useEffect(() => {
+    const bannerfetch = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/banners/fetchimages`
+        );
+        if (response.data.success) {
+          setBannerImages(response.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+
+    bannerfetch();
+  }, []);
+
+  // Auto-slide effect
+  useEffect(() => {
+    if (bannerImages.length === 0) return;
+
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % bannerImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [bannerImages.length]);
+    }, 3000); // changes every 3 seconds
+
+    return () => clearInterval(interval); // clean up on unmount
+  }, [bannerImages]);
 
   useEffect(() => {
     const targetDate = new Date("2025-07-30T00:00:00");
@@ -228,13 +250,16 @@ const HomePage = () => {
         });
       }
     });
-    navigate(`/products/search/${prodCategory}/${prodSubCategory}/${productId}`, {
-      state: {
-        user: userDetails,
-        productCategory: prodCategory,
-        productSubCategory: prodSubCategory,
-      },
-    });
+    navigate(
+      `/products/search/${prodCategory}/${prodSubCategory}/${productId}`,
+      {
+        state: {
+          user: userDetails,
+          productCategory: prodCategory,
+          productSubCategory: prodSubCategory,
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -337,6 +362,7 @@ const HomePage = () => {
                 </motion.div>
               </AnimatePresence>
 
+              {/* Indicator buttons */}
               <div className="banner-indicators">
                 {bannerImages.map((_, index) => (
                   <button

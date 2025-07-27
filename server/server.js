@@ -23,6 +23,7 @@ const categoryRoutes = require("./routes/categorylist");
 const employeesRoutes = require("./routes/employees");
 const dailysalesRoutes = require("./routes/dailysales");
 const sellersRoutes = require("./routes/sellers");
+const bannerRoutes = require("./routes/banner");
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use("/api/categorylist", categoryRoutes);
 app.use("/api/employees", employeesRoutes);
 app.use("/api/dailysales", dailysalesRoutes);
 app.use("/api/sellers", sellersRoutes);
+app.use("/api/banners", bannerRoutes);
 
 
 // MongoDB Connection

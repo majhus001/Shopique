@@ -72,7 +72,7 @@ router.get("/", async (req, res) => {
 
     const categories = await Category.find(findQuery)
       .sort({ priority: -1 })
-      .populate("featuredProducts", "name price image");
+      .populate("featuredProducts", "name price images");
 
     res.json(categories);
   } catch (error) {
@@ -199,7 +199,7 @@ router.get("/products/search", async (req, res) => {
       ],
     })
       .limit(10)
-      .select("name price image"); // Only return essential fields
+      .select("name price images"); 
 
     res.json(products);
   } catch (error) {
