@@ -451,7 +451,6 @@ const ProductList = () => {
   };
 
   const handleCheckDelivery = async () => {
-    
     if (pincode.length !== 6) {
       setExpectedDelivery("Please enter a valid 6-digit pincode.");
       return;
@@ -725,14 +724,16 @@ const ProductList = () => {
                     <FaMapMarkerAlt className="input-icon" />
                     <input
                       type="text"
-                      placeholder={!pincode ? "Enter Delivery Pincode" : ""} 
+                      placeholder={!pincode ? "Enter Delivery Pincode" : ""}
                       maxLength="6"
                       value={pincode}
                       onChange={(e) => setPincode(e.target.value)}
                       onFocus={() => setIsPincodeFocused(true)}
                       onBlur={() => setIsPincodeFocused(false)}
                       className={
-                        !isPincodeFocused && !pincode ? "faded-input" :  "normal-input"
+                        !isPincodeFocused && !pincode
+                          ? "faded-input"
+                          : "normal-input"
                       }
                     />
                   </div>
@@ -990,13 +991,15 @@ const ProductList = () => {
             <span className="pl-section-title">Related products</span>
 
             <div className="pl-horizontal-scroll-container">
-              <button
-                className="pl-scroll-button pl-left"
-                onClick={() => scrollLeft("related")}
-                aria-label="pl-Scroll pl-left"
-              >
-                <FaChevronLeft />
-              </button>
+              {relatedProds.length > 5 && (
+                <button
+                  className="pl-scroll-button pl-left"
+                  onClick={() => scrollLeft("related")}
+                  aria-label="pl-Scroll pl-left"
+                >
+                  <FaChevronLeft />
+                </button>
+              )}
 
               <div
                 className="pl-product-horizontal-scroll"
@@ -1072,13 +1075,15 @@ const ProductList = () => {
                 ))}
               </div>
 
-              <button
-                className="pl-scroll-button pl-right"
-                onClick={() => scrollRight("related")}
-                aria-label="pl-Scroll pl-right"
-              >
-                <FaChevronRight />
-              </button>
+              {relatedProds.length > 5 && (
+                <button
+                  className="pl-scroll-button pl-right"
+                  onClick={() => scrollRight("related")}
+                  aria-label="pl-Scroll pl-right"
+                >
+                  <FaChevronRight />
+                </button>
+              )}
             </div>
           </div>
         ) : (

@@ -20,6 +20,7 @@ const Banner = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
+    description:"",
     link: "",
     position: 1,
     isActive: true,
@@ -27,6 +28,7 @@ const Banner = () => {
   });
   const [editForm, setEditForm] = useState({
     title: "",
+    description:"",
     link: "",
     position: 1,
     isActive: true,
@@ -127,6 +129,7 @@ const Banner = () => {
       setLoading(true);
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
+      formDataToSend.append("description", formData.description);
       formDataToSend.append("link", formData.link);
       formDataToSend.append("position", formData.position);
       formDataToSend.append("isActive", formData.isActive);
@@ -140,6 +143,7 @@ const Banner = () => {
 
       setFormData({
         title: "",
+        description:"",
         link: "",
         position: 1,
         isActive: true,
@@ -165,6 +169,7 @@ const Banner = () => {
     setSelectedBanner(banner);
     setEditForm({
       title: banner.title,
+      description: banner.description,
       link: banner.link,
       position: banner.position,
       isActive: banner.isActive,
@@ -181,6 +186,7 @@ const Banner = () => {
       setLoading(true);
       const formDataToSend = new FormData();
       formDataToSend.append("title", editForm.title);
+      formDataToSend.append("description", editForm.description);
       formDataToSend.append("link", editForm.link);
       formDataToSend.append("position", editForm.position);
       formDataToSend.append("isActive", editForm.isActive);
@@ -335,6 +341,22 @@ const Banner = () => {
                   </div>
 
                   <div className="ad-banner-form-group">
+                    <label htmlFor="description" className="ad-banner-label">
+                      Description
+                    </label>
+                    <input
+                      type="text"
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      className="ad-banner-input"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="ad-banner-form-group">
                     <label htmlFor="link" className="ad-banner-label">
                       Link URL
                     </label>
@@ -446,6 +468,22 @@ const Banner = () => {
                     id="edit-title"
                     name="title"
                     value={editForm.title}
+                    onChange={handleEditInputChange}
+                    className="ad-banner-input"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="ad-banner-form-group">
+                  <label htmlFor="edit-description" className="ad-banner-label">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    id="edit-description"
+                    name="description"
+                    value={editForm.description}
                     onChange={handleEditInputChange}
                     className="ad-banner-input"
                     required

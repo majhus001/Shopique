@@ -20,8 +20,8 @@ const productSchema = new mongoose.Schema(
     tags: [{ type: String }],                            
 
     isFeatured: { type: Boolean, default: false },        
-    offerPrice: { type: Number },                          
-    deliveryTime: { type: String },                        
+    offerPrice: { type: Number },                         
+    views: { type: Number },                         
 
     reviews: {
       type: [{

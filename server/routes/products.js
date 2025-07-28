@@ -31,7 +31,6 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       description,
       stock,
       rating,
-      deliveryTime,
       offerPrice,
       isFeatured,
       tags,
@@ -49,7 +48,7 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       description,
       stock: Number(stock),
       rating: rating ? Number(rating) : 0,
-      deliveryTime,
+      views: 0,
       offerPrice: offerPrice ? Number(offerPrice) : undefined,
       isFeatured: isFeatured === "true" || isFeatured === true,
       tags: Array.isArray(tags)
@@ -126,11 +125,14 @@ router.get("/fetchAll", async (req, res) => {
   }
 });
 
-router.get("/fetchByCategories", async (req, res) => {
+router.get("/fetchBySpecified", async (req, res) => {
   try {
     const categories = await Category.find({ isActive: true })
       .sort({ priority: -1 })
       .lean();
+
+    const trending = await product.find().sort({ salesCount: -1 }).limit(10);
+    const newArrivals = await product.find().sort({ createdAt: -1 }).limit(10);
 
     const categoriesWithProducts = await Promise.all(
       categories.map(async (category) => {
@@ -143,26 +145,54 @@ router.get("/fetchByCategories", async (req, res) => {
             salesCount: -1,
             createdAt: -1,
           })
-          .select("_id name price offerPrice images rating salesCount")
+          .select(
+            "_id name price category subCategory offerPrice images rating salesCount"
+          )
           .lean();
 
         return {
           _id: category._id,
+          category: category.category,
           subCategory: category.subCategory,
-          displayName: category.displayName,
           products,
         };
       })
     );
 
-    // Filter out categories with no products
     const filteredCategories = categoriesWithProducts.filter(
       (category) => category.products && category.products.length > 0
     );
 
+    const filteredproducts = filteredCategories.filter(
+      (category) => category.products && category.products.length > 6
+    );
+
+    const uniqueCategoriesWithProducts = [];
+
+    filteredCategories.forEach((item) => {
+      const existing = uniqueCategoriesWithProducts.find(
+        (cat) => cat.category === item.category
+      );
+
+      if (existing) {
+        existing.products.push(...item.products);
+      } else {
+        uniqueCategoriesWithProducts.push({
+          _id: item._id,
+          category: item.category,
+
+          products: [...item.products],
+        });
+      }
+    });
+
     res.status(200).json({
       success: true,
-      data: filteredCategories,
+      filteredCategories,
+      filteredproducts,
+      trending,
+      newArrivals,
+      categories: uniqueCategoriesWithProducts,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -212,7 +242,6 @@ router.get("/fetch/:id", async (req, res) => {
 // GET /admin/paginated?page=1&limit=10
 router.get("/admin/paginated", async (req, res) => {
   try {
-
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
     const skip = (page - 1) * limit;
@@ -232,7 +261,7 @@ router.get("/admin/paginated", async (req, res) => {
         { brand: searchRegex },
         { description: searchRegex },
         { category: searchRegex },
-        { tags: searchRegex }
+        { tags: searchRegex },
       ];
     }
 
@@ -246,12 +275,13 @@ router.get("/admin/paginated", async (req, res) => {
 
     // Execute queries in parallel for better performance
     const [products, total] = await Promise.all([
-      product.find(query)
+      product
+        .find(query)
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })
         .lean(),
-      product.countDocuments(query)
+      product.countDocuments(query),
     ]);
 
     // Calculate total pages
@@ -266,14 +296,14 @@ router.get("/admin/paginated", async (req, res) => {
       totalPages,
       hasNextPage: currentPage < totalPages,
       hasPrevPage: currentPage > 1,
-      limit
+      limit,
     });
   } catch (error) {
     console.error("Error in paginated products:", error);
     res.status(500).json({
       success: false,
       message: "Server error while fetching products",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
