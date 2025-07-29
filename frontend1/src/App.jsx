@@ -13,6 +13,7 @@ import Buynow from "./screens/BuyNowScreen/Buynow";
 import ScrollToTop from "./ScrollToTop";
 import AuthRequired from "./components/Authentication/AuthRequired";
 import NotFound from "./NotFound/NotFound";
+import AllProducts from "./screens/AllProducts/AllProducts";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
         <Route path="/auth/login" element={<Login />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/" element={<HomePage />} />
+        <Route path="/allproducts" element={<AllProducts />} />
         <Route path="/products/:category/:subCategory/:id" element={<ProductList />} />
         <Route path="/user/:userId/myorders" element={<Orderhistory />} />
         <Route path="/user/:userId/cart" element={<Cart />} />

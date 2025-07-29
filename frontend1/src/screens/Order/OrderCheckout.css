@@ -99,7 +99,7 @@
 
 /* Main Container */
 .checkout-container {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   min-height: 100vh;
 }
 
@@ -260,6 +260,14 @@
 
 .ord-login-btn:hover {
   background-color: #27ae60;
+}
+
+.ord-payment-select{
+  border: 1px solid;
+  width: 100%;
+  padding: 10px;
+  height: 40px;
+  border-radius: 5px;
 }
 
 /* Price Breakdown */

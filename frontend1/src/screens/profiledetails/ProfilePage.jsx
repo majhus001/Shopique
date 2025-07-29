@@ -232,6 +232,7 @@ const ProfilePage = () => {
       formData.append("address", userDetails.address);
       formData.append("pincode", userDetails.pincode);
 
+      console.log(userDetails);
       const imageFile = document.querySelector('input[type="file"]')?.files[0];
       if (imageFile) {
         formData.append("image", imageFile);

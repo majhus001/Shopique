@@ -16,7 +16,7 @@
 .search-page {
   padding: 80px 0;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background-color: #ffffff;
 }
 
 .search-container {
@@ -291,6 +291,7 @@
 .sp-original-price {
   text-decoration: line-through;
   color: #b70505;
+  font-weight:600;
   font-size: 0.9rem;
 }
 

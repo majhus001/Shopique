@@ -125,15 +125,167 @@ router.get("/fetchAll", async (req, res) => {
   }
 });
 
-router.get("/fetchBySpecified", async (req, res) => {
+router.get("/fetchby/category/:category?", async (req, res) => {
   try {
+    const { category } = req.params;
+
+    const allProducts = await product
+      .find()
+      .sort({ createdAt: -1 })
+      .select(
+        "_id name price category subCategory offerPrice images rating salesCount"
+      );
+
+    const categoryProducts = category
+      ? allProducts.filter(
+          (item) =>
+            item.category &&
+            item.category.toLowerCase() === category.toLowerCase()
+        )
+      : allProducts;
+
+    const categoryMap = new Map();
+
+    allProducts.forEach((item) => {
+      const cat = item.category;
+      const subCat = item.subCategory;
+
+      if (!cat) return;
+
+      // If category doesn't exist in map, initialize
+      if (!categoryMap.has(cat)) {
+        categoryMap.set(cat, {
+          name: cat,
+          count: 0,
+          subCategories: new Map(),
+        });
+      }
+
+      // Update category count
+      const categoryEntry = categoryMap.get(cat);
+      categoryEntry.count++;
+
+      // Update subcategory count
+      if (subCat) {
+        const subMap = categoryEntry.subCategories;
+        subMap.set(subCat, (subMap.get(subCat) || 0) + 1);
+      }
+    });
+
+    // Convert Map to final array
+    const categoryList = Array.from(categoryMap.values()).map((cat) => ({
+      name: cat.name,
+      count: cat.count,
+      subCategories: Array.from(cat.subCategories.entries()).map(
+        ([name, count]) => ({ name, count })
+      ),
+    }));
+
+    res.status(200).json({
+      success: true,
+      products: categoryProducts,
+      categories: categoryList,
+      totalProducts: allProducts.length,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch products",
+    });
+  }
+});
+
+router.post("/fetchBySpecified", async (req, res) => {
+  try {
+    const viewedProducts = req.body.viewedProducts;
+
     const categories = await Category.find({ isActive: true })
       .sort({ priority: -1 })
       .lean();
 
-    const trending = await product.find().sort({ salesCount: -1 }).limit(10);
-    const newArrivals = await product.find().sort({ createdAt: -1 }).limit(10);
+    const products = await product
+      .find()
+      .sort({ createdAt: -1 })
+      .select(
+        "_id name price category subCategory offerPrice images rating salesCount"
+      );
 
+    //filtering for viewed products
+    let recentlyViewedProducts = [];
+
+    if (viewedProducts.length > 9) {
+      recentlyViewedProducts = viewedProducts
+        .map((id) => products.find((p) => p._id.toString() === id))
+        .filter(Boolean); // remove any undefined if product not found
+    }
+
+    //filtering for trending products
+    const trending = [...products]
+      .sort((a, b) => b.salesCount - a.salesCount || b.views - a.views)
+      .slice(0, 10);
+
+    //filtering for newarrivals products
+    const newArrivals = products.slice(0, 10); // already sorted by createdAt desc
+
+    // Step 1: Group all products by category
+    const allCategoryMap = new Map();
+
+    products.forEach((prod) => {
+      const cat = prod.category;
+      if (!allCategoryMap.has(cat)) {
+        allCategoryMap.set(cat, {
+          category: cat,
+          image: prod.images[0],
+          count: 1,
+        });
+      } else {
+        const existing = allCategoryMap.get(cat);
+        existing.count += 1;
+      }
+    });
+
+    // Step 2: Analyze viewedProducts to find top categories
+    const viewedCategoryCount = {};
+
+    products.forEach((prod) => {
+      if (viewedProducts.includes(prod._id.toString())) {
+        const cat = prod.category;
+        if (!viewedCategoryCount[cat]) {
+          viewedCategoryCount[cat] = 1;
+        } else {
+          viewedCategoryCount[cat]++;
+        }
+      }
+    });
+
+    // Step 3: Sort categories by viewed count (if any)
+    const sortedViewedCategories = Object.entries(viewedCategoryCount)
+      .sort((a, b) => b[1] - a[1])
+      .map((entry) => entry[0]);
+
+    let categoriesgridProducts = [];
+
+    if (sortedViewedCategories.length > 0) {
+      sortedViewedCategories.forEach((cat) => {
+        if (allCategoryMap.has(cat)) {
+          categoriesgridProducts.push(allCategoryMap.get(cat));
+        }
+      });
+
+      for (let [cat, info] of allCategoryMap) {
+        if (
+          !sortedViewedCategories.includes(cat) &&
+          categoriesgridProducts.length < 6
+        ) {
+          categoriesgridProducts.push(info);
+        }
+      }
+    } else {
+      categoriesgridProducts = Array.from(allCategoryMap.values()).slice(0, 6);
+    }
+
+    //filtering for categorized products
     const categoriesWithProducts = await Promise.all(
       categories.map(async (category) => {
         const products = await product
@@ -167,32 +319,14 @@ router.get("/fetchBySpecified", async (req, res) => {
       (category) => category.products && category.products.length > 6
     );
 
-    const uniqueCategoriesWithProducts = [];
-
-    filteredCategories.forEach((item) => {
-      const existing = uniqueCategoriesWithProducts.find(
-        (cat) => cat.category === item.category
-      );
-
-      if (existing) {
-        existing.products.push(...item.products);
-      } else {
-        uniqueCategoriesWithProducts.push({
-          _id: item._id,
-          category: item.category,
-
-          products: [...item.products],
-        });
-      }
-    });
-
     res.status(200).json({
       success: true,
+      categoriesgridProducts,
       filteredCategories,
       filteredproducts,
       trending,
       newArrivals,
-      categories: uniqueCategoriesWithProducts,
+      recentlyViewedProducts,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -585,7 +719,35 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
   }
 });
 
-// Delete product
+// update views product
+router.put("/views/update/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existingProduct = await product.findById(id);
+    if (!existingProduct) {
+      return res.status(404).json({
+        success: false,
+        error: "Product not found",
+      });
+    }
+    existingProduct.views += 1;
+    await existingProduct.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Product views updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to update product",
+      details: error.message,
+    });
+  }
+});
+
 router.delete("/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;

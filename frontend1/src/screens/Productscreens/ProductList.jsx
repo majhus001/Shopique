@@ -349,6 +349,27 @@ const ProductList = () => {
   };
 
   useEffect(() => {
+    const updateViews = () => {
+      try {
+        const response = axios.put(
+          `${API_BASE_URL}/api/products/views/update/${id}`
+        );
+      } catch {
+        console.error("Error updating views");
+      }
+    };
+
+    const viewed = JSON.parse(localStorage.getItem("viewedProducts")) || [];
+    
+    if (!viewed.includes(id)) {
+      viewed.unshift(id); 
+      if (viewed.length > 10) viewed.pop(); 
+      localStorage.setItem("viewedProducts", JSON.stringify(viewed));
+    }
+
+    
+
+    updateViews();
     fetchData();
     fetchReviews();
   }, [id, user, navigate]);

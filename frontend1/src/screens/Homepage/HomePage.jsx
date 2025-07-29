@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import "./HomeStyle.css";
 import axios from "axios";
 import normalizeError from "../../utils/Error/NormalizeError";
@@ -18,6 +18,9 @@ import HeroSection from "./HeroSection/HeroSection";
 import TrendingProducts from "./TrendingSection/TrendingProducts";
 import FeaturedProducts from "./FeaturedProducts/FeaturedProducts";
 import NewArrival from "./NewArrival/NewArrival";
+import RecentlyViewed from "./RecentProducts/RecentlyViewed";
+import CategoryList from "./CategoryList/CategoryList";
+import Footer from "./Footer/Footer";
 
 // Add timeout utility for fetch
 AbortSignal.timeout = function (ms) {
@@ -104,6 +107,8 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [newArrivalProducts, setNewArrivalProducts] = useState([]);
+  const [recentlyViewedProducts, setRecentlyViewedProducts] = useState([]);
+  const [categoriesGridProducts, setCategoriesGridProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState(null);
@@ -135,8 +140,12 @@ const HomePage = () => {
         );
       }
 
-      const response = await axios.get(
+      const viewedProducts =
+        JSON.parse(localStorage.getItem("viewedProducts")) || [];
+
+      const response = await axios.post(
         `${API_BASE_URL}/api/products/fetchBySpecified`,
+        { viewedProducts },
         { signal: AbortSignal.timeout(8000) }
       );
 
@@ -146,10 +155,12 @@ const HomePage = () => {
         throw new Error("Invalid data received from server");
       }
 
-      setFilteredProducts(response.data.filteredproducts);
-      setFeaturedProducts(response.data.filteredCategories);
-      setTrendingProducts(response.data.trending);
-      setNewArrivalProducts(response.data.newArrivals);
+      setCategoriesGridProducts(response.data.categoriesgridProducts || []);
+      setFilteredProducts(response.data.filteredproducts || []);
+      setFeaturedProducts(response.data.filteredCategories || []);
+      setTrendingProducts(response.data.trending || []);
+      setNewArrivalProducts(response.data.newArrivals || []);
+      setRecentlyViewedProducts(response.data.recentlyViewedProducts || []);
     } catch (err) {
       console.error("Error fetching data:", err);
       if (
@@ -238,14 +249,28 @@ const HomePage = () => {
         <div className="content">
           <HeroSection />
 
-          
-          <FeaturedProducts
-            featuredProducts={featuredProducts}
-            userDetails={userDetails}
-          />
+          {featuredProducts.length > 0 && (
+            <FeaturedProducts
+              featuredProducts={featuredProducts}
+              userDetails={userDetails}
+            />
+          )}
 
-          <TrendingProducts trendingProducts={trendingProducts} />
-          <NewArrival newProducts={newArrivalProducts} />
+          {categoriesGridProducts.length > 0 && (
+            <CategoryList categories={categoriesGridProducts} />
+          )}
+
+          {trendingProducts.length > 0 && (
+            <TrendingProducts trendingProducts={trendingProducts} />
+          )}
+
+          {newArrivalProducts.length > 0 && (
+            <NewArrival newProducts={newArrivalProducts} />
+          )}
+
+          {recentlyViewedProducts.length > 0 && (
+            <RecentlyViewed recentProducts={recentlyViewedProducts} />
+          )}
 
           <section className="products-section">
             {filteredProducts.length > 0 ? (
@@ -259,7 +284,9 @@ const HomePage = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
                     >
-                      <h4 className="products-category-title">{capitalizeWords(subCategory)}</h4>
+                      <h4 className="products-category-title">
+                        {capitalizeWords(subCategory)}
+                      </h4>
                       <span
                         onClick={() => handlecategoryClick(subCategory)}
                         className="view-all-link"
@@ -430,131 +457,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      <motion.footer
-        className="modern-footer"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="footer-container">
-          <div className="footer-grid">
-            <motion.div
-              className="footer-column"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <h4>Shop</h4>
-              <ul>
-                <li>
-                  <Link to="/products">All Products</Link>
-                </li>
-                <li>
-                  <Link to="/products?filter=featured">Featured</Link>
-                </li>
-                <li>
-                  <Link to="/products?filter=new">New Arrivals</Link>
-                </li>
-                <li>
-                  <Link to="/products?filter=sale">Sale Items</Link>
-                </li>
-              </ul>
-            </motion.div>
-            <motion.div
-              className="footer-column"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <h4>Customer Service</h4>
-              <ul>
-                <li>
-                  <Link to="/contact">Contact Us</Link>
-                </li>
-                <li>
-                  <Link to="/faq">FAQs</Link>
-                </li>
-                <li>
-                  <Link to="/shipping">Shipping Policy</Link>
-                </li>
-                <li>
-                  <Link to="/returns">Returns & Exchanges</Link>
-                </li>
-              </ul>
-            </motion.div>
-            <motion.div
-              className="footer-column"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <h4>About Us</h4>
-              <ul>
-                <li>
-                  <Link to="/about">Our Story</Link>
-                </li>
-                <li>
-                  <Link to="/careers">Careers</Link>
-                </li>
-                <li>
-                  <Link to="/blog">Blog</Link>
-                </li>
-                <li>
-                  <Link to="/press">Press</Link>
-                </li>
-              </ul>
-            </motion.div>
-            <motion.div
-              className="footer-column"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <h4>Connect With Us</h4>
-              <div className="social-links">
-                <motion.a href="#" aria-label="Facebook" whileHover={{ y: -3 }}>
-                  <i className="fab fa-facebook"></i>
-                </motion.a>
-                <motion.a
-                  href="#"
-                  aria-label="Instagram"
-                  whileHover={{ y: -3 }}
-                >
-                  <i className="fab fa-instagram"></i>
-                </motion.a>
-                <motion.a href="#" aria-label="Twitter" whileHover={{ y: -3 }}>
-                  <i className="fab fa-twitter"></i>
-                </motion.a>
-                <motion.a
-                  href="#"
-                  aria-label="Pinterest"
-                  whileHover={{ y: -3 }}
-                >
-                  <i className="fab fa-pinterest"></i>
-                </motion.a>
-              </div>
-              <div className="payment-methods">
-                <i className="fab fa-cc-visa" aria-label="Visa"></i>
-                <i className="fab fa-cc-mastercard" aria-label="Mastercard"></i>
-                <i className="fab fa-cc-paypal" aria-label="PayPal"></i>
-                <i className="fab fa-cc-apple-pay" aria-label="Apple Pay"></i>
-              </div>
-            </motion.div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2025 E-Commerce Website. All rights reserved.</p>
-            <div className="legal-links">
-              <Link to="/privacy">Privacy Policy</Link>
-              <Link to="/terms">Terms of Service</Link>
-            </div>
-          </div>
-        </div>
-      </motion.footer>
+      <Footer />
 
       <BottomNav />
     </div>

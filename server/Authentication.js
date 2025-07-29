@@ -8,7 +8,7 @@ const Employee = require("./models/EmployeeSchema");
 const jwt = require("jsonwebtoken");
 const AdminEmail = require("./Admin/AdminEmail");
 const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = express.Router();
 
@@ -471,20 +471,14 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update fields only if they exist in req.body
-    if (name !== undefined) user.username = name;
-    if (email !== undefined) {
-      user.email = email;
-    }
-    if (password !== "undefined") {
+    user.username = name;
+    user.email = email;
+    if (password) {
       user.password = password;
     }
-    if (mobile !== undefined) user.mobile = mobile;
-    if (address !== undefined) user.address = address;
-    if (pincode !== undefined) {
-      user.pincode =
-        pincode === "" || pincode === "null" ? null : Number(pincode);
-    }
+    user.mobile = mobile;
+    user.address = address;
+    user.pincode = pincode;
 
     if (req.file) {
       const file = req.file;
@@ -634,7 +628,7 @@ router.post("/google-login", async (req, res) => {
     // Verify the token
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
@@ -650,13 +644,13 @@ router.post("/google-login", async (req, res) => {
         username,
         email,
         image: picture,
-        password: "google-oauth", 
+        password: "google-oauth",
         pincode: "",
       });
       await user.save();
       console.log("✅ Google Signup success");
     }
-    
+
     const userData = {
       _id: user._id,
       username: user.username,
@@ -664,20 +658,18 @@ router.post("/google-login", async (req, res) => {
       image: user.image,
       pincode: user.pincode,
     };
-    
+
     console.log("llll");
     res.status(200).json({
       success: true,
       message: "Login successful!",
       user: userData,
-      role: "user", 
+      role: "user",
     });
   } catch (error) {
     console.error("❌ Google Login Error:", error);
     res.status(500).json({ success: false, message: "Google login failed." });
   }
 });
-
-
 
 module.exports = router;

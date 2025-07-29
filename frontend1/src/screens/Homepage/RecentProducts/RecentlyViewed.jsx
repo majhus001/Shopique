@@ -8,18 +8,18 @@ import {
   FiChevronLeft,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-const NewArrival = ({ newProducts }) => {
+const RecentlyViewed = ({ recentProducts }) => {
   const navigate = useNavigate();
-  const newproductContainerRefs = useRef({});
+  const recentproductContainerRefs = useRef({});
   const scrollLeft = (subCategory) => {
-    const container = newproductContainerRefs.current[subCategory];
+    const container = recentproductContainerRefs.current[subCategory];
     if (container) {
       container.scrollBy({ left: -500, behavior: "smooth" });
     }
   };
 
   const scrollRight = (subCategory) => {
-    const container = newproductContainerRefs.current[subCategory];
+    const container = recentproductContainerRefs.current[subCategory];
     if (container) {
       container.scrollBy({ left: 500, behavior: "smooth" });
     }
@@ -35,7 +35,7 @@ const NewArrival = ({ newProducts }) => {
   };
   return (
     <section className="products-section">
-      {newProducts.length > 0 ? (
+      {recentProducts.length > 0 ? (
         <div className="product-category">
           {/* Header */}
           <motion.div
@@ -45,7 +45,7 @@ const NewArrival = ({ newProducts }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h4 className="products-category-title">New Arrivals</h4>
+            <h4 className="products-category-title">Recently Viewed</h4>
             <span
               className="view-all-link"
               onClick={() => navigate("/products/trending")}
@@ -56,10 +56,10 @@ const NewArrival = ({ newProducts }) => {
 
           {/* Scroll Container */}
           <div className="horizontal-scroll-container">
-            {newProducts.length > 5 && (
+            {recentProducts.length > 5 && (
               <motion.button
                 className="scroll-button left"
-                onClick={() => scrollLeft("newarrivals")}
+                onClick={() => scrollLeft("recent")}
                 aria-label="Scroll left"
               >
                 <FiChevronLeft />
@@ -68,9 +68,9 @@ const NewArrival = ({ newProducts }) => {
 
             <div
               className="product-horizontal-scroll"
-              ref={(el) => (newproductContainerRefs.current["newarrivals"] = el)}
+              ref={(el) => (recentproductContainerRefs.current["recent"] = el)}
             >
-              {newProducts.map((item) => (
+              {recentProducts.map((item) => (
                 <motion.div
                   className="product-card-horizontal"
                   key={item._id}
@@ -148,10 +148,10 @@ const NewArrival = ({ newProducts }) => {
               ))}
             </div>
 
-            {newProducts.length > 5 && (
+            {recentProducts.length > 5 && (
               <motion.button
                 className="scroll-button right"
-                onClick={() => scrollRight("newarrivals")}
+                onClick={() => scrollRight("recent")}
                 aria-label="Scroll right"
               >
                 <FiChevronRight />
@@ -183,4 +183,4 @@ const NewArrival = ({ newProducts }) => {
   );
 };
 
-export default NewArrival;
+export default RecentlyViewed;
