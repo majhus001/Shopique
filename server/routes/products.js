@@ -204,7 +204,8 @@ router.post("/fetchBySpecified", async (req, res) => {
       .sort({ priority: -1 })
       .lean();
 
-    const products = await product
+      
+      const products = await product
       .find()
       .sort({ createdAt: -1 })
       .select(
@@ -244,10 +245,11 @@ router.post("/fetchBySpecified", async (req, res) => {
         existing.count += 1;
       }
     });
+    // console.log(allCategoryMap)
 
     // Step 2: Analyze viewedProducts to find top categories
     const viewedCategoryCount = {};
-
+    
     products.forEach((prod) => {
       if (viewedProducts.includes(prod._id.toString())) {
         const cat = prod.category;
@@ -272,7 +274,7 @@ router.post("/fetchBySpecified", async (req, res) => {
           categoriesgridProducts.push(allCategoryMap.get(cat));
         }
       });
-
+      
       for (let [cat, info] of allCategoryMap) {
         if (
           !sortedViewedCategories.includes(cat) &&

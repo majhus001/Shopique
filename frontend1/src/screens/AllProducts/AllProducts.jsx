@@ -10,6 +10,8 @@ import { ToastContainer, toast } from "react-toastify";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import normalizeError from "../../utils/Error/NormalizeError";
 import { FiX } from "react-icons/fi";
+import capitalizeWords from "../../utils/CapitalizeWord";
+import slugify from "../../utils/SlugifyUrl";
 
 AbortSignal.timeout = function (ms) {
   const controller = new AbortController();
@@ -21,13 +23,6 @@ AbortSignal.timeout = function (ms) {
     ms
   );
   return controller.signal;
-};
-const capitalizeWords = (string) => {
-  if (!string) return "";
-  return string
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
 };
 
 const AllProductsSkeleton = () => {
@@ -160,12 +155,45 @@ const AllProducts = () => {
 
   const sortedProducts = sortProducts(products);
 
-  const handleprodlistnavigation = (item) => {
-    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
-      state: {
-        product: item,
-      },
+  const handlecategoryClick = (subCategory) => {
+    let prodCategory = null;
+    let prodSubCategory = null;
+    let prodname = null;
+    let productId = null;
+    products.forEach((item) => {
+      if (item.subCategory === subCategory) {
+        console.log(item);
+        prodSubCategory = slugify(item.subCategory);
+        prodCategory = slugify(item.category);
+        prodname = slugify(item.name);
+        productId = item._id;
+      }
     });
+    navigate(
+      `/products/search/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
+      {
+        state: {
+          user,
+          productCategory: prodCategory,
+          productSubCategory: prodSubCategory,
+        },
+      }
+    );
+  };
+
+  const handleprodlistnavigation = (item) => {
+    const prodSubCategory = slugify(item.subCategory);
+    const prodCategory = slugify(item.category);
+    const prodname = slugify(item.name);
+    const productId = item._id;
+    navigate(
+      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
+      {
+        state: {
+          product: item,
+        },
+      }
+    );
   };
 
   if (error) {
@@ -326,7 +354,7 @@ const AllProducts = () => {
                   {sortedProducts.map((product) => (
                     <div
                       key={product._id}
-                      onClick={() => handleprodlistnavigation(product)}
+                      onClick={() => handlecategoryClick(product.subCategory)}
                       className="all-prods-card"
                     >
                       <div className="all-prods-card-img-container">
@@ -383,7 +411,13 @@ const AllProducts = () => {
                           </span>
                         </div>
 
-                        <button className="all-prods-add-to-cart">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleprodlistnavigation(product);
+                          }}
+                          className="all-prods-add-to-cart"
+                        >
                           Buy now
                         </button>
                       </div>

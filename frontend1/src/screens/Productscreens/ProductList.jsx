@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   FaShoppingCart,
   FaStar,
@@ -360,14 +361,12 @@ const ProductList = () => {
     };
 
     const viewed = JSON.parse(localStorage.getItem("viewedProducts")) || [];
-    
+
     if (!viewed.includes(id)) {
-      viewed.unshift(id); 
-      if (viewed.length > 10) viewed.pop(); 
+      viewed.unshift(id);
+      if (viewed.length > 10) viewed.pop();
       localStorage.setItem("viewedProducts", JSON.stringify(viewed));
     }
-
-    
 
     updateViews();
     fetchData();
@@ -555,568 +554,594 @@ const ProductList = () => {
     );
   }
 
+  const title = `${productData.name} - Buy Now | Shopique`;
+  const description = `Get the best deals on ${productData.name}. Shopique offers free delivery, EMI options, and more.`;
+
   return (
-    <div className="product-page-container">
-      <Navbar />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="colored"
-      />
+    <>
+      <Helmet>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta
+          name="keywords"
+          content={`buy ${productData.name}, ${productData.category}, shopique`}
+        />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+      </Helmet>
 
-      <div className="product-main-content">
-        {/* Breadcrumbs */}
-        <div className="breadcrumbs">
-          <span>Home</span>
-          <IoIosArrowForward className="breadcrumb-arrow" />
-          <span>{productData.category}</span>
-          <IoIosArrowForward className="breadcrumb-arrow" />
-          <span>{productData.subCategory}</span>
-          <IoIosArrowForward className="breadcrumb-arrow" />
-          <span className="current">{productData.name}</span>
-        </div>
+      <div className="product-page-container">
+        <Navbar />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="colored"
+        />
 
-        {/* Product Section */}
-        <div className="product-section">
-          {/* Image Gallery */}
-          <div className="product-gallery">
-            <div
-              className={`main-image-container ${zoomImage ? "zoomed" : ""}`}
-              onClick={() => setZoomImage(!zoomImage)}
-            >
-              {productData.images?.length > 0 ? (
-                <img
-                  src={productData.images[selectedImageIndex]}
-                  alt={productData.name}
-                  className="main-product-image"
-                />
-              ) : (
-                <div className="no-image-placeholder">
-                  <RiFlashlightFill className="placeholder-icon" />
-                  <p>No image available</p>
-                </div>
-              )}
-            </div>
-
-            <div className="thumbnail-scroller">
-              {productData.images?.map((img, index) => (
-                <div
-                  key={index}
-                  className={`thumbnail-item ${
-                    index === selectedImageIndex ? "active" : ""
-                  }`}
-                  onClick={() => handleImageSelect(index)}
-                >
-                  <img src={img} alt={`Thumbnail ${index}`} />
-                </div>
-              ))}
-            </div>
-
-            <div className="action-buttons">
-              <button
-                className={`pl-cart-btn ${isProdAdded ? "go-to-cart" : ""}`}
-                onClick={() => {
-                  if (productData.stock <= 0) {
-                    toast.error("Sorry, Out of Stock");
-                  } else if (isProdAdded) {
-                    navigate(`/user/${userId}/cart`);
-                  } else {
-                    handleAddToCart();
-                  }
-                }}
-                disabled={productData.stock <= 0 && !isProdAdded}
-              >
-                <FaShoppingCart className="btn-icon" />
-                {isProdAdded
-                  ? "Go to Cart"
-                  : productData.stock > 0
-                  ? "Add to Cart"
-                  : "Out of Stock"}
-              </button>
-
-              <button
-                className="buy-btn"
-                onClick={handleBuyNow}
-                disabled={productData.stock <= 0}
-              >
-                {productData.stock > 0 ? "Buy Now" : "Out of Stock"}
-              </button>
-            </div>
+        <div className="product-main-content">
+          {/* Breadcrumbs */}
+          <div className="breadcrumbs">
+            <span>Home</span>
+            <IoIosArrowForward className="breadcrumb-arrow" />
+            <span>{productData.category}</span>
+            <IoIosArrowForward className="breadcrumb-arrow" />
+            <span>{productData.subCategory}</span>
+            <IoIosArrowForward className="breadcrumb-arrow" />
+            <span className="current">{productData.name}</span>
           </div>
 
-          {/* Product Info */}
-          <div className="product-info">
-            <h1 className="product-title">
-              <span className="product-name">{productData.name}</span>
-              <span className="pl-brand-name">{productData.brand}</span>
-            </h1>
-
-            <div className="pl-product-meta">
-              <div className="rating-badge">
-                {renderStars(Math.round(productData.rating))}
-                <span className="rating-text">
-                  {productData.rating?.toFixed(1)} | {totalReviews} Ratings
-                </span>
-              </div>
-              <span className="pl-mv-brand-name">{productData.brand}</span>
-            </div>
-
-            <div className="price-section">
-              <div>
-                <div className="pl-current-price">
-                  {productData.offerPrice &&
-                  productData.offerPrice !== productData.price ? (
-                    <>
-                      <span className="pl-offer-price">
-                        ₹{productData.offerPrice.toLocaleString()}
-                      </span>
-                      <span className="pl-original-price">
-                        ₹{productData.price.toLocaleString()}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="pl-offer-price">
-                      ₹{productData.price?.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="price-meta">inclusive of all taxes</div>
-            </div>
-
-            <div className="product-highlights">
-              <h3 className="section-heading">Highlights</h3>
-              <ul className="highlight-list">
-                <li>Brand: {productData.brand || "Not specified"}</li>
-                <li>Category: {productData.category}</li>
-                {productData.description && <li>{productData.description}</li>}
-              </ul>
-
-              {productData.specifications && (
-                <>
-                  <h3 className="section-heading">Specifications</h3>
-                  <div className="specifications-cont">
-                    {Object.entries(productData.specifications).map(
-                      ([key, value]) => (
-                        <div key={key} className="pl-spec-item">
-                          <span className="pl-spec-label">
-                            {key.replace(/-/g, " ")}
-                          </span>
-                          <span className="pl-spec-value">{value}</span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="delivery-section">
-              <h3 className="section-heading">
-                <FaTruck className="section-icon" />
-                Delivery Options
-              </h3>
-
+          {/* Product Section */}
+          <div className="product-section">
+            {/* Image Gallery */}
+            <div className="product-gallery">
               <div
-                className={`stock-status ${
-                  productData.stock > 0 ? "in-stock" : "out-stock"
-                }`}
+                className={`main-image-container ${zoomImage ? "zoomed" : ""}`}
+                onClick={() => setZoomImage(!zoomImage)}
               >
-                {productData.stock > 0 ? (
-                  <>
-                    <span className="status-badge available">In Stock</span>
-                    <span className="stock-text">
-                      {productData.stock} units available
-                    </span>
-                  </>
-                ) : (
-                  <span className="status-badge unavailable">Out of Stock</span>
-                )}
-              </div>
-
-              <div className="delivery-checker">
-                <div className="pincode-input-group">
-                  <div className="input-with-icon">
-                    <FaMapMarkerAlt className="input-icon" />
-                    <input
-                      type="text"
-                      placeholder={!pincode ? "Enter Delivery Pincode" : ""}
-                      maxLength="6"
-                      value={pincode}
-                      onChange={(e) => setPincode(e.target.value)}
-                      onFocus={() => setIsPincodeFocused(true)}
-                      onBlur={() => setIsPincodeFocused(false)}
-                      className={
-                        !isPincodeFocused && !pincode
-                          ? "faded-input"
-                          : "normal-input"
-                      }
-                    />
-                  </div>
-                  <button
-                    className="check-btn"
-                    onClick={handleCheckDelivery}
-                    disabled={pincodeload}
-                  >
-                    {pincodeload ? "Checking..." : "Check"}
-                  </button>
-                </div>
-
-                {expectedDelivery && (
-                  <div className="delivery-info-card">
-                    <div className="info-row">
-                      <FaMapMarkerAlt className="info-icon" />
-                      <span>{expectedDelivery}</span>
-                    </div>
-                    <div className="info-row">
-                      <FaTruck className="info-icon" />
-                      <span>{expectedDeliverydist}</span>
-                    </div>
-                    <div className="info-row">
-                      <FaCalendarAlt className="info-icon" />
-                      <span>{expectedDeliverydate}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Product Details Tabs */}
-        <div className="product-details-tabs">
-          <div className="tab-header">
-            <button
-              className={`tab-btn ${
-                activeTab === "description" ? "active" : ""
-              }`}
-              onClick={() => setActiveTab("description")}
-            >
-              Description
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "reviews" ? "active" : ""}`}
-              onClick={() => setActiveTab("reviews")}
-            >
-              Reviews ({totalReviews})
-            </button>
-          </div>
-
-          <div className="tab-content">
-            {activeTab === "description" ? (
-              <div className="description-content">
-                <h3>Product Details</h3>
-                <p>
-                  {productData.description ||
-                    "No detailed description available for this product."}
-                </p>
-                <div className="specs-grid">
-                  <div className="spec-item">
-                    <span className="spec-label">Brand</span>
-                    <span className="spec-value">
-                      {productData.brand || "-"}
-                    </span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Category</span>
-                    <span className="spec-value">
-                      {productData.subCategory?.charAt(0).toUpperCase() +
-                        productData.subCategory?.slice(1) || "-"}
-                    </span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Rating</span>
-                    <span className="spec-value">
-                      {productData.rating?.toFixed(1)} ({totalReviews} reviews)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="reviews-content">
-                <div className="review-form-card">
-                  <h3>Write a Review</h3>
-                  <textarea
-                    placeholder="Share your experience with this product..."
-                    value={review}
-                    style={{
-                      resize: "none",
-                      width: "100%",
-                      height: "100px",
-                      padding: "10px",
-                      boxSizing: "border-box",
-                    }}
-                    onChange={(e) => {
-                      if (e.target.value.length <= 500) {
-                        setReview(e.target.value);
-                      } else toast.warn("Maximum characters reached");
-                    }}
-                    maxLength={501}
+                {productData.images?.length > 0 ? (
+                  <img
+                    src={productData.images[selectedImageIndex]}
+                    alt={productData.name}
+                    className="main-product-image"
                   />
-                  <div className="rating-input-container">
-                    <span>Your Rating:</span>
-                    <div className="star-rating-input">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <FaStar
-                          key={star}
-                          className={`rating-star ${
-                            star <= urating ? "selected" : ""
-                          }`}
-                          onClick={() => setRating(star)}
-                        />
-                      ))}
-                    </div>
-                    <button
-                      className="submit-review-btn"
-                      onClick={handleSubmit}
-                    >
-                      Submit Review
-                    </button>
-                  </div>
-                </div>
-
-                {reviews.length > 0 ? (
-                  <>
-                    <div className="reviews-list">
-                      {reviewsWithExpansion.map((r, index) => {
-                        const charLimit = getCharacterLimit();
-                        const shouldTruncate =
-                          r.review.length > charLimit && !r.expanded;
-
-                        return (
-                          <div key={index} className="review-card">
-                            <div className="reviewer-info">
-                              <img
-                                src={
-                                  userImages[r.userId]?.image ||
-                                  "/default-user.png"
-                                }
-                                alt="User"
-                                className="reviewer-avatar"
-                              />
-                              <div className="reviewer-details">
-                                <h4>
-                                  {userImages[r.userId]?.username ||
-                                    "Anonymous"}
-                                </h4>
-                                <div className="review-rating">
-                                  {renderStars(r.rating)}
-                                </div>
-                              </div>
-                              <div className="review-date">
-                                {new Date(r.createdAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div className="review-text">
-                              <p>
-                                {shouldTruncate ? (
-                                  <>
-                                    {r.review.substring(0, charLimit)}...
-                                    <button
-                                      className="view-more-btn"
-                                      onClick={() => toggleReviewExpand(r._id)}
-                                    >
-                                      View More
-                                    </button>
-                                  </>
-                                ) : (
-                                  r.review
-                                )}
-                              </p>
-                              {r.review.length > charLimit && r.expanded && (
-                                <button
-                                  className="view-less-btn"
-                                  onClick={() => toggleReviewExpand(r._id)}
-                                >
-                                  View Less
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                      <div className="pagination-controls">
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="pagination-btn"
-                        >
-                          <FaChevronLeft />
-                        </button>
-
-                        {Array.from(
-                          { length: Math.min(5, totalPages) },
-                          (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                              pageNum = i + 1;
-                            } else if (currentPage <= 3) {
-                              pageNum = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
-                              pageNum = totalPages - 4 + i;
-                            } else {
-                              pageNum = currentPage - 2 + i;
-                            }
-
-                            return (
-                              <button
-                                key={pageNum}
-                                onClick={() => handlePageChange(pageNum)}
-                                className={`pagination-btn ${
-                                  currentPage === pageNum ? "active" : ""
-                                }`}
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          }
-                        )}
-
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="pagination-btn"
-                        >
-                          <FaChevronRight />
-                        </button>
-
-                        <span className="pagination-info">
-                          Page {currentPage} of {totalPages}
-                        </span>
-                      </div>
-                    )}
-                  </>
                 ) : (
-                  <div className="no-reviews">
-                    <p>No reviews yet. Be the first to review this product!</p>
+                  <div className="no-image-placeholder">
+                    <RiFlashlightFill className="placeholder-icon" />
+                    <p>No image available</p>
                   </div>
                 )}
               </div>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <section className="pl-products-section">
-        {relatedProds.length > 0 ? (
-          <div className="pl-related-products-container">
-            <span className="pl-section-title">Related products</span>
-
-            <div className="pl-horizontal-scroll-container">
-              {relatedProds.length > 5 && (
-                <button
-                  className="pl-scroll-button pl-left"
-                  onClick={() => scrollLeft("related")}
-                  aria-label="pl-Scroll pl-left"
-                >
-                  <FaChevronLeft />
-                </button>
-              )}
-
-              <div
-                className="pl-product-horizontal-scroll"
-                ref={(el) => (productContainerRefs.current["related"] = el)}
-              >
-                {relatedProds.map((item) => (
+              <div className="thumbnail-scroller">
+                {productData.images?.map((img, index) => (
                   <div
-                    className="pl-product-card-horizontal"
-                    key={item._id}
-                    onClick={() =>
-                      navigate(
-                        `/products/${item.category}/${item.subCategory}/${item._id}`,
-                        {
-                          state: { product: item },
-                        }
-                      )
-                    }
+                    key={index}
+                    className={`thumbnail-item ${
+                      index === selectedImageIndex ? "active" : ""
+                    }`}
+                    onClick={() => handleImageSelect(index)}
                   >
-                    <div className="pl-product-image-container">
-                      <img
-                        src={item.images?.[0] || ""}
-                        alt={item.name}
-                        className="pl-product-image"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src = "";
-                          e.target.alt = "Image not available";
-                          e.target.className = "product-image-error";
-                        }}
-                      />
-                      {item.offerPrice && item.price > item.offerPrice && (
-                        <div className="pl-discount-badge">
-                          {Math.round(
-                            ((item.price - item.offerPrice) / item.price) * 100
-                          )}
-                          % OFF
-                        </div>
-                      )}
-                    </div>
-                    <div className="pl-product-details">
-                      <h4 className="pl-product-name">{item.name}</h4>
-                      <div className="pl-price-container">
-                        {item.offerPrice ? (
-                          <>
-                            <span className="pl-rp-offer-price">
-                              ₹{item.offerPrice.toLocaleString()}
-                            </span>
-                            <span className="pl-rp-original-price">
-                              ₹{item.price.toLocaleString()}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="pl-rp-price">
-                            ₹{item.price.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="pl-product-meta">
-                        {item.rating > 0 && (
-                          <div className="pl-rating">
-                            <FaStar className="pl-star-icon" />
-                            <span>{item.rating.toFixed(1)}</span>
-                          </div>
-                        )}
-                        {item.stock > 0 && (
-                          <div className="pl-stock-status">
-                            <span>{item.stock} in stock</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <img src={img} alt={`Thumbnail ${index}`} />
                   </div>
                 ))}
               </div>
 
-              {relatedProds.length > 5 && (
+              <div className="action-buttons">
                 <button
-                  className="pl-scroll-button pl-right"
-                  onClick={() => scrollRight("related")}
-                  aria-label="pl-Scroll pl-right"
+                  className={`pl-cart-btn ${isProdAdded ? "go-to-cart" : ""}`}
+                  onClick={() => {
+                    if (productData.stock <= 0) {
+                      toast.error("Sorry, Out of Stock");
+                    } else if (isProdAdded) {
+                      navigate(`/user/${userId}/cart`);
+                    } else {
+                      handleAddToCart();
+                    }
+                  }}
+                  disabled={productData.stock <= 0 && !isProdAdded}
                 >
-                  <FaChevronRight />
+                  <FaShoppingCart className="btn-icon" />
+                  {isProdAdded
+                    ? "Go to Cart"
+                    : productData.stock > 0
+                      ? "Add to Cart"
+                      : "Out of Stock"}
                 </button>
+
+                <button
+                  className="buy-btn"
+                  onClick={handleBuyNow}
+                  disabled={productData.stock <= 0}
+                >
+                  {productData.stock > 0 ? "Buy Now" : "Out of Stock"}
+                </button>
+              </div>
+            </div>
+
+            {/* Product Info */}
+            <div className="product-info">
+              <h1 className="product-title">
+                <span className="product-name">{productData.name}</span>
+                <span className="pl-brand-name">{productData.brand}</span>
+              </h1>
+
+              <div className="pl-product-meta">
+                <div className="rating-badge">
+                  {renderStars(Math.round(productData.rating))}
+                  <span className="rating-text">
+                    {productData.rating?.toFixed(1)} | {totalReviews} Ratings
+                  </span>
+                </div>
+                <span className="pl-mv-brand-name">{productData.brand}</span>
+              </div>
+
+              <div className="price-section">
+                <div>
+                  <div className="pl-current-price">
+                    {productData.offerPrice &&
+                    productData.offerPrice !== productData.price ? (
+                      <>
+                        <span className="pl-offer-price">
+                          ₹{productData.offerPrice.toLocaleString()}
+                        </span>
+                        <span className="pl-original-price">
+                          ₹{productData.price.toLocaleString()}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="pl-offer-price">
+                        ₹{productData.price?.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="price-meta">inclusive of all taxes</div>
+              </div>
+
+              <div className="product-highlights">
+                <h3 className="section-heading">Highlights</h3>
+                <ul className="highlight-list">
+                  <li>Brand: {productData.brand || "Not specified"}</li>
+                  <li>Category: {productData.category}</li>
+                  {productData.description && (
+                    <li>{productData.description}</li>
+                  )}
+                </ul>
+
+                {productData.specifications && (
+                  <>
+                    <h3 className="section-heading">Specifications</h3>
+                    <div className="specifications-cont">
+                      {Object.entries(productData.specifications).map(
+                        ([key, value]) => (
+                          <div key={key} className="pl-spec-item">
+                            <span className="pl-spec-label">
+                              {key.replace(/-/g, " ")}
+                            </span>
+                            <span className="pl-spec-value">{value}</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="delivery-section">
+                <h3 className="section-heading">
+                  <FaTruck className="section-icon" />
+                  Delivery Options
+                </h3>
+
+                <div
+                  className={`stock-status ${
+                    productData.stock > 0 ? "in-stock" : "out-stock"
+                  }`}
+                >
+                  {productData.stock > 0 ? (
+                    <>
+                      <span className="status-badge available">In Stock</span>
+                      <span className="stock-text">
+                        {productData.stock} units available
+                      </span>
+                    </>
+                  ) : (
+                    <span className="status-badge unavailable">
+                      Out of Stock
+                    </span>
+                  )}
+                </div>
+
+                <div className="delivery-checker">
+                  <div className="pincode-input-group">
+                    <div className="input-with-icon">
+                      <FaMapMarkerAlt className="input-icon" />
+                      <input
+                        type="text"
+                        placeholder={!pincode ? "Enter Delivery Pincode" : ""}
+                        maxLength="6"
+                        value={pincode}
+                        onChange={(e) => setPincode(e.target.value)}
+                        onFocus={() => setIsPincodeFocused(true)}
+                        onBlur={() => setIsPincodeFocused(false)}
+                        className={
+                          !isPincodeFocused && !pincode
+                            ? "faded-input"
+                            : "normal-input"
+                        }
+                      />
+                    </div>
+                    <button
+                      className="check-btn"
+                      onClick={handleCheckDelivery}
+                      disabled={pincodeload}
+                    >
+                      {pincodeload ? "Checking..." : "Check"}
+                    </button>
+                  </div>
+
+                  {expectedDelivery && (
+                    <div className="delivery-info-card">
+                      <div className="info-row">
+                        <FaMapMarkerAlt className="info-icon" />
+                        <span>{expectedDelivery}</span>
+                      </div>
+                      <div className="info-row">
+                        <FaTruck className="info-icon" />
+                        <span>{expectedDeliverydist}</span>
+                      </div>
+                      <div className="info-row">
+                        <FaCalendarAlt className="info-icon" />
+                        <span>{expectedDeliverydate}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Details Tabs */}
+          <div className="product-details-tabs">
+            <div className="tab-header">
+              <button
+                className={`tab-btn ${
+                  activeTab === "description" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("description")}
+              >
+                Description
+              </button>
+              <button
+                className={`tab-btn ${activeTab === "reviews" ? "active" : ""}`}
+                onClick={() => setActiveTab("reviews")}
+              >
+                Reviews ({totalReviews})
+              </button>
+            </div>
+
+            <div className="tab-content">
+              {activeTab === "description" ? (
+                <div className="description-content">
+                  <h3>Product Details</h3>
+                  <p>
+                    {productData.description ||
+                      "No detailed description available for this product."}
+                  </p>
+                  <div className="specs-grid">
+                    <div className="spec-item">
+                      <span className="spec-label">Brand</span>
+                      <span className="spec-value">
+                        {productData.brand || "-"}
+                      </span>
+                    </div>
+                    <div className="spec-item">
+                      <span className="spec-label">Category</span>
+                      <span className="spec-value">
+                        {productData.subCategory?.charAt(0).toUpperCase() +
+                          productData.subCategory?.slice(1) || "-"}
+                      </span>
+                    </div>
+                    <div className="spec-item">
+                      <span className="spec-label">Rating</span>
+                      <span className="spec-value">
+                        {productData.rating?.toFixed(1)} ({totalReviews}{" "}
+                        reviews)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="reviews-content">
+                  <div className="review-form-card">
+                    <h3>Write a Review</h3>
+                    <textarea
+                      placeholder="Share your experience with this product..."
+                      value={review}
+                      style={{
+                        resize: "none",
+                        width: "100%",
+                        height: "100px",
+                        padding: "10px",
+                        boxSizing: "border-box",
+                      }}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 500) {
+                          setReview(e.target.value);
+                        } else toast.warn("Maximum characters reached");
+                      }}
+                      maxLength={501}
+                    />
+                    <div className="rating-input-container">
+                      <span>Your Rating:</span>
+                      <div className="star-rating-input">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <FaStar
+                            key={star}
+                            className={`rating-star ${
+                              star <= urating ? "selected" : ""
+                            }`}
+                            onClick={() => setRating(star)}
+                          />
+                        ))}
+                      </div>
+                      <button
+                        className="submit-review-btn"
+                        onClick={handleSubmit}
+                      >
+                        Submit Review
+                      </button>
+                    </div>
+                  </div>
+
+                  {reviews.length > 0 ? (
+                    <>
+                      <div className="reviews-list">
+                        {reviewsWithExpansion.map((r, index) => {
+                          const charLimit = getCharacterLimit();
+                          const shouldTruncate =
+                            r.review.length > charLimit && !r.expanded;
+
+                          return (
+                            <div key={index} className="review-card">
+                              <div className="reviewer-info">
+                                <img
+                                  src={
+                                    userImages[r.userId]?.image ||
+                                    "/default-user.png"
+                                  }
+                                  alt="User"
+                                  className="reviewer-avatar"
+                                />
+                                <div className="reviewer-details">
+                                  <h4>
+                                    {userImages[r.userId]?.username ||
+                                      "Anonymous"}
+                                  </h4>
+                                  <div className="review-rating">
+                                    {renderStars(r.rating)}
+                                  </div>
+                                </div>
+                                <div className="review-date">
+                                  {new Date(r.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <div className="review-text">
+                                <p>
+                                  {shouldTruncate ? (
+                                    <>
+                                      {r.review.substring(0, charLimit)}...
+                                      <button
+                                        className="view-more-btn"
+                                        onClick={() =>
+                                          toggleReviewExpand(r._id)
+                                        }
+                                      >
+                                        View More
+                                      </button>
+                                    </>
+                                  ) : (
+                                    r.review
+                                  )}
+                                </p>
+                                {r.review.length > charLimit && r.expanded && (
+                                  <button
+                                    className="view-less-btn"
+                                    onClick={() => toggleReviewExpand(r._id)}
+                                  >
+                                    View Less
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="pagination-controls">
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="pagination-btn"
+                          >
+                            <FaChevronLeft />
+                          </button>
+
+                          {Array.from(
+                            { length: Math.min(5, totalPages) },
+                            (_, i) => {
+                              let pageNum;
+                              if (totalPages <= 5) {
+                                pageNum = i + 1;
+                              } else if (currentPage <= 3) {
+                                pageNum = i + 1;
+                              } else if (currentPage >= totalPages - 2) {
+                                pageNum = totalPages - 4 + i;
+                              } else {
+                                pageNum = currentPage - 2 + i;
+                              }
+
+                              return (
+                                <button
+                                  key={pageNum}
+                                  onClick={() => handlePageChange(pageNum)}
+                                  className={`pagination-btn ${
+                                    currentPage === pageNum ? "active" : ""
+                                  }`}
+                                >
+                                  {pageNum}
+                                </button>
+                              );
+                            }
+                          )}
+
+                          <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="pagination-btn"
+                          >
+                            <FaChevronRight />
+                          </button>
+
+                          <span className="pagination-info">
+                            Page {currentPage} of {totalPages}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="no-reviews">
+                      <p>
+                        No reviews yet. Be the first to review this product!
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
-        ) : (
-          <div className="pl-empty-state">
-            <RiFlashlightFill className="pl-empty-icon" />
-            <h3>No related products found</h3>
-          </div>
-        )}
-      </section>
+        </div>
 
-      <BottomNav />
-    </div>
+        <section className="pl-products-section">
+          {relatedProds.length > 0 ? (
+            <div className="pl-related-products-container">
+              <span className="pl-section-title">Related products</span>
+
+              <div className="pl-horizontal-scroll-container">
+                {relatedProds.length > 5 && (
+                  <button
+                    className="pl-scroll-button pl-left"
+                    onClick={() => scrollLeft("related")}
+                    aria-label="pl-Scroll pl-left"
+                  >
+                    <FaChevronLeft />
+                  </button>
+                )}
+
+                <div
+                  className="pl-product-horizontal-scroll"
+                  ref={(el) => (productContainerRefs.current["related"] = el)}
+                >
+                  {relatedProds.map((item) => (
+                    <div
+                      className="pl-product-card-horizontal"
+                      key={item._id}
+                      onClick={() =>
+                        navigate(
+                          `/products/${item.category}/${item.subCategory}/${item._id}`,
+                          {
+                            state: { product: item },
+                          }
+                        )
+                      }
+                    >
+                      <div className="pl-product-image-container">
+                        <img
+                          src={item.images?.[0] || ""}
+                          alt={item.name}
+                          className="pl-product-image"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.src = "";
+                            e.target.alt = "Image not available";
+                            e.target.className = "product-image-error";
+                          }}
+                        />
+                        {item.offerPrice && item.price > item.offerPrice && (
+                          <div className="pl-discount-badge">
+                            {Math.round(
+                              ((item.price - item.offerPrice) / item.price) *
+                                100
+                            )}
+                            % OFF
+                          </div>
+                        )}
+                      </div>
+                      <div className="pl-product-details">
+                        <h4 className="pl-product-name">{item.name}</h4>
+                        <div className="pl-price-container">
+                          {item.offerPrice ? (
+                            <>
+                              <span className="pl-rp-offer-price">
+                                ₹{item.offerPrice.toLocaleString()}
+                              </span>
+                              <span className="pl-rp-original-price">
+                                ₹{item.price.toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="pl-rp-price">
+                              ₹{item.price.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="pl-product-meta">
+                          {item.rating > 0 && (
+                            <div className="pl-rating">
+                              <FaStar className="pl-star-icon" />
+                              <span>{item.rating.toFixed(1)}</span>
+                            </div>
+                          )}
+                          {item.stock > 0 && (
+                            <div className="pl-stock-status">
+                              <span>{item.stock} in stock</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {relatedProds.length > 5 && (
+                  <button
+                    className="pl-scroll-button pl-right"
+                    onClick={() => scrollRight("related")}
+                    aria-label="pl-Scroll pl-right"
+                  >
+                    <FaChevronRight />
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="pl-empty-state">
+              <RiFlashlightFill className="pl-empty-icon" />
+              <h3>No related products found</h3>
+            </div>
+          )}
+        </section>
+
+        <BottomNav />
+      </div>
+    </>
   );
 };
 

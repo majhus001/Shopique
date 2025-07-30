@@ -7,7 +7,8 @@ import {
   FiChevronRight,
   FiChevronLeft,
 } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
+import slugify from "../../../utils/SlugifyUrl";
+import { motion } from "framer-motion";
 const NewArrival = ({ newProducts }) => {
   const navigate = useNavigate();
   const newproductContainerRefs = useRef({});
@@ -26,13 +27,20 @@ const NewArrival = ({ newProducts }) => {
   };
 
   const handleprodlistnavigation = (item) => {
-    console.log(item);
-    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
-      state: {
-        product: item,
-      },
-    });
+    const prodSubCategory = slugify(item.subCategory);
+    const prodCategory = slugify(item.category);
+    const prodname = slugify(item.name);
+    const productId = item._id;
+    navigate(
+      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
+      {
+        state: {
+          product: item,
+        },
+      }
+    );
   };
+
   return (
     <section className="products-section">
       {newProducts.length > 0 ? (
@@ -68,7 +76,9 @@ const NewArrival = ({ newProducts }) => {
 
             <div
               className="product-horizontal-scroll"
-              ref={(el) => (newproductContainerRefs.current["newarrivals"] = el)}
+              ref={(el) =>
+                (newproductContainerRefs.current["newarrivals"] = el)
+              }
             >
               {newProducts.map((item) => (
                 <motion.div

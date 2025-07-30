@@ -259,21 +259,15 @@
   overflow: hidden;
   
 }
-.sp-product-info-top{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  height: 3em;
-  
-}
 .sp-sales-count{
   font-size: 0.8rem;
 }
 
 .sp-price-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: start;
+  justify-content: flex-start;
 }
 
 .sp-prod-prices{

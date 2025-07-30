@@ -5,6 +5,7 @@ import "./Navbar.css";
 import { useDispatch, useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import ValidUserData from "../../utils/ValidUserData";
+import slugify from "../../utils/SlugifyUrl";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -61,8 +62,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const initialize = async () => {
-      if (hasCheckedUser.current) return; 
-      hasCheckedUser.current = true; 
+      if (hasCheckedUser.current) return;
+      hasCheckedUser.current = true;
 
       setIsLoading(true);
 
@@ -100,9 +101,9 @@ export default function Navbar() {
     try {
       setIsSearching(true);
       const response = await axios.get(`${API_BASE_URL}/api/products/search`, {
-        params: { query: query.trim() }
+        params: { query: query.trim() },
       });
-      
+
       if (response.data.success) {
         setSearchResults(response.data.data.slice(0, 5)); // Limit to 5 results
       }
@@ -130,7 +131,7 @@ export default function Navbar() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
+    if (e.key === "Enter" && searchQuery.trim()) {
       // If user presses Enter with a search query, navigate to search page
       e.preventDefault();
       navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
@@ -140,8 +141,12 @@ export default function Navbar() {
   };
 
   const handleProductClick = (product) => {
+    const prodSubCategory = slugify(product.subCategory);
+    const prodCategory = slugify(product.category);
+    const prodname = slugify(product.name);
+    const productId = product._id;
     navigate(
-      `/products/search/${product.category}/${product.subCategory}/${product._id}`,
+      `/products/search/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
       {
         state: {
           clickedProduct: product,
@@ -222,9 +227,6 @@ export default function Navbar() {
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
           />
-          {isSearching && (
-            <div className="search-loading">Searching...</div>
-          )}
           {searchResults.length > 0 && !isSearching && (
             <div className="search-results-dropdown">
               {searchResults.map((product) => (
@@ -251,10 +253,12 @@ export default function Navbar() {
                   </div>
                 </div>
               ))}
-              <div 
+              <div
                 className="search-view-all"
                 onClick={() => {
-                  navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
+                  navigate(
+                    `/products/search?query=${encodeURIComponent(searchQuery)}`
+                  );
                   setSearchQuery("");
                   setSearchResults([]);
                 }}
@@ -280,9 +284,6 @@ export default function Navbar() {
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
           />
-          {isSearching && (
-            <div className="search-loading">Searching...</div>
-          )}
           {searchResults.length > 0 && !isSearching && (
             <div className="search-results-dropdown">
               {searchResults.map((product) => (
@@ -309,10 +310,12 @@ export default function Navbar() {
                   </div>
                 </div>
               ))}
-              <div 
+              <div
                 className="search-view-all"
                 onClick={() => {
-                  navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
+                  navigate(
+                    `/products/search?query=${encodeURIComponent(searchQuery)}`
+                  );
                   setSearchQuery("");
                   setSearchResults([]);
                 }}

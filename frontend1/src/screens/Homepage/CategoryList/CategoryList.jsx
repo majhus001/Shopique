@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "./CategoryList.css";
+import capitalizeWords from "../../../utils/CapitalizeWord";
 
 const CategoryList = ({ categories }) => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const CategoryList = ({ categories }) => {
                 loading="lazy"
               />
               <div className="cat-list-overlay">
-                <h3 className="cat-list-category-name">{category.category}</h3>
+                <h3 className="cat-list-category-name">{capitalizeWords(category.category)}</h3>
               </div>
             </div>
 

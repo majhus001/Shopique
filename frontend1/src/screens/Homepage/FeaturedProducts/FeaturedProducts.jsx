@@ -1,34 +1,30 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../HomeStyle.css";
 import { FiChevronRight } from "react-icons/fi";
 import { motion } from "framer-motion";
-
-const capitalizeWords = (string) => {
-  if (!string) return "";
-  return string
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
+import capitalizeWords from "../../../utils/CapitalizeWord";
+import slugify from "../../../utils/SlugifyUrl";
 
 const FeaturedProducts = ({ featuredProducts, userDetails }) => {
   const navigate = useNavigate();
   const handlecategoryClick = (subCategory) => {
     let prodCategory = null;
     let prodSubCategory = null;
+    let prodname = null;
     let productId = null;
+
     featuredProducts.forEach((item) => {
       if (item.subCategory === subCategory) {
         item.products.forEach((el) => {
-          prodSubCategory = el.subCategory;
-          prodCategory = el.category;
+          prodSubCategory = slugify(el.subCategory);
+          prodCategory = slugify(el.category);
+          prodname = slugify(el.name);
           productId = el._id;
         });
       }
     });
     navigate(
-      `/products/search/${prodCategory}/${prodSubCategory}/${productId}`,
+      `/products/search/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
       {
         state: {
           user: userDetails,
@@ -40,15 +36,23 @@ const FeaturedProducts = ({ featuredProducts, userDetails }) => {
   };
 
   const handleprodlistnavigation = (item) => {
-    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
-      state: {
-        product: item,
-      },
-    });
+    const prodSubCategory = slugify(item.subCategory);
+    const prodCategory = slugify(item.category);
+    const prodname = slugify(item.name);
+    const productId = item._id;
+    navigate(
+      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
+      {
+        state: {
+          product: item,
+        },
+      }
+    );
   };
+
   return (
     <section className="featured-section">
-     <div className="featured-scroll-wrapper">
+      <div className="featured-scroll-wrapper">
         <div className="featured-category-cont">
           {featuredProducts.slice(0, 8).map((category) => (
             <motion.div

@@ -663,13 +663,13 @@
 }
 
 .buy-btn {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: #007AFF;
   color: white;
 }
 
 .buy-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 10px rgba(59, 58, 57, 0.3);
 }
 
 .pl-cart-btn:disabled,
@@ -1142,12 +1142,12 @@
 .pl-rp-offer-price {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: #059669;
 }
 
 .pl-rp-original-price {
   font-size: 0.9rem;
-  color: #999;
+  color: #b70505;
   text-decoration: line-through;
   margin-left: 0.5rem;
 }

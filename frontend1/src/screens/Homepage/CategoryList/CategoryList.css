@@ -1,9 +1,8 @@
 
 .cat-list-container {
   margin: 0;
-  padding: 2rem 1rem;
+  padding: 1rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* background: red */
 }
 
 .cat-list-title {
@@ -91,7 +90,7 @@
 
 .cat-list-category-name {
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 2rem;
   font-weight: 600;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
@@ -153,21 +152,24 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 94, 98, 0.3);
+  box-shadow: 0 4px 12px rgba(46, 47, 48, 0.3);
   transition: all 0.3s ease;
 }
 
 .cat-list-view-all-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 94, 98, 0.4);
+  box-shadow: 0 6px 16px #b8bbbd;
 }
 
 /* Responsive Adjustments */
-@media (max-width: 768px) {
-  .cat-list-container {
-    padding: 1.5rem 1rem;
+
+@media (max-width: 910px) {
+  .cat-list-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1rem;
   }
-  
+}
+@media (max-width: 810px) {
   .cat-list-title {
     font-size: 1.5rem;
   }
@@ -182,7 +184,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 510px) {
   .cat-list-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -190,7 +192,9 @@
   .cat-list-image-container {
     height: 120px;
   }
-  
+  .cat-list-image{
+    object-fit: contain;
+  }
   .cat-list-category-name {
     font-size: 1rem;
   }

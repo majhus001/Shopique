@@ -21,8 +21,9 @@ import NewArrival from "./NewArrival/NewArrival";
 import RecentlyViewed from "./RecentProducts/RecentlyViewed";
 import CategoryList from "./CategoryList/CategoryList";
 import Footer from "./Footer/Footer";
+import capitalizeWords from "../../utils/CapitalizeWord";
+import slugify from "../../utils/SlugifyUrl";
 
-// Add timeout utility for fetch
 AbortSignal.timeout = function (ms) {
   const controller = new AbortController();
   setTimeout(
@@ -33,14 +34,6 @@ AbortSignal.timeout = function (ms) {
     ms
   );
   return controller.signal;
-};
-
-const capitalizeWords = (string) => {
-  if (!string) return "";
-  return string
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
 };
 
 const SkeletonLoading = () => {
@@ -102,6 +95,7 @@ const SkeletonLoading = () => {
 const HomePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [userDetails, setUserDetails] = useState(location.state?.user || null);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -211,11 +205,18 @@ const HomePage = () => {
   };
 
   const handleprodlistnavigation = (item) => {
-    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
-      state: {
-        product: item,
-      },
-    });
+    const prodSubCategory = slugify(item.subCategory);
+    const prodCategory = slugify(item.category);
+    const prodname = slugify(item.name);
+    const productId = item._id;
+    navigate(
+      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
+      {
+        state: {
+          product: item,
+        },
+      }
+    );
   };
 
   if (loading) {

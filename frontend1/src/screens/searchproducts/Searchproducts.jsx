@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import slugify from "../../utils/SlugifyUrl";
 import {
   FiShoppingCart,
   FiShoppingBag,
@@ -87,7 +88,6 @@ export default function Searchproducts() {
       document.removeEventListener("keydown", handleOutsideInteraction);
     };
   }, [mobileFiltersOpen]);
-
 
   const fetchPaginatedProducts = async () => {
     try {
@@ -205,7 +205,11 @@ export default function Searchproducts() {
   };
 
   const handleprodlistnavigation = (item) => {
-    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`, {
+    const prodSubCategory = slugify(item.subCategory);
+    const prodCategory = slugify(item.category);
+    const prodname = slugify(item.name);
+    const productId = item._id;
+    navigate(`/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`, {
       state: {
         product: item,
       },
@@ -433,15 +437,7 @@ export default function Searchproducts() {
                       )}
                     </div>
                     <div className="sp-product-info">
-                      <div className="sp-product-info-top">
-                        <h3>{item.name}</h3>
-                        {item.salesCount > 0 && (
-                          <div className="sp-sales-count">
-                            <FiShoppingBag />
-                            <span>{item.salesCount + 50} sold</span>
-                          </div>
-                        )}
-                      </div>
+                      <h3>{item.name}</h3>
                       <div className="sp-price-section">
                         <div className="sp-prod-prices">
                           {item.offerPrice ? (
@@ -458,9 +454,22 @@ export default function Searchproducts() {
                           )}
                         </div>
                         {item.rating > 0 && (
-                          <div className="rating">
-                            <FiStar className="star-icon" />
-                            <span>{item.rating?.toFixed(1)}</span>
+                          <div className="all-prods-card-rating">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <span
+                                key={i}
+                                className={`all-prods-star ${
+                                  i < Math.floor(item.rating)
+                                    ? "all-prods-star-filled"
+                                    : ""
+                                }`}
+                              >
+                                {i < Math.floor(item.rating) ? "★" : "☆"}
+                              </span>
+                            ))}
+                            <span className="all-prods-rating-count">
+                              ({item.rating})
+                            </span>
                           </div>
                         )}
                       </div>
@@ -539,7 +548,10 @@ export default function Searchproducts() {
             </>
           ) : (
             <div className="no-products">
-              <img src="https://cdn-icons-png.flaticon.com/512/5089/5089733.png" alt="No products found" />
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/5089/5089733.png"
+                alt="No products found"
+              />
               <h3>No products found</h3>
               <p>Try adjusting your filters or search criteria</p>
               <button
