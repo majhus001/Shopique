@@ -23,8 +23,9 @@ import { IoIosArrowForward } from "react-icons/io";
 import Navbar from "../../components/navbar/Navbar";
 import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import API_BASE_URL from "../../api";
-import getCoordinates from "../../utils/Geolocation";
+import getCoordinates from "../../utils/DeliveryPincodeCheck/Geolocation";
 import "./ProductList.css";
+import NotFound from "../../NotFound/NotFound";
 
 const useScreenSize = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -210,6 +211,7 @@ const ProductList = () => {
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const warehousePincode = "641008";
+  const [notFound, setNotFound] = useState(false);
 
   const [userId, setUserId] = useState(user?._id || null);
   const [userDetails, setUserDetails] = useState(user || null);
@@ -283,9 +285,10 @@ const ProductList = () => {
         err.response.status >= 400 &&
         err.response.status < 500
       ) {
-        toast.error(
-          err.response.data.message || "Error fetching Products data"
-        );
+        console.log("404");
+        toast.warn("Error fetching Products data");
+        console.log("404 again");
+        setNotFound(true);
       } else {
         let errorMessage = normalizeError(err);
         setError(errorMessage);
@@ -527,6 +530,10 @@ const ProductList = () => {
 
   // Calculate total pages for reviews
   const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+
+  if (notFound) {
+    return <NotFound />;
+  }
 
   if (loading) {
     return (

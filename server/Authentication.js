@@ -471,14 +471,13 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.username = name;
-    user.email = email;
-    if (password) {
-      user.password = password;
-    }
-    user.mobile = mobile;
-    user.address = address;
-    user.pincode = pincode;
+    if (name) user.username = name;
+    if (email) user.email = email;
+    if (password) user.password = password;
+
+    user.mobile = mobile || " ";
+    user.address = address || " ";
+    user.pincode = pincode || " ";
 
     if (req.file) {
       const file = req.file;

@@ -7,6 +7,8 @@ import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import Navbar from "../../components/navbar/Navbar";
 import API_BASE_URL from "../../api";
+import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
+import HandleCategoryClick from "../../utils/Navigation/CategoryListNavigation";
 import {
   FiShoppingBag,
   FiStar,
@@ -22,7 +24,6 @@ import RecentlyViewed from "./RecentProducts/RecentlyViewed";
 import CategoryList from "./CategoryList/CategoryList";
 import Footer from "./Footer/Footer";
 import capitalizeWords from "../../utils/CapitalizeWord";
-import slugify from "../../utils/SlugifyUrl";
 
 AbortSignal.timeout = function (ms) {
   const controller = new AbortController();
@@ -179,45 +180,6 @@ const HomePage = () => {
     fetchData();
   }, [fetchData]);
 
-  const handlecategoryClick = (subCategory) => {
-    let prodCategory = null;
-    let prodSubCategory = null;
-    let productId = null;
-    featuredProducts.forEach((item) => {
-      if (item.subCategory === subCategory) {
-        item.products.forEach((el) => {
-          prodSubCategory = el.subCategory;
-          prodCategory = el.category;
-          productId = el._id;
-        });
-      }
-    });
-    navigate(
-      `/products/search/${prodCategory}/${prodSubCategory}/${productId}`,
-      {
-        state: {
-          user: userDetails,
-          productCategory: prodCategory,
-          productSubCategory: prodSubCategory,
-        },
-      }
-    );
-  };
-
-  const handleprodlistnavigation = (item) => {
-    const prodSubCategory = slugify(item.subCategory);
-    const prodCategory = slugify(item.category);
-    const prodname = slugify(item.name);
-    const productId = item._id;
-    navigate(
-      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          product: item,
-        },
-      }
-    );
-  };
 
   if (loading) {
     return (
@@ -289,7 +251,7 @@ const HomePage = () => {
                         {capitalizeWords(subCategory)}
                       </h4>
                       <span
-                        onClick={() => handlecategoryClick(subCategory)}
+                        onClick={() => HandleCategoryClick(categoryProducts[0], subCategory, filteredProducts, navigate)}
                         className="view-all-link"
                       >
                         View All <FiChevronRight />
@@ -327,7 +289,7 @@ const HomePage = () => {
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleprodlistnavigation(item);
+                                HandleProdlistNavigation(item, navigate);
                               }}
                             >
                               <div className="product-image-container">

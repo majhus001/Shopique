@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import RazorPayment from "../../utils/RazorPayment";
 import EmailFunction from "../../utils/EmailFunction";
+import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 
 const OrderDetailsSkeleton = () => {
   return (
@@ -211,10 +212,7 @@ const Orderdetails = () => {
     }
   };
 
-  const handleProductNavigation = (item) => {
-    navigate(`/products/${item.category}/${item.subCategory}/${item._id}`);
-  };
-
+  
   if (loading) {
     return (
       <div className="product-page-container">
@@ -380,10 +378,11 @@ const Orderdetails = () => {
                     onError={(e) => {
                       e.target.src = "/placeholder-product.png";
                     }}
+                     onClick={() => HandleProdlistNavigation(item, navigate)}
                   />
                   <div
                     className="ord-product-details"
-                    onClick={() => handleProductNavigation(item)}
+                    onClick={() => HandleProdlistNavigation(item, navigate)}
                   >
                     <span className="ord-product-name">{item.name}</span>
                     <span className="ord-product-price">

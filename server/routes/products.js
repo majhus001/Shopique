@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -54,8 +55,8 @@ router.post("/add", upload.array("images", 5), async (req, res) => {
       tags: Array.isArray(tags)
         ? tags
         : typeof tags === "string"
-        ? tags.split(",")
-        : [],
+          ? tags.split(",")
+          : [],
       specifications:
         typeof specifications === "string"
           ? JSON.parse(specifications)
@@ -204,8 +205,7 @@ router.post("/fetchBySpecified", async (req, res) => {
       .sort({ priority: -1 })
       .lean();
 
-      
-      const products = await product
+    const products = await product
       .find()
       .sort({ createdAt: -1 })
       .select(
@@ -249,7 +249,7 @@ router.post("/fetchBySpecified", async (req, res) => {
 
     // Step 2: Analyze viewedProducts to find top categories
     const viewedCategoryCount = {};
-    
+
     products.forEach((prod) => {
       if (viewedProducts.includes(prod._id.toString())) {
         const cat = prod.category;
@@ -274,7 +274,7 @@ router.post("/fetchBySpecified", async (req, res) => {
           categoriesgridProducts.push(allCategoryMap.get(cat));
         }
       });
-      
+
       for (let [cat, info] of allCategoryMap) {
         if (
           !sortedViewedCategories.includes(cat) &&
@@ -342,8 +342,21 @@ router.post("/fetchBySpecified", async (req, res) => {
 
 // Get product by ID
 router.get("/fetch/:id", async (req, res) => {
+  const { id } = req.params;
+
+  console.log("isValid:", mongoose.Types.ObjectId.isValid(id));
+
+  // 👇 First validate the ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({
+      success: false,
+      error: "Invalid product ID format",
+    });
+  }
+
   try {
-    const productItem = await product.findById(req.params.id);
+    const productItem = await product.findById(id);
+
     if (!productItem) {
       return res.status(404).json({
         success: false,
@@ -352,14 +365,11 @@ router.get("/fetch/:id", async (req, res) => {
     }
 
     const subcat = productItem.subCategory;
-    let finalsubcatprods = [];
-
     const subCatProducts = await product.find({ subCategory: subcat });
-    if (subCatProducts.length > 0) {
-      finalsubcatprods = subCatProducts.filter(
-        (p) => !p._id.equals(productItem._id)
-      );
-    }
+
+    const finalsubcatprods = subCatProducts.filter(
+      (p) => !p._id.equals(productItem._id)
+    );
 
     res.status(200).json({
       success: true,
@@ -472,7 +482,6 @@ router.get("/paginated", async (req, res) => {
 
     if (productId) {
       try {
-        // Include all necessary fields for the clicked product
         clickedProduct = await product
           .findById(productId)
           .select(
@@ -653,8 +662,8 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
       tags: Array.isArray(tags)
         ? tags
         : typeof tags === "string"
-        ? tags.split(",")
-        : existingProduct.tags,
+          ? tags.split(",")
+          : existingProduct.tags,
       specifications:
         typeof specifications === "string"
           ? JSON.parse(specifications)
@@ -725,6 +734,13 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
 router.put("/views/update/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({
+        success: false,
+        error: "Invalid product ID format",
+      });
+    }
 
     const existingProduct = await product.findById(id);
     if (!existingProduct) {

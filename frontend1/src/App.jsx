@@ -38,9 +38,9 @@ const App = () => {
             path="/products/:category/:subCategory/:name/:id"
             element={<ProductList />}
           />
-          <Route path="/user/:userId/myorders" element={<Orderhistory />} />
-          <Route path="/user/:userId/cart" element={<Cart />} />
-          <Route path="/user/:userId/profile" element={<ProfilePage />} />
+          <Route path="/user/myorders" element={<Orderhistory />} />
+          <Route path="/user/cart" element={<Cart />} />
+          <Route path="/user/profile" element={<ProfilePage />} />
           <Route
             path="/products/search/:category/:subCategory/:name/:id?"
             element={<Searchproducts />}

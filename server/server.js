@@ -47,9 +47,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
-app.use("/api/mobiles", mobileRoutes);
-app.use("/api/clothings", clothingRoutes);
-app.use("/api/hoappliances", homeappliRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payment", paymentRoutes);
@@ -68,7 +65,6 @@ app.use("/api/sellers", sellersRoutes);
 app.use("/api/banners", bannerRoutes);
 
 
-// MongoDB Connection
 // mongodb+srv://majidsmart7:maji5002@cluster0.jyfpj.mongodb.net/Ecommerse
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected..."))

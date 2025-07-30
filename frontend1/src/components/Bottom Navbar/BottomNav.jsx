@@ -14,11 +14,11 @@ export default function BottomNav() {
   const handleNavigation = (path) => {
     setActiveTab(path);
     if (path === "profile") {
-      navigate(`/user/${user?._id || "unauthorized"}/profile`);
+      navigate(`/user/profile`);
     } else if (path === "cart") {
-      navigate(`/user/${user?._id || "unauthorized"}/cart`);
+      navigate(`/user/cart`);
     } else if (path === "myorders") {
-      navigate(`/user/${user?._id || "unauthorized"}/myorders`);
+      navigate(`/user/myorders`);
     } else if (path === "home") {
       navigate(`/home`);
     } else {

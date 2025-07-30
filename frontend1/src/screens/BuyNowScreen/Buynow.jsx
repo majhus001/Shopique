@@ -9,23 +9,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import "../CartScreen/Cart.css";
-import getCoordinates from "../../utils/Geolocation";
 import AuthRequired from "../../components/Authentication/AuthRequired";
-
-// Helper function to calculate distance between two coordinates (Haversine formula)
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Earth radius in km
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c); // Distance in km
-};
+import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
 
 const Buynow = () => {
   const location = useLocation();
@@ -38,12 +23,13 @@ const Buynow = () => {
   const [loading, setLoading] = useState(false);
 
   const [pincode, setPincode] = useState(user?.pincode || "");
+  const [isPincodeTouched, setIsPincodeTouched] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
+
   const [expectedDelivery, setExpectedDelivery] = useState("");
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
   const [isPincodeDone, setIsPincodeDone] = useState(false);
-  const warehousePincode = "641008";
 
   useEffect(() => {
     if (product) {
@@ -64,14 +50,14 @@ const Buynow = () => {
         },
       ]);
     } else {
-      navigate("/")
+      navigate("/");
     }
 
     if (user) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
-      toast.error("please login to continue")
+      toast.error("please login to continue");
     }
   }, [user]);
 
@@ -117,58 +103,15 @@ const Buynow = () => {
     );
   };
 
-  const handleCheckDelivery = async (value) => {
-    if (value.length !== 6) {
-      setExpectedDelivery("Please enter a valid 6-digit pincode");
-      setExpectedDeliverydate("");
-      setIsPincodeDone(false);
-      return;
-    }
-
-    setPincodeLoad(true);
-    setExpectedDelivery("");
-    setExpectedDeliverydate("");
-    setIsPincodeDone(false);
-
-    try {
-      const warehouseCoords = await getCoordinates(warehousePincode);
-      const userCoords = await getCoordinates(value);
-
-      if (!warehouseCoords || !userCoords) {
-        throw new Error("Could not get coordinates for pincodes");
-      }
-
-      const distanceKm = calculateDistance(
-        warehouseCoords.lat,
-        warehouseCoords.lon,
-        userCoords.lat,
-        userCoords.lon
-      );
-
-      let deliveryDays = Math.min(Math.ceil(distanceKm / 100) + 1, 6);
-      const deliveryDate = new Date();
-      deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
-
-      if (distanceKm > 0 && distanceKm < 100) {
-        setDeliveryFee(50);
-      } else if (distanceKm > 100) {
-        setDeliveryFee(100);
-      }
-
-      setExpectedDelivery(`${userCoords.address}`);
-
-      setExpectedDeliverydate(
-        ` in ${deliveryDays} day(s) (by ${deliveryDate.toLocaleDateString()})`
-      );
-
-      setIsPincodeDone(true);
-    } catch (error) {
-      console.error("Error checking delivery:", error);
-      setExpectedDelivery("❌ Error checking delivery for this pincode");
-      setIsPincodeDone(false);
-    } finally {
-      setPincodeLoad(false);
-    }
+  const handleCheckDelivery = (value) => {
+    HandleCheckDelivery(
+      value,
+      setExpectedDelivery,
+      setExpectedDeliverydate,
+      setIsPincodeDone,
+      setDeliveryFee,
+      setPincodeLoad
+    );
   };
 
   return (
@@ -280,13 +223,22 @@ const Buynow = () => {
                           handleCheckDelivery(value);
                         }
                       }
+                      if (!isPincodeTouched) {
+                        setIsPincodeTouched(true);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (!isPincodeTouched) {
+                        setIsPincodeTouched(true);
+                      }
                     }}
                     maxLength={6}
+                    style={{ color: isPincodeTouched ? "inherit" : "#aaa" }}
                   />
                   <button
                     className="cart-pincode-check-btn"
                     onClick={() => handleCheckDelivery(pincode)}
-                    disabled={pincodeload || pincode.length !== 6}
+                    disabled={pincodeload || !isPincodeTouched}
                   >
                     {pincodeload ? (
                       <>

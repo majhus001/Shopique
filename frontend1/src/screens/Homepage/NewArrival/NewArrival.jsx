@@ -7,8 +7,10 @@ import {
   FiChevronRight,
   FiChevronLeft,
 } from "react-icons/fi";
-import slugify from "../../../utils/SlugifyUrl";
 import { motion } from "framer-motion";
+import HandleProdlistNavigation from "../../../utils/Navigation/ProdlistNavigation";
+import HandleCategoryClick from "../../../utils/Navigation/CategoryListNavigation";
+
 const NewArrival = ({ newProducts }) => {
   const navigate = useNavigate();
   const newproductContainerRefs = useRef({});
@@ -26,21 +28,6 @@ const NewArrival = ({ newProducts }) => {
     }
   };
 
-  const handleprodlistnavigation = (item) => {
-    const prodSubCategory = slugify(item.subCategory);
-    const prodCategory = slugify(item.category);
-    const prodname = slugify(item.name);
-    const productId = item._id;
-    navigate(
-      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          product: item,
-        },
-      }
-    );
-  };
-
   return (
     <section className="products-section">
       {newProducts.length > 0 ? (
@@ -56,7 +43,9 @@ const NewArrival = ({ newProducts }) => {
             <h4 className="products-category-title">New Arrivals</h4>
             <span
               className="view-all-link"
-              onClick={() => navigate("/products/trending")}
+              onClick={() =>
+                navigate("/allproducts")
+              }
             >
               View All <FiChevronRight />
             </span>
@@ -92,7 +81,7 @@ const NewArrival = ({ newProducts }) => {
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  onClick={() => handleprodlistnavigation(item)}
+                  onClick={() => HandleProdlistNavigation(item, navigate)}
                 >
                   {/* Product Image */}
                   <div className="product-image-container">

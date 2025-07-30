@@ -9,7 +9,6 @@ import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import slugify from "../../utils/SlugifyUrl";
 import {
   FiShoppingCart,
   FiShoppingBag,
@@ -22,6 +21,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import BottomNav from "../../components/Bottom Navbar/BottomNav";
+import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 
 export default function Searchproducts() {
   const location = useLocation();
@@ -29,7 +29,7 @@ export default function Searchproducts() {
   const { id } = useParams();
   const { clickedProduct, productCategory, productSubCategory } =
     location.state || {};
-
+    
   const user = useSelector((state) => state.user);
 
   const [userId, setUserId] = useState(user?._id || null);
@@ -202,18 +202,6 @@ export default function Searchproducts() {
 
   const handleGoToCart = () => {
     navigate(`/user/${userId}/cart`);
-  };
-
-  const handleprodlistnavigation = (item) => {
-    const prodSubCategory = slugify(item.subCategory);
-    const prodCategory = slugify(item.category);
-    const prodname = slugify(item.name);
-    const productId = item._id;
-    navigate(`/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`, {
-      state: {
-        product: item,
-      },
-    });
   };
 
   const handlePriceApply = () => {
@@ -416,7 +404,7 @@ export default function Searchproducts() {
                 {categoryProducts.map((item) => (
                   <div
                     key={item._id}
-                    onClick={() => handleprodlistnavigation(item)}
+                    onClick={() => HandleProdlistNavigation(item, navigate)}
                     className="product-card"
                   >
                     <div className="sp-product-image">

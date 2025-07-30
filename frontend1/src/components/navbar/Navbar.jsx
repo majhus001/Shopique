@@ -196,7 +196,7 @@ export default function Navbar() {
             <button
               className="nav-btns profile-btn"
               onClick={() =>
-                navigate(`/user/${user?._id || "unauthorized"}/profile`)
+                navigate(`/user/profile`)
               }
               aria-label="Profile"
             >
@@ -331,7 +331,7 @@ export default function Navbar() {
             <button
               className="nav-btns cart-btn"
               onClick={() =>
-                navigate(`/user/${user?._id || "unauthorized"}/cart`)
+                navigate(`/user/cart`)
               }
             >
               <i className="fas fa-shopping-cart"></i>
@@ -346,7 +346,7 @@ export default function Navbar() {
             <button
               className="nav-btns profile-btn"
               onClick={() =>
-                navigate(`/user/${user?._id || "unauthorized"}/profile`)
+                navigate(`/user/profile`)
               }
             >
               <i className="fas fa-user"></i>

@@ -2,9 +2,9 @@ import axios from "axios";
 
 const getCoordinates = async (pincode, setLoading) => {
   try {
-    console.log("Starting API call for pincode:", pincode); // Debug 1
     if (setLoading) setLoading(true);
 
+    // ✅ WORKING frontend-safe version
     const response = await axios.get(
       `https://nominatim.openstreetmap.org/search`,
       {
@@ -12,9 +12,6 @@ const getCoordinates = async (pincode, setLoading) => {
           postalcode: pincode,
           country: "IN",
           format: "json",
-        },
-        headers: {
-          "User-Agent": "Shopique/1.0 (majidsmart7@gmail.com)", // REQUIRED
         },
         timeout: 5000,
       }

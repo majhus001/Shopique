@@ -1,55 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import "../HomeStyle.css";
+import "./FeaturedProducts.css";
 import { FiChevronRight } from "react-icons/fi";
 import { motion } from "framer-motion";
 import capitalizeWords from "../../../utils/CapitalizeWord";
-import slugify from "../../../utils/SlugifyUrl";
+import HandleProdlistNavigation from "../../../utils/Navigation/ProdlistNavigation";
+import HandleCategoryClick from "../../../utils/Navigation/CategoryListNavigation";
 
-const FeaturedProducts = ({ featuredProducts, userDetails }) => {
+const FeaturedProducts = ({ featuredProducts }) => {
   const navigate = useNavigate();
-  const handlecategoryClick = (subCategory) => {
-    let prodCategory = null;
-    let prodSubCategory = null;
-    let prodname = null;
-    let productId = null;
-
-    featuredProducts.forEach((item) => {
-      if (item.subCategory === subCategory) {
-        item.products.forEach((el) => {
-          prodSubCategory = slugify(el.subCategory);
-          prodCategory = slugify(el.category);
-          prodname = slugify(el.name);
-          productId = el._id;
-        });
-      }
-    });
-    navigate(
-      `/products/search/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          user: userDetails,
-          productCategory: prodCategory,
-          productSubCategory: prodSubCategory,
-        },
-      }
-    );
-  };
-
-  const handleprodlistnavigation = (item) => {
-    const prodSubCategory = slugify(item.subCategory);
-    const prodCategory = slugify(item.category);
-    const prodname = slugify(item.name);
-    const productId = item._id;
-    navigate(
-      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          product: item,
-        },
-      }
-    );
-  };
-
+  
   return (
     <section className="featured-section">
       <div className="featured-scroll-wrapper">
@@ -58,7 +17,7 @@ const FeaturedProducts = ({ featuredProducts, userDetails }) => {
             <motion.div
               key={category._id}
               className="featured-category-card"
-              onClick={() => handlecategoryClick(category.subCategory)}
+              onClick={() => HandleCategoryClick(category.products[0], category.subCategory, featuredProducts, navigate)}
               transition={{ duration: 0.3 }}
               whileHover={{ zIndex: 10 }}
             >
@@ -69,36 +28,36 @@ const FeaturedProducts = ({ featuredProducts, userDetails }) => {
                     "/placeholder-category.jpg"
                   }
                   alt={category.displayName || category.subCategory}
-                  className="category-image"
+                  className="featured-category-image"
                   loading="lazy"
                   onError={(e) => {
                     e.target.src = "/placeholder-category.jpg";
                   }}
                 />
               </div>
-              <div className="category-info">
+              <div className="featured-category-info">
                 <span>
                   {capitalizeWords(category.subCategory)}
                   <FiChevronRight />
                 </span>
               </div>
 
-              <div className="category-dropdown">
+              <div className="featured-category-dropdown">
                 {category.products.slice(0, 5).map((item) => (
                   <div
                     key={item._id}
-                    className="dropdown-item"
+                    className="featured-category-dropdown-item"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleprodlistnavigation(item);
+                      HandleProdlistNavigation(item, navigate);
                     }}
                   >
                     <img
-                      className="dropdown-img"
+                      className="featured-category-dropdown-img"
                       src={item.images[0]}
                       alt={item.name}
                     />
-                    <span className="dropdown-item-name">{item.name}</span>
+                    <span className="featured-category-dropdown-item-name">{item.name}</span>
                   </div>
                 ))}
               </div>

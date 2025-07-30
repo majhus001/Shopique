@@ -7,7 +7,7 @@ import {
   FiChevronRight,
   FiChevronLeft,
 } from "react-icons/fi";
-import slugify from "../../../utils/SlugifyUrl";
+import HandleProdlistNavigation from "../../../utils/Navigation/ProdlistNavigation";
 import { motion } from "framer-motion";
 const TrendingProducts = ({ trendingProducts }) => {
   const navigate = useNavigate();
@@ -26,20 +26,6 @@ const TrendingProducts = ({ trendingProducts }) => {
     }
   };
 
-  const handleprodlistnavigation = (item) => {
-    const prodSubCategory = slugify(item.subCategory);
-    const prodCategory = slugify(item.category);
-    const prodname = slugify(item.name);
-    const productId = item._id;
-    navigate(
-      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          product: item,
-        },
-      }
-    );
-  };
 
   return (
     <section className="products-section">
@@ -56,7 +42,7 @@ const TrendingProducts = ({ trendingProducts }) => {
             <h4 className="products-category-title">Trending Products</h4>
             <span
               className="view-all-link"
-              onClick={() => navigate("/products/trending")}
+              onClick={() => navigate("/allproducts")}
             >
               View All <FiChevronRight />
             </span>
@@ -92,7 +78,7 @@ const TrendingProducts = ({ trendingProducts }) => {
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  onClick={() => handleprodlistnavigation(item)}
+                  onClick={() => HandleProdlistNavigation(item, navigate)}
                 >
                   {/* Product Image */}
                   <div className="product-image-container">

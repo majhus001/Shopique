@@ -11,6 +11,7 @@ import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import normalizeError from "../../utils/Error/NormalizeError";
 import { FiX } from "react-icons/fi";
 import capitalizeWords from "../../utils/CapitalizeWord";
+import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 import slugify from "../../utils/SlugifyUrl";
 
 AbortSignal.timeout = function (ms) {
@@ -181,21 +182,7 @@ const AllProducts = () => {
     );
   };
 
-  const handleprodlistnavigation = (item) => {
-    const prodSubCategory = slugify(item.subCategory);
-    const prodCategory = slugify(item.category);
-    const prodname = slugify(item.name);
-    const productId = item._id;
-    navigate(
-      `/products/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          product: item,
-        },
-      }
-    );
-  };
-
+ 
   if (error) {
     return (
       <div className="usprof-container">
@@ -414,7 +401,7 @@ const AllProducts = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleprodlistnavigation(product);
+                            HandleProdlistNavigation(product, navigate);
                           }}
                           className="all-prods-add-to-cart"
                         >

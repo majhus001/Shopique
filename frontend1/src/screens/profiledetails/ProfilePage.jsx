@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../../Redux/slices/userSlice";
 import API_BASE_URL from "../../api";
-import getCoordinates from "../../utils/Geolocation";
+import getCoordinates from "../../utils/DeliveryPincodeCheck/Geolocation";
 import Sidebar from "../../components/sidebar/Sidebar";
 import "../../App.css";
 import userimg from "../../assets/users/user.png";

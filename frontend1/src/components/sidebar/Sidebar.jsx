@@ -31,11 +31,11 @@ const Sidebar = () => {
 
   const handleNavigation = (path) => {
     if (path === "profile") {
-      navigate(`/user/${user?._id || "unauthorized"}/profile`);
+      navigate(`/user/profile`);
     } else if (path === "myorders") {
-      navigate(`/user/${user?._id || "unauthorized"}/myorders`);
+      navigate(`/user/myorders`);
     } else if (path === "cart") {
-      navigate(`/user/${user?._id || "unauthorized"}/cart`);
+      navigate(`/user/cart`);
     } else {
       navigate(`${path}`);
     }
