@@ -494,6 +494,33 @@
   }
 }
 
+.ord-delivery-loading {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ord-spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #000;
+  animation: ord-spin 1s ease-in-out infinite;
+  margin-left: 5px;
+}
+
+.ord-not-available {
+  color: #ff4444;
+  font-weight: 500;
+}
+
+@keyframes ord-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .ord-container {

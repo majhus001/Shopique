@@ -3,13 +3,14 @@ import getCoordinates from "./Geolocation";
 
 const HandleCheckDelivery = async (
   value,
-  setExpectedDelivery,
-  setExpectedDeliverydate,
-  setIsPincodeDone,
-  setDeliveryFee,
-  setPincodeLoad
+  setExpectedDelivery = () => {},
+  setExpectedDeliverydate = () => {},
+  setIsPincodeDone = () => {},
+  setDeliveryFee = () => {},
+  setPincodeLoad = () => {}
 ) => {
-    const warehousePincode = "641008";
+  console.log("came i ")
+  const warehousePincode = "641008";
   if (String(value).length != 6) {
     setExpectedDelivery("Please enter a valid 6-digit pincode");
     setExpectedDeliverydate("");
@@ -58,8 +59,14 @@ const HandleCheckDelivery = async (
 
     if (distanceKm > 0 && distanceKm < 100) {
       setDeliveryFee(50);
-    } else if (distanceKm > 100) {
+    } else if (distanceKm > 100 && distanceKm < 800) {
       setDeliveryFee(100);
+      
+    } else {
+      setExpectedDelivery("Delivery not available for this pincode");
+      setIsPincodeDone(false);
+      setPincodeLoad(false);
+      return "Delivery not available for this pincode.. Try Different";
     }
 
     setExpectedDelivery(`${userCoords.address}`);
@@ -69,12 +76,15 @@ const HandleCheckDelivery = async (
     );
 
     setIsPincodeDone(true);
+    return "";
   } catch (error) {
     toast.error("Failed to Check Delivery Address");
     console.error("Error checking delivery:", error);
-    setExpectedDelivery("❌ Error checking delivery for this pincode");
-    setExpectedDeliverydist("Please try again or contact support");
+    setExpectedDelivery(
+      "Sorry We cant check Delivery for this Pincode Now.. Try again later"
+    );
     setIsPincodeDone(false);
+    return "Sorry We cant check Delivery for this Pincode Now.. Try again later";
   } finally {
     setPincodeLoad(false);
   }

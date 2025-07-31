@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../HomeStyle.css";
+import "./HeroSection.css";
 import axios from "axios";
 import API_BASE_URL from "../../../api";
 import { motion, AnimatePresence } from "framer-motion";

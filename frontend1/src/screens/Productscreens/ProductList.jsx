@@ -26,6 +26,8 @@ import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/DeliveryPincodeCheck/Geolocation";
 import "./ProductList.css";
 import NotFound from "../../NotFound/NotFound";
+import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
+import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 
 const useScreenSize = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -203,15 +205,17 @@ const ProductList = () => {
   const [productData, setProductData] = useState(location.state?.product || {});
   const [relatedProds, setRelatedProds] = useState({});
   const [loading, setLoading] = useState(true);
+
+  const [isPincodeDone, setIsPincodeDone] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [pincode, setPincode] = useState(user?.pincode || "");
-  const [isPincodeFocused, setIsPincodeFocused] = useState(false);
   const [expectedDelivery, setExpectedDelivery] = useState("");
-  const [expectedDeliverydist, setExpectedDeliverydist] = useState("");
+  const [deliveryfee, setDeliveryFee] = useState(0);
   const [expectedDeliverydate, setExpectedDeliverydate] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const warehousePincode = "641008";
+
   const [notFound, setNotFound] = useState(false);
+  const [isPincodeTouched, setIsPincodeTouched] = useState(false);
 
   const [userId, setUserId] = useState(user?._id || null);
   const [userDetails, setUserDetails] = useState(user || null);
@@ -451,66 +455,24 @@ const ProductList = () => {
       return;
     }
 
-    navigate(`/user/${userId}/product/buynow`, {
+    
+    navigate(`/user/${userId?userId:"guest"}/product/buynow`, {
       state: {
         product: productData,
+        statepincode: pincode
       },
     });
   };
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return (R * c).toFixed(2);
-  };
-
-  const handleCheckDelivery = async () => {
-    if (pincode.length !== 6) {
-      setExpectedDelivery("Please enter a valid 6-digit pincode.");
-      return;
-    }
-    setPincodeLoad(true);
-    try {
-      const warehouseCoords = await getCoordinates(warehousePincode);
-      const userCoords = await getCoordinates(pincode);
-
-      if (warehouseCoords && userCoords) {
-        const distanceKm = calculateDistance(
-          warehouseCoords.lat,
-          warehouseCoords.lon,
-          userCoords.lat,
-          userCoords.lon
-        );
-
-        let deliveryDays = Math.min(Math.ceil(distanceKm / 100) + 1, 6);
-        const deliveryDate = new Date();
-        deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
-
-        setExpectedDelivery(`Customer Location: ${userCoords.address}`);
-        setExpectedDeliverydist(`Distance: ${distanceKm} km`);
-        setExpectedDeliverydate(
-          `Delivery in ${deliveryDays} day(s) (Expected: ${deliveryDate.toLocaleDateString()})`
-        );
-      } else {
-        setExpectedDelivery("Unable to check delivery for this pincode.");
-        setExpectedDeliverydist("");
-        setExpectedDeliverydate("");
-      }
-    } catch (error) {
-      console.error("Error checking delivery:", error);
-      setExpectedDelivery("Error checking delivery. Please try again.");
-    } finally {
-      setPincodeLoad(false);
-    }
+  const handleCheckDelivery = (value) => {
+    HandleCheckDelivery(
+      value,
+      setExpectedDelivery,
+      setExpectedDeliverydate,
+      setIsPincodeDone,
+      setDeliveryFee,
+      setPincodeLoad
+    );
   };
 
   const renderStars = (rating) => {
@@ -645,7 +607,7 @@ const ProductList = () => {
                     if (productData.stock <= 0) {
                       toast.error("Sorry, Out of Stock");
                     } else if (isProdAdded) {
-                      navigate(`/user/${userId}/cart`);
+                      navigate(`/user/cart`);
                     } else {
                       handleAddToCart();
                     }
@@ -770,44 +732,81 @@ const ProductList = () => {
                       <FaMapMarkerAlt className="input-icon" />
                       <input
                         type="text"
-                        placeholder={!pincode ? "Enter Delivery Pincode" : ""}
-                        maxLength="6"
+                        placeholder={"Enter Delivery Pincode"}
                         value={pincode}
-                        onChange={(e) => setPincode(e.target.value)}
-                        onFocus={() => setIsPincodeFocused(true)}
-                        onBlur={() => setIsPincodeFocused(false)}
-                        className={
-                          !isPincodeFocused && !pincode
-                            ? "faded-input"
-                            : "normal-input"
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 6) {
+                            setPincode(value);
+                            if (value.length === 6) {
+                              handleCheckDelivery(value);
+                            }
+                          }
+                          if (!isPincodeTouched) {
+                            setIsPincodeTouched(true);
+                          }
+                        }}
+                        onFocus={() => {
+                          if (!isPincodeTouched) {
+                            setIsPincodeTouched(true);
+                          }
+                        }}
+                        maxLength={6}
+                        style={{ color: isPincodeTouched ? "inherit" : "#aaa" }} // Light gray when untouched
                       />
                     </div>
                     <button
                       className="check-btn"
-                      onClick={handleCheckDelivery}
-                      disabled={pincodeload}
+                      onClick={() => {
+                        handleCheckDelivery(pincode);
+                      }}
+                      disabled={pincodeload || !isPincodeTouched}
                     >
-                      {pincodeload ? "Checking..." : "Check"}
+                      {pincodeload ? (
+                        <>
+                          <span className="cart-loader"></span>
+                          <span>Checking...</span>
+                        </>
+                      ) : (
+                        "Check"
+                      )}
                     </button>
                   </div>
 
-                  {expectedDelivery && (
-                    <div className="delivery-info-card">
-                      <div className="info-row">
-                        <FaMapMarkerAlt className="info-icon" />
-                        <span>{expectedDelivery}</span>
-                      </div>
-                      <div className="info-row">
-                        <FaTruck className="info-icon" />
-                        <span>{expectedDeliverydist}</span>
-                      </div>
-                      <div className="info-row">
-                        <FaCalendarAlt className="info-icon" />
-                        <span>{expectedDeliverydate}</span>
-                      </div>
+                  {pincodeload ? (
+                    <div className="cart-delivery-loading">
+                      <span className="cart-loader"></span>
+                      <span>Checking delivery availability...</span>
                     </div>
-                  )}
+                  ) : expectedDelivery ? (
+                    <div className="cart-delivery-info">
+                      <div className="cart-delivery-message">
+                        <strong className="cart-delivery-address-label">
+                          Delivery Address:
+                        </strong>
+                      </div>
+                      <div className="cart-delivery-message">
+                        {expectedDelivery}
+                      </div>
+
+                      {expectedDeliverydate && (
+                        <div className="cart-delivery-date">
+                          <strong className="cart-delivery-address-label">
+                            Estimated Delivery :
+                          </strong>
+                          {expectedDeliverydate}
+                        </div>
+                      )}
+                      {deliveryfee > 0 && (
+                        <div className="cart-delivery-date">
+                          <strong className="cart-delivery-address-label">
+                            Delivery Fee :
+                          </strong>
+                          ₹{deliveryfee}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1060,14 +1059,7 @@ const ProductList = () => {
                     <div
                       className="pl-product-card-horizontal"
                       key={item._id}
-                      onClick={() =>
-                        navigate(
-                          `/products/${item.category}/${item.subCategory}/${item._id}`,
-                          {
-                            state: { product: item },
-                          }
-                        )
-                      }
+                      onClick={() => HandleProdlistNavigation(item, navigate)}
                     >
                       <div className="pl-product-image-container">
                         <img

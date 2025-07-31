@@ -48,7 +48,8 @@ router.post("/signup", async (req, res) => {
   const verificationCode = Math.floor(100000 + Math.random() * 900000);
 
   try {
-    const { data, error } = await resend.emails.send({
+    console.log("b s e")
+    const { error } = await resend.emails.send({
       from: "Shopique <onboarding@resend.dev>",
       to: email,
       subject: "🌟 Welcome to Shopique! Verify Your Email",

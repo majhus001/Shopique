@@ -14,13 +14,16 @@ import { useSelector } from "react-redux";
 import RazorPayment from "../../utils/RazorPayment";
 import EmailFunction from "../../utils/EmailFunction";
 import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
-
+import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
 const OrderDetailsSkeleton = () => {
   return (
     <div className="checkout-container">
       <div className="ord-notification"></div>
       <div className="ord-checkout-title ord-skeleton-loading">
-        <div className="ord-skeleton-line" style={{ width: "200px", margin: "0 auto" }}></div>
+        <div
+          className="ord-skeleton-line"
+          style={{ width: "200px", margin: "0 auto" }}
+        ></div>
       </div>
       <div className="ord-container">
         {/* Skeleton content remains the same */}
@@ -37,7 +40,7 @@ const Orderdetails = () => {
   const {
     cartItems = [],
     totalPrice = 0,
-    deliveryfee = 0,
+    stateDF = 0,
     statePincode = "",
     path,
   } = location.state || {};
@@ -45,58 +48,84 @@ const Orderdetails = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState(null);
   const [mobileNumber, setMobileNumber] = useState("");
-  const [pincode, setPincode] = useState("");
+  const [pincode, setPincode] = useState(statePincode || user?.pincode || "");
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+
+  const [deliveryfee, setDeliveryFee] = useState(stateDF || 0);
+  const [paymentMethod, setPaymentMethod] = useState("Online Payment");
   const [isMobileDone, setIsMobileDone] = useState(false);
   const [isAddressDone, setIsAddressDone] = useState(false);
-  const [isPincodeDone, setIsPincodeDone] = useState(false);
+  const [isPincodeDone, setIsPincodeDone] = useState(
+    statePincode ? true : false
+  );
   const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-
-  const allStepsComplete = isMobileDone && isPincodeDone && isAddressDone;
+  const [checkingDelivery, setCheckingDelivery] = useState(false);
+  const allStepsComplete =
+    isMobileDone && isPincodeDone && isAddressDone && deliveryfee > 0;
 
   useEffect(() => {
+    if (!location.state?.cartItems) {
+      navigate("/home");
+      return;
+    }
+
     const initialize = async () => {
       try {
         if (!user?._id) {
           setIsLoggedIn(false);
+          setLoading(false);
           return;
         }
 
-        const response = await axios.get(`${API_BASE_URL}/api/auth/profile/${user._id}`);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/auth/profile/${user._id}`
+        );
         const userData = response.data.user;
 
-        // Set all states at once
         setMobileNumber(userData.mobile || "");
-        setPincode(statePincode || user.pincode || "");
+        setPincode(statePincode || userData.pincode || "");
         setDeliveryAddress(userData.address || "");
         setIsLoggedIn(true);
 
-        // Validate fields after setting all states
         setIsMobileDone(userData.mobile?.length === 10);
-        setIsPincodeDone((statePincode || user.pincode)?.length === 6);
+        setIsPincodeDone((statePincode || userData.pincode)?.length === 6);
         setIsAddressDone(!!userData.address);
 
-        setInitialLoadComplete(true);
-      } catch (err) {
-        toast.error("Failed to initialize order details");
-        console.error("Initialization error:", err);
-        if (err?.response?.status >= 400 && err?.response?.status < 500) {
-          toast.error(err.response.data.message || "Error fetching user data");
+        if (
+          !deliveryfee &&
+          String(statePincode || userData.pincode)?.length === 6
+        ) {
+          setCheckingDelivery(true);
+          const value = statePincode || userData.pincode;
+
+          const msg = await HandleCheckDelivery(
+            value,
+            () => {},
+            () => {},
+            setIsPincodeDone,
+            setDeliveryFee,
+            () => {}
+          );
+          setMsg(msg);
+        } else if (!deliveryfee && !statePincode && !userData.pincode) {
+          setIsPincodeDone(false);
+          setMsg("Enter the pincode to check delivery fee..");
         } else {
-          setError(normalizeError(err));
+          setIsPincodeDone(true);
         }
+      } catch (err) {
+        console.error("Initialization error:", err);
+        setError(normalizeError(err));
+        toast.error("Failed to initialize order details");
       } finally {
         setLoading(false);
+        setCheckingDelivery(false);
       }
     };
 
     initialize();
-    if (!location.state?.cartItems) {
-      navigate("/home");
-    }
   }, [user, navigate, statePincode]);
 
   const handleMobileChange = (e) => {
@@ -114,65 +143,88 @@ const Orderdetails = () => {
 
   const validateForm = useCallback(() => {
     const errors = [];
-    
+
     if (!isLoggedIn) errors.push("Please login to place an order");
-    if (mobileNumber.length !== 10) errors.push("Please enter a valid 10-digit mobile number");
-    if (pincode.length !== 6) errors.push("Please enter a valid 6-digit pincode");
-    if (!deliveryAddress.trim()) errors.push("Please enter your delivery address");
+    if (mobileNumber.length !== 10)
+      errors.push("Please enter a valid 10-digit mobile number");
+    if (String(pincode).length !== 6) {
+      console.log(String(pincode).length == 6);
+      errors.push("Please enter a valid 6-digit pincode");
+    }
+    if (!deliveryAddress.trim())
+      errors.push("Please enter your delivery address");
     if (cartItems.length === 0) errors.push("Your cart is empty");
 
     if (errors.length > 0) {
-      errors.forEach(error => toast.warn(error));
+      errors.forEach((error) => toast.warn(error));
       return false;
     }
     return true;
   }, [isLoggedIn, mobileNumber, pincode, deliveryAddress, cartItems]);
 
-  const handlePlaceOrder = useCallback(async (paymentId = null) => {
-    if (!validateForm()) return;
+  const handlePlaceOrder = useCallback(
+    async (paymentId = null) => {
+      if (!validateForm()) return;
 
-    setPlacingOrder(true);
-    try {
-      const orderData = {
-        userId: user._id,
-        cartItems,
-        totalPrice: totalPrice + deliveryfee,
-        mobileNumber,
-        pincode,
-        deliveryfee,
-        deliveryAddress,
-        paymentMethod,
-        paymentId,
-      };
+      setPlacingOrder(true);
+      try {
+        const orderData = {
+          userId: user._id,
+          cartItems,
+          totalPrice: totalPrice + deliveryfee,
+          mobileNumber,
+          pincode,
+          deliveryfee,
+          deliveryAddress,
+          paymentMethod,
+          paymentId,
+        };
 
-      const orderResponse = await axios.post(`${API_BASE_URL}/api/orders/add`, orderData);
-      
-      if (orderResponse.data.success) {
-        await Promise.all([
-          EmailFunction({
-            path: "orderplaced",
-            email: user.email,
-            data: orderData,
-            orderId: orderResponse.data.orderId,
-          }),
-          path === "cart" ? clearCart() : Promise.resolve(),
-          axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
-            name: user.username,
-            activity: "has Placed an order",
-          })
-        ]);
-        
-        toast.success("Order Placed Successfully!");
-        navigate(`/user/${user._id}/myorders`, { replace: true });
+        const orderResponse = await axios.post(
+          `${API_BASE_URL}/api/orders/add`,
+          orderData
+        );
+
+        if (orderResponse.data.success) {
+          await Promise.all([
+            EmailFunction({
+              path: "orderplaced",
+              email: user.email,
+              data: orderData,
+              orderId: orderResponse.data.orderId,
+            }),
+            path === "cart" ? clearCart() : Promise.resolve(),
+            axios.post(`${API_BASE_URL}/api/user/reactivity/add`, {
+              name: user.username,
+              activity: "has Placed an order",
+            }),
+          ]);
+
+          toast.success("Order Placed Successfully!");
+          navigate(`/user/myorders`, { replace: true });
+        }
+      } catch (error) {
+        console.error("Order placement error:", error);
+        toast.error(error.message || "An error occurred. Please try again.");
+        throw error;
+      } finally {
+        setPlacingOrder(false);
       }
-    } catch (error) {
-      console.error("Order placement error:", error);
-      toast.error(error.message || "An error occurred. Please try again.");
-      throw error;
-    } finally {
-      setPlacingOrder(false);
-    }
-  }, [validateForm, user, cartItems, totalPrice, deliveryfee, mobileNumber, pincode, deliveryAddress, paymentMethod, path, navigate]);
+    },
+    [
+      validateForm,
+      user,
+      cartItems,
+      totalPrice,
+      deliveryfee,
+      mobileNumber,
+      pincode,
+      deliveryAddress,
+      paymentMethod,
+      path,
+      navigate,
+    ]
+  );
 
   const clearCart = useCallback(async () => {
     try {
@@ -184,7 +236,7 @@ const Orderdetails = () => {
 
   const handlePayment = async () => {
     if (!validateForm()) return;
-    
+
     if (paymentMethod === "Cash on Delivery") {
       await handlePlaceOrder();
       return;
@@ -192,15 +244,15 @@ const Orderdetails = () => {
 
     setPlacingOrder(true);
     try {
-      const paymentId = await RazorPayment({ 
-        cartItems, 
-        user, 
+      const paymentId = await RazorPayment({
+        cartItems,
+        user,
         mobileNumber,
-         deliveryfee
+        deliveryfee,
       });
-      
+
       if (paymentId) {
-        console.log(paymentId)
+        console.log(paymentId);
         await handlePlaceOrder(paymentId);
       } else {
         toast.error("Payment failed. Please try again.");
@@ -212,7 +264,32 @@ const Orderdetails = () => {
     }
   };
 
-  
+  const handledeliverycheck = async (value) => {
+    console.log("called");
+    if (String(value.length) == 6) {
+      setCheckingDelivery(true);
+      console.log("checking..");
+      try {
+        const msg = await HandleCheckDelivery(
+          value,
+          () => {},
+          () => {},
+          setIsPincodeDone,
+          setDeliveryFee,
+          () => {}
+        );
+        setMsg(msg);
+      } catch (error) {
+        toast.error("Failed to check delivery availability");
+        console.error("Delivery check error:", error);
+      } finally {
+        setCheckingDelivery(false);
+      }
+    } else {
+      setDeliveryFee(0);
+    }
+  };
+
   if (loading) {
     return (
       <div className="product-page-container">
@@ -230,10 +307,7 @@ const Orderdetails = () => {
         <div className="usprof-nav">
           <Navbar />
         </div>
-        <ErrorDisplay
-          error={error}
-          onRetry={() => window.location.reload()}
-        />
+        <ErrorDisplay error={error} onRetry={() => window.location.reload()} />
         <BottomNav />
       </div>
     );
@@ -321,9 +395,14 @@ const Orderdetails = () => {
               value={pincode}
               onChange={(e) => {
                 const value = e.target.value.replace(/\D/g, "");
-                if (value.length <= 6) {
+                if (String(value.length) <= 6) {
+                  console.log(value);
                   setPincode(value);
-                  setIsPincodeDone(value.length === 6);
+                }
+                if (String(value.length) == 6) {
+                  setIsPincodeDone(String(value.length) === 6);
+                  console.log("calling...");
+                  handledeliverycheck(value);
                 }
               }}
               maxLength="6"
@@ -378,7 +457,7 @@ const Orderdetails = () => {
                     onError={(e) => {
                       e.target.src = "/placeholder-product.png";
                     }}
-                     onClick={() => HandleProdlistNavigation(item, navigate)}
+                    onClick={() => HandleProdlistNavigation(item, navigate)}
                   />
                   <div
                     className="ord-product-details"
@@ -403,14 +482,36 @@ const Orderdetails = () => {
             </div>
             <div className="ord-price-row">
               <span>Delivery Fee:</span>
-              <span>₹{deliveryfee.toFixed(2)}</span>
+              {checkingDelivery ? (
+                <span className="ord-delivery-loading">
+                  <span className="ord-spinner-small"></span>
+                </span>
+              ) : deliveryfee < 0 || deliveryfee == "" ? (
+                <span className="ord-not-available">Not Available</span>
+              ) : (
+                <span>₹{deliveryfee}</span>
+              )}
             </div>
+            {msg && (
+              <div className="ord-price-row">
+                {/* <span>Error:</span> */}
+                <span>{msg}</span>
+              </div>
+            )}
           </div>
 
           <div className="ord-total-section">
             <div className="ord-price-row ord-total">
               <span>Total Amount:</span>
-              <span>₹{(totalPrice + deliveryfee).toFixed(2)}</span>
+              {checkingDelivery ? (
+                <span className="ord-delivery-loading">
+                  <span className="ord-spinner-small"></span>
+                </span>
+              ) : deliveryfee < 0 ? (
+                <span className="ord-not-available">N/A</span>
+              ) : (
+                <span>₹{totalPrice + deliveryfee}</span>
+              )}
             </div>
 
             <button
@@ -425,8 +526,10 @@ const Orderdetails = () => {
                   <span className="ord-spinner"></span>
                   Processing...
                 </>
+              ) : paymentMethod === "Online Payment" ? (
+                "Pay Now"
               ) : (
-                paymentMethod === "Online Payment" ? "Pay Now" : "Place Order"
+                "Place Order"
               )}
             </button>
           </div>

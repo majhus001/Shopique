@@ -1,7 +1,6 @@
 import slugify from "../SlugifyUrl";
 const HandleCategoryClick = (
   clickedProduct,
-  subCategory,
   products,
   navigate
 ) => {

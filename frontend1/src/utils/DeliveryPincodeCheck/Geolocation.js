@@ -4,7 +4,6 @@ const getCoordinates = async (pincode, setLoading) => {
   try {
     if (setLoading) setLoading(true);
 
-    // ✅ WORKING frontend-safe version
     const response = await axios.get(
       `https://nominatim.openstreetmap.org/search`,
       {

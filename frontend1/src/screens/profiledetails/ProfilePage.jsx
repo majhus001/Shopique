@@ -225,12 +225,13 @@ const ProfilePage = () => {
   const saveDetails = async () => {
     try {
       const formData = new FormData();
-      formData.append("name", userDetails.username);
-      formData.append("email", userDetails.email);
-      formData.append("password", userDetails.password);
-      formData.append("mobile", userDetails.mobile);
-      formData.append("address", userDetails.address);
-      formData.append("pincode", userDetails.pincode);
+      formData.append("name", userDetails.username || "");
+      formData.append("email", userDetails.email || "");
+      formData.append("password", userDetails.password || "");
+      formData.append("mobile", userDetails.mobile || "");
+      formData.append("address", userDetails.address || "");
+      formData.append("pincode", userDetails.pincode || " ");
+
 
       console.log(userDetails);
       const imageFile = document.querySelector('input[type="file"]')?.files[0];
@@ -255,6 +256,7 @@ const ProfilePage = () => {
             username: data.username,
             email: data.email,
             image: data.image,
+            pincode: data.pincode,
           })
         );
       }

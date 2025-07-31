@@ -466,17 +466,18 @@ router.put("/update/:userId", upload.single("image"), async (req, res) => {
     const { name, email, password, mobile, address, pincode } = req.body;
 
     const user = await User.findById(userId);
-
+    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
+    
     if (name) user.username = name;
     if (email) user.email = email;
     if (password) user.password = password;
-
+    
     user.mobile = mobile || " ";
     user.address = address || " ";
+    console.log("pincode",pincode)
     user.pincode = pincode || " ";
 
     if (req.file) {

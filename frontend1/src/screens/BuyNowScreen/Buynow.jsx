@@ -74,12 +74,13 @@ const Buynow = () => {
   };
 
   const handleBuyNow = () => {
-    if (user && cartItems.length > 0) {
+    if (user._id && cartItems.length > 0) {
+      console.log(user)
       navigate(`/user/${user._id}/order/checkout`, {
         state: {
           cartItems,
           totalPrice: calculateSubtotal(),
-          deliveryfee,
+          stateDF: deliveryfee,
           statePincode: pincode,
           path: "buynow",
         },
@@ -251,6 +252,10 @@ const Buynow = () => {
                   </button>
                 </div>
 
+                {!isPincodeDone && (
+                  <span>Enter Pincode to check Delivery fee
+                  </span>)}
+
                 {pincodeload ? (
                   <div className="cart-delivery-loading">
                     <span className="cart-loader"></span>
@@ -275,10 +280,15 @@ const Buynow = () => {
                         {expectedDeliverydate}
                       </div>
                     )}
-                    <div className="cart-summary-row">
-                      <span>Delivery Fee</span>
-                      <span>₹{deliveryfee}</span>
-                    </div>
+
+                    {deliveryfee > 0 && (
+                      <div className="cart-delivery-date">
+                        <strong className="cart-delivery-address-label">
+                          Delivery Fee :
+                        </strong>
+                        ₹{deliveryfee}
+                      </div>
+                    )}
                   </div>
                 ) : null}
 
@@ -289,7 +299,7 @@ const Buynow = () => {
                 <button
                   onClick={handleBuyNow}
                   className="cart-checkout-btn"
-                  disabled={!isPincodeDone || pincodeload}
+                  disabled={pincodeload}
                 >
                   Proceed to Checkout
                 </button>

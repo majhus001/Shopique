@@ -180,7 +180,6 @@ const HomePage = () => {
     fetchData();
   }, [fetchData]);
 
-
   if (loading) {
     return (
       <div className="app">
@@ -251,7 +250,13 @@ const HomePage = () => {
                         {capitalizeWords(subCategory)}
                       </h4>
                       <span
-                        onClick={() => HandleCategoryClick(categoryProducts[0], subCategory, filteredProducts, navigate)}
+                        onClick={() =>
+                          HandleCategoryClick(
+                            categoryProducts[0],
+                            filteredProducts,
+                            navigate
+                          )
+                        }
                         className="view-all-link"
                       >
                         View All <FiChevronRight />
@@ -411,7 +416,7 @@ const HomePage = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Subscribe
+                    <i className="fas fa-paper-plane"></i> Subscribe
                   </motion.button>
                 </form>
               </div>

@@ -14,14 +14,16 @@ export default function Navbar() {
 
   const [username, setUsername] = useState(user?.username || "");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isOrderPage, setIsOrderPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [cartlength, setCartLength] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const debounceTimeout = useRef(null);
-  const searchRef = useRef(null);
+
+  // Separate refs for mobile and desktop search bars
+  const mobileSearchRef = useRef(null);
+  const desktopSearchRef = useRef(null);
 
   const fetchCartData = useCallback(async () => {
     try {
@@ -52,11 +54,6 @@ export default function Navbar() {
       return false;
     }
   }, [dispatch]);
-
-  useEffect(() => {
-    const path = window.location.pathname;
-    setIsOrderPage(path.includes("/orders") || path.includes("/checkout"));
-  }, []);
 
   const hasCheckedUser = useRef(false);
 
@@ -157,12 +154,19 @@ export default function Navbar() {
     setSearchResults([]);
   };
 
-  // Close search results when clicking outside
+  // Close search results when clicking outside both search bars
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setSearchResults([]);
+      if (
+        (mobileSearchRef.current &&
+          mobileSearchRef.current.contains(event.target)) ||
+        (desktopSearchRef.current &&
+          desktopSearchRef.current.contains(event.target))
+      ) {
+        // Click inside either search bar, do nothing
+        return;
       }
+      setSearchResults([]);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -173,8 +177,8 @@ export default function Navbar() {
 
   if (isLoading || isLoggedIn === null) {
     return (
-      <nav className="hm-navbar">
-        <div className="mobile-view-header">
+      <nav className="nav-container">
+        <div className="nav-mobile-header">
           <div className="nav-logo">
             <h2>ShopiQue</h2>
           </div>
@@ -184,20 +188,18 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="hm-navbar">
+    <nav className="nav-container">
       {/* Mobile header row */}
-      <div className="mobile-view-header">
+      <div className="nav-mobile-header">
         <div className="nav-logo" onClick={() => navigate("/home")}>
           <h2>ShopiQue</h2>
         </div>
 
-        <div className="mobile-nav-actions">
+        <div className="nav-mobile-actions">
           {isLoggedIn ? (
             <button
-              className="nav-btns profile-btn"
-              onClick={() =>
-                navigate(`/user/profile`)
-              }
+              className="nav-btn nav-profile-btn"
+              onClick={() => navigate(`/user/profile`)}
               aria-label="Profile"
             >
               <i className="fas fa-user"></i>
@@ -205,7 +207,7 @@ export default function Navbar() {
             </button>
           ) : (
             <button
-              className="nav-btns profile-btn"
+              className="nav-btn nav-profile-btn"
               onClick={() => navigate("/auth/login")}
               aria-label="Login"
             >
@@ -217,22 +219,22 @@ export default function Navbar() {
       </div>
 
       {/* Search bar - always visible in mobile */}
-      <div className="mobile-search-container">
-        <div className="nav-search-bar" ref={searchRef}>
+      <div className="nav-mobile-search-container">
+        <div className="nav-search-bar" ref={mobileSearchRef}>
           <input
             type="text"
             placeholder="Search for products..."
-            className="nav-searchbar"
+            className="nav-search-input"
             value={searchQuery}
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
           />
           {searchResults.length > 0 && !isSearching && (
-            <div className="search-results-dropdown">
+            <div className="nav-search-results">
               {searchResults.map((product) => (
                 <div
                   key={product._id}
-                  className="search-result-item"
+                  className="nav-search-result-item"
                   onClick={() => handleProductClick(product)}
                 >
                   <img
@@ -254,14 +256,8 @@ export default function Navbar() {
                 </div>
               ))}
               <div
-                className="search-view-all"
-                onClick={() => {
-                  navigate(
-                    `/products/search?query=${encodeURIComponent(searchQuery)}`
-                  );
-                  setSearchQuery("");
-                  setSearchResults([]);
-                }}
+                className="nav-search-view-all"
+                onClick={() => handleProductClick(searchResults[0])}
               >
                 View all results for "{searchQuery}"
               </div>
@@ -271,25 +267,25 @@ export default function Navbar() {
       </div>
 
       {/* Desktop layout */}
-      <div className="desktop-content">
+      <div className="nav-desktop-content">
         <div className="nav-logo" onClick={() => navigate("/home")}>
           <h2>ShopiQue</h2>
         </div>
-        <div className="nav-search-bar" ref={searchRef}>
+        <div className="nav-search-bar" ref={desktopSearchRef}>
           <input
             type="text"
             placeholder="Search for products..."
-            className="nav-searchbar"
+            className="nav-search-input"
             value={searchQuery}
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
           />
           {searchResults.length > 0 && !isSearching && (
-            <div className="search-results-dropdown">
+            <div className="nav-search-results">
               {searchResults.map((product) => (
                 <div
                   key={product._id}
-                  className="search-result-item"
+                  className="nav-search-result-item"
                   onClick={() => handleProductClick(product)}
                 >
                   <img
@@ -311,14 +307,8 @@ export default function Navbar() {
                 </div>
               ))}
               <div
-                className="search-view-all"
-                onClick={() => {
-                  navigate(
-                    `/products/search?query=${encodeURIComponent(searchQuery)}`
-                  );
-                  setSearchQuery("");
-                  setSearchResults([]);
-                }}
+                className="nav-search-view-all"
+                onClick={() => handleProductClick(searchResults[0])}
               >
                 View all results for "{searchQuery}"
               </div>
@@ -327,38 +317,32 @@ export default function Navbar() {
         </div>
 
         <div className="nav-actions">
-          {!isOrderPage && (
-            <button
-              className="nav-btns cart-btn"
-              onClick={() =>
-                navigate(`/user/cart`)
-              }
-            >
-              <i className="fas fa-shopping-cart"></i>
-              <span className="btn-text">Cart</span>
-              {cartlength > 0 && (
-                <span className="cart-pro-num">{cartlength}</span>
-              )}
-            </button>
-          )}
+          <button
+            className="nav-btn nav-cart-btn"
+            onClick={() => navigate(`/user/cart`)}
+          >
+            <i className="fas fa-shopping-cart"></i>
+            <span className="nav-btn-text">Cart</span>
+            {cartlength > 0 && (
+              <span className="nav-cart-count">{cartlength}</span>
+            )}
+          </button>
 
           {isLoggedIn ? (
             <button
-              className="nav-btns profile-btn"
-              onClick={() =>
-                navigate(`/user/profile`)
-              }
+              className="nav-btn nav-profile-btn"
+              onClick={() => navigate(`/user/profile`)}
             >
               <i className="fas fa-user"></i>
               <span>{username?.split(" ")[0] || " "}</span>
             </button>
           ) : (
             <button
-              className="nav-btns login-btn"
+              className="nav-btn nav-login-btn"
               onClick={() => navigate("/auth/login")}
             >
               <i className="fas fa-user"></i>
-              <span className="btn-text">Login</span>
+              <span className="nav-btn-text">Login</span>
             </button>
           )}
         </div>

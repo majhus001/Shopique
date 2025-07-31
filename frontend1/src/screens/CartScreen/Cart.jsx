@@ -27,7 +27,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pincode, setPincode] = useState(user?.pincode || "");
-  console.log(user)
+ 
   const [isPincodeTouched, setIsPincodeTouched] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
@@ -397,7 +397,7 @@ const Cart = () => {
                         {expectedDeliverydate}
                       </div>
                     )}
-                    {deliveryfee && (
+                    {deliveryfee > 0 && (
                       <div className="cart-delivery-date">
                         <strong className="cart-delivery-address-label">
                           Delivery Fee :
@@ -415,7 +415,7 @@ const Cart = () => {
                 <button
                   onClick={handleCheckOut}
                   className="cart-checkout-btn"
-                  disabled={!isPincodeDone || pincodeload}
+                  disabled={pincodeload}
                 >
                   Proceed to Checkout
                 </button>

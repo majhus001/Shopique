@@ -1,13 +1,14 @@
 /* Footer Styles */
-.cat-footer {
+.footer {
   background: #1a1a1a;
   color: #fff;
-  padding: 4rem 0 2rem;
+  padding: 4rem 0 0;
+  font-family: 'Poppins', sans-serif;
   position: relative;
   overflow: hidden;
 }
 
-.cat-footer::before {
+.footer::before {
   content: '';
   position: absolute;
   top: 0;
@@ -17,39 +18,47 @@
   background: linear-gradient(90deg, #4f46e5, #ec4899);
 }
 
-.cat-footer-container {
-  max-width: 1200px;
+.footer-container {
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
 }
 
-.cat-footer-grid {
+.footer-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(1, 1fr);
   gap: 3rem;
-  margin-bottom: 3rem;
+  /* margin-bottom: 3rem; */
 }
 
-@media (min-width: 768px) {
-  .cat-footer-grid {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 640px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.cat-footer-column {
+@media (min-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.footer-column {
   display: flex;
   flex-direction: column;
 }
 
-.cat-footer-heading {
+.footer-heading {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   position: relative;
   color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.cat-footer-heading::after {
+.footer-heading::after {
   content: '';
   position: absolute;
   bottom: -0.75rem;
@@ -59,36 +68,37 @@
   background: linear-gradient(90deg, #4f46e5, #ec4899);
 }
 
-.cat-footer-links {
+.footer-links {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.cat-footer-links li {
-  margin-bottom: 0.75rem;
-}
-
-.cat-footer-links a {
+.footer-links a {
   color: #a1a1aa;
   text-decoration: none;
   transition: all 0.3s ease;
   display: inline-block;
+  font-size: 0.95rem;
 }
 
-.cat-footer-links a:hover {
+.footer-links a:hover {
   color: #fff;
   transform: translateX(5px);
 }
 
 /* Social Media Styles */
-.cat-footer-social-icons {
+.footer-social {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.cat-social-icon {
+.social-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,61 +111,89 @@
   transition: all 0.3s ease;
 }
 
-.cat-social-icon:hover {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+.social-icon:hover {
+  background: #007AFF;
   color: white;
 }
 
-.cat-footer-contact {
-  color: #a1a1aa;
+/* Contact Info */
+.footer-contact {
+  margin-bottom: 2rem;
 }
 
-.cat-footer-contact p {
-  margin-bottom: 0.75rem;
+.contact-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  color: #a1a1aa;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
 }
 
-.cat-footer-contact i {
+.contact-item i {
   width: 20px;
   text-align: center;
+  color: #a1a1aa;
 }
-
+.contact-item:hover{
+  color: #fff;
+}
+.contact-item i:hover{
+  color: #fff;
+}
 /* Bottom Section */
-.cat-footer-bottom {
+.footer-bottom {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
-  padding-top: 2rem;
+  padding: 2rem 0;
   border-top: 1px solid #333;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 768px) {
-  .cat-footer-bottom {
+  .footer-bottom {
     flex-direction: row;
     justify-content: space-between;
   }
 }
 
-.cat-footer-copyright {
+.footer-copyright {
   color: #71717a;
   font-size: 0.875rem;
+  text-align: center;
 }
 
-.cat-footer-legal {
+.footer-legal {
   display: flex;
   gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.cat-footer-legal a {
+.footer-legal a {
   color: #a1a1aa;
   text-decoration: none;
   font-size: 0.875rem;
   transition: all 0.3s ease;
 }
 
-.cat-footer-legal a:hover {
+.footer-legal a:hover {
   color: #fff;
+}
+
+.footer-payment-methods {
+  display: flex;
+  gap: 1rem;
+  font-size: 1.5rem;
+  color: #a1a1aa;
+}
+
+.footer-payment-methods i {
+  transition: all 0.3s ease;
+}
+
+.footer-payment-methods i:hover {
+  color: #fff;
+  transform: translateY(-3px);
 }

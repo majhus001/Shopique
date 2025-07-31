@@ -21,6 +21,7 @@ import {
 } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import BottomNav from "../../components/Bottom Navbar/BottomNav";
+import AuthRequired from "../../components/Authentication/AuthRequired";
 
 const Orderhistory = () => {
   const location = useLocation();
@@ -231,25 +232,7 @@ const Orderhistory = () => {
         theme="colored"
       />
       {!isLoggedIn ? (
-        <motion.div
-          className="auth-required"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="auth-card">
-            <FiAlertCircle className="auth-icon" />
-            <h2>Sign In Required</h2>
-            <p>Please login to view your order history</p>
-            <button
-              className="auth-button"
-              onClick={() => handleNavigation("login")}
-            >
-              <FiLogIn className="btn-icon" />
-              Sign In
-            </button>
-          </div>
-        </motion.div>
+        <AuthRequired message="Please login to view your order history" />
       ) : (
         <div className="orderhis-main-cont">
           <div className="sidebar-cont">
