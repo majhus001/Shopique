@@ -1,0 +1,156 @@
+/* Base Styles */
+.about-page {
+  padding: 2rem 1rem;
+  background-color: #fefefe;
+  color: #333;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.about-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Hero Section */
+.about-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+}
+
+.about-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+.about-title-accent {
+  color: #007AFF;
+}
+
+.about-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Content Cards */
+.about-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.about-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f0f0f0;
+  transition: transform 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+}
+
+.about-card-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.about-card-title {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #007AFF;
+}
+
+.about-card-text {
+  color: #555;
+}
+
+/* Founder Section */
+.about-founder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  background: rgba(108, 92, 231, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+}
+
+.about-founder-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #007AFF;
+  background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d');
+  background-size: cover;
+  background-position: center;
+}
+
+.about-founder-note {
+  text-align: center;
+  max-width: 600px;
+}
+
+.about-founder-title {
+  font-size: 1.3rem;
+  color: #007AFF;
+  margin-bottom: 1rem;
+}
+
+.about-founder-text {
+  font-style: italic;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.about-founder-signature {
+  font-weight: 600;
+  color: #007AFF;
+}
+
+/* CTA Section */
+.about-cta {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.about-cta-text {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #666;
+}
+
+.about-cta-button {
+  background: #007AFF;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .about-title {
+    font-size: 2.2rem;
+  }
+  
+  .about-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-founder {
+    text-align: center;
+  }
+}

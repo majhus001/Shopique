@@ -1,0 +1,271 @@
+/* Base Styles */
+.pp-container {
+  padding: 2rem 1rem;
+  background-color: #f8fafc;
+  color: #334155;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  /* max-width: 1200px; */
+  margin: 0 auto;
+}
+
+.pp-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.pp-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.pp-icon-wrapper {
+  background: linear-gradient(135deg, #007AFF, #00A1FF);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 122, 255, 0.3);
+}
+
+.pp-main-icon {
+  color: white;
+  font-size: 2.5rem;
+}
+
+.pp-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #007AFF, #00A1FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pp-effective-date {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pp-divider {
+  height: 3px;
+  width: 100px;
+  background: linear-gradient(90deg, #007AFF, #00A1FF);
+  margin: 1.5rem auto 0;
+  border-radius: 3px;
+}
+
+/* Sections Container */
+.pp-sections-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+/* Cards */
+.pp-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pp-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 122, 255, 0.1);
+}
+
+.pp-card a {
+  text-decoration: none;
+}
+
+
+.pp-highlight-card {
+  background: linear-gradient(135deg, #f0f9ff, #e0f7ff);
+  padding: 2rem;
+  border-radius: 12px;
+  border-left: 4px solid #007AFF;
+  position: relative;
+  overflow: hidden;
+}
+
+.pp-highlight-icon {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 3rem;
+  color: rgba(0, 122, 255, 0.1);
+}
+
+/* Section Titles */
+.pp-section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.pp-section-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #007AFF;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-right: 0.8rem;
+}
+
+.pp-text {
+  margin-bottom: 1.2rem;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.pp-strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Lists */
+.pp-list {
+  margin-left: 0;
+  margin-bottom: 1.5rem;
+}
+
+.pp-list-item {
+  margin-bottom: 0.6rem;
+  color: #475569;
+  position: relative;
+  padding-left: 1.8rem;
+  display: flex;
+  align-items: flex-start;
+  font-size: 0.95rem;
+}
+
+.pp-bullet {
+  width: 8px;
+  height: 8px;
+  background-color: #007AFF;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.8rem;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Contact Section */
+.pp-contact-section {
+  background: linear-gradient(135deg, #f5f9ff, #e5f0ff);
+}
+
+.pp-contact-list {
+  margin-top: 1rem;
+}
+
+.pp-contact-item {
+  margin-bottom: 0.8rem;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.pp-contact-icon {
+  color: #007AFF;
+  margin-right: 0.8rem;
+  font-size: 1.1rem;
+}
+
+/* Footer */
+.pp-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  text-align: center;
+}
+
+.pp-footer-content {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.pp-footer-icon {
+  color: #007AFF;
+  margin-right: 0.8rem;
+  font-size: 1.2rem;
+}
+
+.pp-footer-text {
+  font-style: italic;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .pp-sections-container {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .pp-header {
+    margin-bottom: 4rem;
+  }
+  
+  .pp-title {
+    font-size: 3rem;
+  }
+  
+  .pp-highlight-card {
+    grid-column: span 2;
+  }
+  
+  .pp-contact-section {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .pp-container {
+    padding: 1.5rem 1rem;
+  }
+  
+  .pp-header {
+    margin-bottom: 2rem;
+  }
+  
+  .pp-icon-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .pp-main-icon {
+    font-size: 2rem;
+  }
+  
+  .pp-title {
+    font-size: 2rem;
+  }
+  
+  .pp-card {
+    padding: 1.5rem;
+  }
+}

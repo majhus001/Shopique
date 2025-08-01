@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Sidebar.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -27,7 +27,7 @@ const Sidebar = () => {
     } else {
       setIsLoading(true);
     }
-  });
+  }, [user]);
 
   const handleNavigation = (path) => {
     if (path === "profile") {
@@ -63,73 +63,63 @@ const Sidebar = () => {
           draggable
           theme="colored"
         />
-        {!user ? (
-          <div className="sidebar-auth-prompt">
-            <p>Please login to access your account</p>
-            <button className="sidebar-btn" onClick={() => navigate("/login")}>
-              <FaSignInAlt />
-              <span>Login</span>
-            </button>
-          </div>
-        ) : (
-          <>
-            {isLoading ? (
-              <div className="sidebar-loading">Loading...</div>
-            ) : (
-              <div className="sidebar-user">
-                <img
-                  src={user?.image || userimg}
-                  alt="profile"
-                  className="sidebar-user-img"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/default-profile.png";
-                  }}
-                />
-                <h4 className="sidebar-user-name">{user.username || "User"}</h4>
-                <p className="sidebar-user-email">{user?.email || ""}</p>
-              </div>
-            )}
 
-            <nav className="sidebar-nav">
-              <button
-                className="sidebar-btn"
-                onClick={() => handleNavigation("profile")}
-              >
-                <FaUser />
-                <span>Profile</span>
-              </button>
-              <button
-                className="sidebar-btn"
-                onClick={() => handleNavigation("cart")}
-              >
-                <FaShoppingCart />
-                <span>Cart</span>
-              </button>
-              <button
-                className="sidebar-btn"
-                onClick={() => handleNavigation("myorders")}
-              >
-                <FaBox />
-                <span>My Orders</span>
-              </button>
-              <button
-                className="sidebar-btn"
-                onClick={() => handleNavigation("settings")}
-              >
-                <FaMoneyCheck />
-                <span>Payments</span>
-              </button>
-              <button
-                className="sidebar-btn sidebar-logout"
-                onClick={handleLogoutUser}
-              >
-                <FaSignOutAlt />
-                <span>Logout</span>
-              </button>
-            </nav>
-          </>
-        )}
+        <>
+          {isLoading ? (
+            <div className="sidebar-loading">Loading...</div>
+          ) : (
+            <div className="sidebar-user">
+              <img
+                src={user?.image}
+                alt="profile"
+                className="sidebar-user-img"
+                onError={(e) => {
+                  e.target.src = userimg;
+                }}
+              />
+              <h4 className="sidebar-user-name">{user.username || "User"}</h4>
+              <p className="sidebar-user-email">{user?.email || ""}</p>
+            </div>
+          )}
+
+          <nav className="sidebar-nav">
+            <button
+              className="sidebar-btn"
+              onClick={() => handleNavigation("profile")}
+            >
+              <FaUser />
+              <span>Profile</span>
+            </button>
+            <button
+              className="sidebar-btn"
+              onClick={() => handleNavigation("cart")}
+            >
+              <FaShoppingCart />
+              <span>Cart</span>
+            </button>
+            <button
+              className="sidebar-btn"
+              onClick={() => handleNavigation("myorders")}
+            >
+              <FaBox />
+              <span>My Orders</span>
+            </button>
+            <button
+              className="sidebar-btn"
+              onClick={() => handleNavigation("settings")}
+            >
+              <FaMoneyCheck />
+              <span>Payments</span>
+            </button>
+            <button
+              className="sidebar-btn sidebar-logout"
+              onClick={handleLogoutUser}
+            >
+              <FaSignOutAlt />
+              <span>Logout</span>
+            </button>
+          </nav>
+        </>
       </div>
     </>
   );

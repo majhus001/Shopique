@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./HomeStyle.css";
 import axios from "axios";
@@ -24,6 +24,7 @@ import RecentlyViewed from "./RecentProducts/RecentlyViewed";
 import CategoryList from "./CategoryList/CategoryList";
 import Footer from "./Footer/Footer";
 import capitalizeWords from "../../utils/CapitalizeWord";
+import NewsLetter from "./NewsLetter/NewsLetter";
 
 AbortSignal.timeout = function (ms) {
   const controller = new AbortController();
@@ -390,38 +391,7 @@ const HomePage = () => {
             )}
           </section>
 
-          <motion.section
-            className="newsletter-section"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="newsletter-container">
-              <div className="newsletter-content">
-                <h2>Subscribe to Our Newsletter</h2>
-                <p>Get the latest updates on new products and upcoming sales</p>
-                <form className="newsletter-form">
-                  <motion.input
-                    type="email"
-                    placeholder="Your email address"
-                    required
-                    aria-label="Email address for newsletter"
-                    whileFocus={{
-                      boxShadow: "0 0 0 2px var(--primary-color)",
-                    }}
-                  />
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <i className="fas fa-paper-plane"></i> Subscribe
-                  </motion.button>
-                </form>
-              </div>
-            </div>
-          </motion.section>
+          <NewsLetter />
         </div>
       </div>
 

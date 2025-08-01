@@ -16,6 +16,9 @@ import ScrollToTop from "./ScrollToTop";
 import AuthRequired from "./components/Authentication/AuthRequired";
 import NotFound from "./NotFound/NotFound";
 import AllProducts from "./screens/AllProducts/AllProducts";
+import About from "./screens/StaticPages/About/About";
+import Contact from "./screens/StaticPages/Contact/Contact";
+import PrivacyPolicy from "./screens/StaticPages/PrivacyPolicy/PrivacyPolicy";
 
 const App = () => {
   return (
@@ -52,6 +55,12 @@ const App = () => {
           />
           <Route path="/authentication" element={<AuthRequired />} />
           <Route path="/not-found" element={<NotFound />} />
+          
+          
+          
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </Router>
     </HelmetProvider>

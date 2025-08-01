@@ -5,9 +5,6 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require('dotenv').config();
 const authRoutes = require("./Authentication");
-const mobileRoutes = require("./Products/mobileprod");
-const clothingRoutes = require("./Products/clothprod");
-const homeappliRoutes = require("./Products/homeappli");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
 const paymentRoutes = require("./Razopay/payment");
@@ -24,6 +21,8 @@ const employeesRoutes = require("./routes/employees");
 const dailysalesRoutes = require("./routes/dailysales");
 const sellersRoutes = require("./routes/sellers");
 const bannerRoutes = require("./routes/banner");
+const newsletterRoutes = require("./routes/newsletter");
+const contactRoutes = require("./routes/contact");
 
 const app = express();
 
@@ -63,6 +62,8 @@ app.use("/api/employees", employeesRoutes);
 app.use("/api/dailysales", dailysalesRoutes);
 app.use("/api/sellers", sellersRoutes);
 app.use("/api/banners", bannerRoutes);
+app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/contact/support", contactRoutes);
 
 
 // mongodb+srv://majidsmart7:maji5002@cluster0.jyfpj.mongodb.net/Ecommerse

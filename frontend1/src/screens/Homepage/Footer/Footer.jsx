@@ -58,7 +58,7 @@ const Footer = () => {
                 <Link to="/returns">Returns</Link>
               </li>
               <li>
-                <Link to="/privacy">Privacy Policy</Link>
+                <Link to="/privacy-policy">Privacy Policy</Link>
               </li>
             </ul>
           </motion.div>

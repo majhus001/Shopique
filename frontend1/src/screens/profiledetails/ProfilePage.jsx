@@ -110,6 +110,7 @@ const ProfilePage = () => {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(user?.isLoggedIn);
   const [userDetails, setUserDetails] = useState({
     image: user?.image?.trim() ? user?.image : userimg,
@@ -224,6 +225,8 @@ const ProfilePage = () => {
 
   const saveDetails = async () => {
     try {
+      setUpdateLoading(true);
+
       const formData = new FormData();
       formData.append("name", userDetails.username || "");
       formData.append("email", userDetails.email || "");
@@ -231,7 +234,6 @@ const ProfilePage = () => {
       formData.append("mobile", userDetails.mobile || "");
       formData.append("address", userDetails.address || "");
       formData.append("pincode", userDetails.pincode || " ");
-
 
       console.log(userDetails);
       const imageFile = document.querySelector('input[type="file"]')?.files[0];
@@ -267,6 +269,8 @@ const ProfilePage = () => {
       } else {
         toast.error("Failed to update profile. Please try again.");
       }
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -518,8 +522,14 @@ const ProfilePage = () => {
                 {isEditing && (
                   <div className="usprof-action-btns">
                     <button onClick={saveDetails} className="usprof-save-btn">
-                      <FaSave className="btn-icon" />
-                      <span>Save Changes</span>
+                      {updateLoading ? (
+                        <div className="pf-btn-loading-spinner"></div> // Optional spinner CSS
+                      ) : (
+                        <>
+                          <FaSave className="btn-icon" />
+                          <span>Save Changes</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 )}
