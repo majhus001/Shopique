@@ -118,6 +118,7 @@
 .all-prods-container {
   margin: 50px auto;
   padding: 15px;
+  overflow: visible;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -168,9 +169,7 @@
 .all-prods-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  height: calc(100vh - 180px);
-  overflow: hidden;
+  gap: 20px;   
 }
 
 .all-prods-sidebar {
@@ -179,14 +178,10 @@
   background: white;
   padding: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  overflow-y: auto;
-  max-height: 100%;
 }
 
 .all-prods-main {
   flex: 3.5;
-  overflow-y: auto;
-  max-height: 100%;
 }
 
 /* Sidebar Styles */
@@ -483,7 +478,6 @@
   .all-prods-content {
     flex-direction: row;
     gap: 25px;
-    height: calc(100vh - 190px);
   }
   
   .all-prods-header {
@@ -525,7 +519,8 @@
   }
   
   .all-prods-content {
-    height: calc(100vh - 200px);
+    /* height: calc(100vh - 200px); */
+    
   }
 }
 
@@ -549,6 +544,7 @@
   
   .all-prods-sidebar-mobile-active {
     left: 0;
+    top:100px
   }
   
   .all-prods-sidebar-title {
@@ -585,6 +581,7 @@
   }
   
   .all-prods-content {
+    
     height: auto;
     overflow: visible;
   }

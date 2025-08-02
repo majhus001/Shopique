@@ -2,17 +2,16 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "./ProfilePage.css";
-import Navbar from "../../components/navbar/Navbar";
 import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../../Redux/slices/userSlice";
+import { setCartCount } from "../../Redux/slices/cartSlice";
 import API_BASE_URL from "../../api";
 import getCoordinates from "../../utils/DeliveryPincodeCheck/Geolocation";
 import Sidebar from "../../components/sidebar/Sidebar";
-import "../../App.css";
 import userimg from "../../assets/users/user.png";
 import {
   FaSignOutAlt,
@@ -24,7 +23,6 @@ import {
 import { IoMdLock } from "react-icons/io";
 import { MdEmail, MdPhone, MdLocationOn, MdPerson } from "react-icons/md";
 import handleLogout from "../../utils/Logout";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import AuthRequired from "../../components/Authentication/AuthRequired";
 
 const PfSkeletonSidebar = () => (
@@ -277,6 +275,7 @@ const ProfilePage = () => {
   const handleLogoutUser = async () => {
     const logout = await handleLogout(dispatch);
     if (logout) {
+      dispatch(setCartCount(0)); 
       navigate("/home");
     } else {
       toast.error("Unable to logout");
@@ -286,24 +285,16 @@ const ProfilePage = () => {
   if (error) {
     return (
       <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
         <ErrorDisplay
           error={error}
           onRetry={() => user?._id && fetchUserData(user._id)}
         />
-        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="usprof-container">
-      <div className="usprof-nav">
-        <Navbar />
-      </div>
-
+    <div className="us-prof-container">
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -324,9 +315,7 @@ const ProfilePage = () => {
         </>
       ) : (
         <div className="usprof-main">
-          <div className="sidebar-cont">
             <Sidebar />
-          </div>
           <div className="usprof-content">
             <div className="usprof-header">
               <div className="usprof-title-container">
@@ -395,7 +384,7 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              <div className="usprof-form-section">
+              <div className="usprof-form-section-container">
                 <div className="form-section-header">
                   <h3>Personal Information</h3>
                   <p>Update your personal details and preferences</p>
@@ -538,8 +527,6 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
-
-      <BottomNav />
     </div>
   );
 };

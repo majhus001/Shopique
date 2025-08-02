@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { setCartCount } from "../../Redux/slices/cartSlice";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -9,7 +11,7 @@ import {
   FaRegStar,
   FaTruck,
   FaMapMarkerAlt,
-  FaCalendarAlt,
+  
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
@@ -17,13 +19,9 @@ import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
 import { RiFlashlightFill } from "react-icons/ri";
 import { IoIosArrowForward } from "react-icons/io";
-import Navbar from "../../components/navbar/Navbar";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import API_BASE_URL from "../../api";
-import getCoordinates from "../../utils/DeliveryPincodeCheck/Geolocation";
 import "./ProductList.css";
 import NotFound from "../../NotFound/NotFound";
 import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
@@ -198,6 +196,7 @@ const SkeletonRelatedProducts = () => (
 const ProductList = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
   const user = useSelector((state) => state.user);
 
@@ -440,6 +439,7 @@ const ProductList = () => {
       if (response.data.success) {
         toast.success("Product added to the cart!");
         setProdAdded(true);
+        dispatch(setCartCount(response.data.cartCount));
       } else {
         toast.warn(response.data.message || "Failed to add product to cart.");
       }
@@ -455,11 +455,10 @@ const ProductList = () => {
       return;
     }
 
-    
-    navigate(`/user/${userId?userId:"guest"}/product/buynow`, {
+    navigate(`/user/${userId ? userId : "guest"}/product/buynow`, {
       state: {
         product: productData,
-        statepincode: pincode
+        statepincode: pincode,
       },
     });
   };
@@ -483,14 +482,12 @@ const ProductList = () => {
           return <FaStar key={i} className="star-filled" />;
         }
         if (i < rating) {
-          // Handles decimal (e.g., 3.5)
           return <FaStarHalf key={i} className="star-half" />;
         }
         return <FaRegStar key={i} className="star-empty" />;
       });
   };
 
-  // Calculate total pages for reviews
   const totalPages = Math.ceil(totalReviews / reviewsPerPage);
 
   if (notFound) {
@@ -500,7 +497,6 @@ const ProductList = () => {
   if (loading) {
     return (
       <div className="product-page-container">
-        <Navbar />
         <div className="product-main-content">
           <div className="product-section">
             <SkeletonImageGallery />
@@ -516,9 +512,7 @@ const ProductList = () => {
   if (error) {
     return (
       <div>
-        <Navbar />
         <ErrorDisplay error={error} onRetry={fetchData} />
-        <BottomNav />
       </div>
     );
   }
@@ -540,7 +534,6 @@ const ProductList = () => {
       </Helmet>
 
       <div className="product-page-container">
-        <Navbar />
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -1137,8 +1130,6 @@ const ProductList = () => {
             </div>
           )}
         </section>
-
-        <BottomNav />
       </div>
     </>
   );

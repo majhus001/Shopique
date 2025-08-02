@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import Navbar from "../../components/navbar/Navbar";
+import { setCartCount } from "../../Redux/slices/cartSlice";
+import { useSelector, useDispatch } from "react-redux";
 import "./Searchproducts.css";
 import axios from "axios";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import normalizeError from "../../utils/Error/NormalizeError";
-import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,16 +20,16 @@ import {
   FiFilter,
   FiX,
 } from "react-icons/fi";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 
 export default function Searchproducts() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
   const { clickedProduct, productCategory, productSubCategory } =
     location.state || {};
-    
+
   const user = useSelector((state) => state.user);
 
   const [userId, setUserId] = useState(user?._id || null);
@@ -179,6 +179,8 @@ export default function Searchproducts() {
         productDetails
       );
       if (response.data.success) {
+        dispatch(setCartCount(response.data.cartCount));
+        toast.success("Product added to the cart!");
         await fetchPaginatedProducts();
       }
     } catch (error) {
@@ -201,7 +203,7 @@ export default function Searchproducts() {
   };
 
   const handleGoToCart = () => {
-    navigate(`/user/${userId}/cart`);
+    navigate(`/user/cart`);
   };
 
   const handlePriceApply = () => {
@@ -214,31 +216,28 @@ export default function Searchproducts() {
     setSliderValue(Number(event.target.value));
   };
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
+
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (error) {
     return (
-      <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
+      <div>
         <ErrorDisplay error={error} onRetry={fetchPaginatedProducts} />
-        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="search-page">
-      <Navbar />
+    <div className="sp-search-page">
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -252,16 +251,16 @@ export default function Searchproducts() {
       {/* Overlay for mobile filters */}
       {mobileFiltersOpen && (
         <div
-          className="filter-overlay"
+          className="sp-filter-overlay"
           onClick={() => setMobileFiltersOpen(false)}
         />
       )}
 
-      <div className="search-container">
+      <div className="sp-search-container">
         {/* Mobile Filter Toggle */}
         <button
           ref={mobileFilterToggleRef}
-          className="mobile-filter-toggle"
+          className="sp-mobile-filter-toggle"
           onClick={() => setMobileFiltersOpen(true)}
         >
           <FiFilter /> Filters
@@ -270,31 +269,31 @@ export default function Searchproducts() {
         {/* Filter Sidebar */}
         <div
           ref={filterSidebarRef}
-          className={`filter-sidebar ${mobileFiltersOpen ? "mobile-open" : ""}`}
+          className={`sp-filter-sidebar ${mobileFiltersOpen ? "sp-mobile-open" : ""}`}
         >
-          <div className="sidebar-header">
+          <div className="sp-sidebar-header">
             <h3>Filters</h3>
             <button
-              className="close-filters"
+              className="sp-close-filters"
               onClick={() => setMobileFiltersOpen(false)}
             >
               <FiX />
             </button>
           </div>
 
-          <div className="filter-section">
+          <div className="sp-filter-section">
             <div
-              className="filter-title"
+              className="sp-filter-title"
               onClick={() => setShowPriceFilter(!showPriceFilter)}
             >
               <h4>Price Range</h4>
-              <span className="toggle-icon">
+              <span className="sp-toggle-icon">
                 {showPriceFilter ? <FiChevronUp /> : <FiChevronDown />}
               </span>
             </div>
             {showPriceFilter && (
-              <div className="price-filter-content">
-                <div className="price-range-display">
+              <div className="sp-price-filter-content">
+                <div className="sp-price-range-display">
                   <span>₹0 - ₹{sliderValue.toLocaleString()}</span>
                 </div>
                 <input
@@ -304,9 +303,9 @@ export default function Searchproducts() {
                   step="1"
                   value={sliderValue}
                   onChange={handlePriceSlideChange}
-                  className="price-slider"
+                  className="sp-price-slider"
                 />
-                <div className="price-limits">
+                <div className="sp-price-limits">
                   <span>₹0</span>
                   <span>₹{maxPrice.toLocaleString()}</span>
                 </div>
@@ -314,23 +313,23 @@ export default function Searchproducts() {
             )}
           </div>
 
-          <div className="filter-section">
+          <div className="sp-filter-section">
             <div
-              className="filter-title"
+              className="sp-filter-title"
               onClick={() => setShowBrandFilter(!showBrandFilter)}
             >
               <h4>Brand</h4>
-              <span className="toggle-icon">
+              <span className="sp-toggle-icon">
                 {showBrandFilter ? <FiChevronUp /> : <FiChevronDown />}
               </span>
             </div>
             {showBrandFilter && (
-              <div className="brand-filter-content">
+              <div className="sp-brand-filter-content">
                 {brands.map((brand, index) => (
                   <div
                     key={index}
-                    className={`brand-item ${
-                      selectedbrands.includes(brand) ? "selected" : ""
+                    className={`sp-brand-item ${
+                      selectedbrands.includes(brand) ? "sp-selected" : ""
                     }`}
                     onClick={() => {
                       const newSelectedBrands = selectedbrands.includes(brand)
@@ -347,13 +346,13 @@ export default function Searchproducts() {
             )}
           </div>
 
-          <button className="apply-filters-btn" onClick={handlePriceApply}>
+          <button className="sp-apply-filters-btn" onClick={handlePriceApply}>
             Apply Filters
           </button>
         </div>
 
         {/* Product Listing */}
-        <div className="product-results">
+        <div className="sp-product-results">
           {loading ? (
             <div className="sp-skeleton-loading">
               <div className="sp-skeleton-filter-toggle"></div>
@@ -400,12 +399,12 @@ export default function Searchproducts() {
                 )
               )}
 
-              <div className="product-grid">
+              <div className="sp-product-grid">
                 {categoryProducts.map((item) => (
                   <div
                     key={item._id}
                     onClick={() => HandleProdlistNavigation(item, navigate)}
-                    className="product-card"
+                    className="sp-product-card"
                   >
                     <div className="sp-product-image">
                       <img
@@ -416,7 +415,7 @@ export default function Searchproducts() {
                         }}
                       />
                       {item.offerPrice && (
-                        <div className="discount-badge">
+                        <div className="sp-discount-badge">
                           {Math.round(
                             ((item.price - item.offerPrice) / item.price) * 100
                           )}
@@ -438,33 +437,33 @@ export default function Searchproducts() {
                               </span>
                             </>
                           ) : (
-                            <span className="current-price">₹{item.price}</span>
+                            <span className="sp-current-price">₹{item.price}</span>
                           )}
                         </div>
                         {item.rating > 0 && (
-                          <div className="all-prods-card-rating">
+                          <div className="sp-all-prods-card-rating">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <span
                                 key={i}
-                                className={`all-prods-star ${
+                                className={`sp-all-prods-star ${
                                   i < Math.floor(item.rating)
-                                    ? "all-prods-star-filled"
+                                    ? "sp-all-prods-star-filled"
                                     : ""
                                 }`}
                               >
                                 {i < Math.floor(item.rating) ? "★" : "☆"}
                               </span>
                             ))}
-                            <span className="all-prods-rating-count">
+                            <span className="sp-all-prods-rating-count">
                               ({item.rating})
                             </span>
                           </div>
                         )}
                       </div>
-                      <div className="product-actions">
+                      <div className="sp-product-actions">
                         {item.isAddedToCart ? (
                           <button
-                            className="action-btn sp-go-to-cart"
+                            className="sp-action-btn sp-go-to-cart"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleGoToCart();
@@ -474,7 +473,7 @@ export default function Searchproducts() {
                           </button>
                         ) : (
                           <button
-                            className="action-btn sp-add-to-cart"
+                            className="sp-action-btn sp-add-to-cart"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleAddToCart(item);
@@ -484,7 +483,7 @@ export default function Searchproducts() {
                           </button>
                         )}
                         <button
-                          className="action-btn sp-buy-now"
+                          className="sp-action-btn sp-buy-now"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleBuyNow(item);
@@ -499,21 +498,21 @@ export default function Searchproducts() {
               </div>
 
               {/* Pagination */}
-              <div className="pagination">
+              <div className="sp-pagination">
                 <button
-                  className="pagination-btn"
+                  className="sp-pagination-btn"
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
                 >
                   <FiChevronLeft /> Previous
                 </button>
-                <div className="page-numbers">
+                <div className="sp-page-numbers">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                     (num) => (
                       <button
                         key={num}
-                        className={`page-btn ${
-                          currentPage === num ? "active" : ""
+                        className={`sp-page-btn ${
+                          currentPage === num ? "sp-active" : ""
                         }`}
                         onClick={() => {
                           setCurrentPage(num);
@@ -526,7 +525,7 @@ export default function Searchproducts() {
                   )}
                 </div>
                 <button
-                  className="pagination-btn"
+                  className="sp-pagination-btn"
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
                 >
@@ -535,7 +534,7 @@ export default function Searchproducts() {
               </div>
             </>
           ) : (
-            <div className="no-products">
+            <div className="sp-no-products">
               <img
                 src="https://cdn-icons-png.flaticon.com/512/5089/5089733.png"
                 alt="No products found"
@@ -543,7 +542,7 @@ export default function Searchproducts() {
               <h3>No products found</h3>
               <p>Try adjusting your filters or search criteria</p>
               <button
-                className="reset-filters"
+                className="sp-reset-filters"
                 onClick={() => {
                   setSliderValue(maxPrice);
                   setAppliedPriceRange([0, maxPrice]);
@@ -557,7 +556,6 @@ export default function Searchproducts() {
           )}
         </div>
       </div>
-      <BottomNav UserData={user} />
     </div>
   );
 }

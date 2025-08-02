@@ -8,11 +8,10 @@ import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
+import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 import API_BASE_URL from "../../api";
-import Navbar from "../../components/navbar/Navbar";
 import Sidebar from "../../components/sidebar/Sidebar";
-import { FaTimes, FaArrowRight, FaRedo } from "react-icons/fa";
-import { FiLogIn, FiAlertCircle } from "react-icons/fi";
+import { FaTimes, FaArrowRight } from "react-icons/fa";
 import {
   MdDeliveryDining,
   MdPendingActions,
@@ -204,23 +203,16 @@ const Orderhistory = () => {
   if (error) {
     return (
       <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
         <ErrorDisplay
           error={error}
           onRetry={() => user?._id && fetchOrders(user._id)}
         />
-        <BottomNav />
       </div>
     );
   }
 
   return (
     <div className="order-history-container">
-      <div className="usprof-nav">
-        <Navbar />
-      </div>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -235,25 +227,24 @@ const Orderhistory = () => {
         <AuthRequired message="Please login to view your order history" />
       ) : (
         <div className="orderhis-main-cont">
-          <div className="sidebar-cont">
-            <Sidebar />
-          </div>
+          <Sidebar />
           <div className="order-history-content">
             {loading ? (
               <SkeletonLoading />
             ) : (
               <>
                 <div className="order-history-header-container">
-                  <motion.h1
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="ord-his-header-title"
-                  >
-                    My Orders
-                  </motion.h1>
-                  <p>View and manage your recent purchases</p>
-
+                  <div className="order-history-header-title-tag">
+                    <motion.h1
+                      initial={{ y: -20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="ord-his-header-title"
+                    >
+                      My Orders
+                    </motion.h1>
+                    <p>View and manage your recent purchases</p>
+                  </div>
                   <div className="order-filters">
                     {[
                       "All",
@@ -294,11 +285,11 @@ const Orderhistory = () => {
                         >
                           <div className="order-card-header">
                             <div className="order-meta">
+                              <span className="order-id">
+                                Order #{order._id.toUpperCase().slice(0, 8)}
+                              </span>
                               <span className="order-date">
                                 {formatDate(order.createdAt)}
-                              </span>
-                              <span className="order-id">
-                                Order #{order._id.slice(-8).toUpperCase()}
                               </span>
                             </div>
                             <div
@@ -340,7 +331,9 @@ const Orderhistory = () => {
                               >
                                 <div className="delivery-info">
                                   <span>Delivery to:</span>
-                                  <strong>{order.deliveryAddress}</strong>
+                                  <strong className="ord-his-truncated-name">
+                                    {order.deliveryAddress}
+                                  </strong>
                                 </div>
                                 <div className="delivery-info">
                                   <span>Delivery fee:</span>
@@ -365,26 +358,48 @@ const Orderhistory = () => {
                                           e.target.src =
                                             "https://via.placeholder.com/80?text=No+Image";
                                         }}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+
+                                          HandleProdlistNavigation(
+                                            item,
+                                            navigate
+                                          );
+                                        }}
                                       />
                                       <div className="item-details-cont">
-                                        <h4 className="ord-his-truncated-name">{item.name}</h4>
-                                        <div className="item-details">
-                                          <span>Price :</span>
-                                          <span className="item-price">
-                                            {formatCurrency(item.price)}
-                                          </span>
-                                        </div>
-                                        <div className="item-details">
-                                          <span>Quantity :</span>
-                                          <span>{item.quantity}</span>
-                                        </div>
-                                        <div className="item-details">
-                                          <span>Total :</span>
-                                          <span className="item-subtotal">
-                                            {formatCurrency(
-                                              item.price * item.quantity
-                                            )}
-                                          </span>
+                                        <h4
+                                          className="ord-his-truncated-name"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+
+                                            HandleProdlistNavigation(
+                                              item,
+                                              navigate
+                                            );
+                                          }}
+                                        >
+                                          {item.name}
+                                        </h4>
+                                        <div className="ord-his-item-details-info">
+                                          <div className="item-details">
+                                            <span>Price :</span>
+                                            <span className="item-price">
+                                              {formatCurrency(item.price)}
+                                            </span>
+                                          </div>
+                                          <div className="item-details ord-item-quantity">
+                                            <span>Quantity :</span>
+                                            <span>{item.quantity}</span>
+                                          </div>
+                                          <div className="item-details">
+                                            <span>Total :</span>
+                                            <span className="item-subtotal">
+                                              {formatCurrency(
+                                                item.price * item.quantity
+                                              )}
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>

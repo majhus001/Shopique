@@ -51,14 +51,14 @@ const SkeletonLoading = () => {
       <div className="skeleton-section">
         <div className="skeleton-header"></div>
         <div className="skeleton-featured-categories">
-          {[...Array(8)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <div key={i} className="skeleton-featured-card"></div>
           ))}
         </div>
       </div>
 
       {/* Product categories skeleton */}
-      {[...Array(3)].map((_, catIndex) => (
+      {[...Array(6)].map((_, catIndex) => (
         <div key={catIndex} className="skeleton-section">
           <div className="skeleton-category-header">
             <div className="skeleton-title"></div>
@@ -67,7 +67,7 @@ const SkeletonLoading = () => {
           <div className="skeleton-products-container">
             <div className="skeleton-scroll-button left"></div>
             <div className="skeleton-products-scroll">
-              {[...Array(5)].map((_, prodIndex) => (
+              {[...Array(6)].map((_, prodIndex) => (
                 <div key={prodIndex} className="skeleton-product-card">
                   <div className="skeleton-product-image"></div>
                   <div className="skeleton-product-details">
@@ -184,13 +184,11 @@ const HomePage = () => {
   if (loading) {
     return (
       <div className="app">
-        <Navbar />
         <div className="main-container">
           <div className="content">
             <SkeletonLoading />
           </div>
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -198,16 +196,13 @@ const HomePage = () => {
   if (error) {
     return (
       <div>
-        <Navbar />
         <ErrorDisplay error={error} onRetry={fetchData} />
-        <BottomNav />
       </div>
     );
   }
 
   return (
     <div className="app">
-      <Navbar />
       <div className="main-container">
         <div className="content">
           <HeroSection />
@@ -395,9 +390,9 @@ const HomePage = () => {
         </div>
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
 
-      <BottomNav />
+      {/* <BottomNav /> */}
     </div>
   );
 };

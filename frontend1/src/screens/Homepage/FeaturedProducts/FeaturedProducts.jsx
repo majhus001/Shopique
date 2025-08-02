@@ -17,7 +17,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
             <motion.div
               key={category._id}
               className="featured-category-card"
-              onClick={() => HandleCategoryClick(category.products[0], featuredProducts, navigate)}
+              onClick={() => HandleCategoryClick(category.products[0], navigate)}
               transition={{ duration: 0.3 }}
               whileHover={{ zIndex: 10 }}
             >

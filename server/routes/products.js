@@ -210,7 +210,7 @@ router.post("/fetchBySpecified", async (req, res) => {
       .sort({ createdAt: -1 })
       .select(
         "_id name price category subCategory offerPrice images rating salesCount"
-      );
+      ).lean();
 
     //filtering for viewed products
     let recentlyViewedProducts = [];
@@ -344,8 +344,7 @@ router.post("/fetchBySpecified", async (req, res) => {
 router.get("/fetch/:id", async (req, res) => {
   const { id } = req.params;
 
-  console.log("isValid:", mongoose.Types.ObjectId.isValid(id));
-
+  console.log(id)
   // 👇 First validate the ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).json({

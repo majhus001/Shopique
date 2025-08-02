@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require('dotenv').config();
+const logResponseSize = require("./middleware/logResponseSize");
 const authRoutes = require("./Authentication");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
@@ -26,6 +27,20 @@ const contactRoutes = require("./routes/contact");
 
 const app = express();
 
+
+// app.use(logResponseSize);
+// app.use((req, res, next) => {
+//   const start = Date.now();
+
+//   res.on('finish', () => {
+//     const duration = Date.now() - start;
+//     console.log(`[${req.method}] ${req.originalUrl} → Time: ${duration} ms`);
+//   });
+
+//   next();
+// });
+
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://shopique-iota.vercel.app",
@@ -36,7 +51,7 @@ app.use(bodyParser.json());
 
 app.use(
   cors({
-    origin: true, // Allow all origins
+    origin: true, 
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })

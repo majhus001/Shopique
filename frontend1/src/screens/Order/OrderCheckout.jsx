@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import Navbar from "../../components/navbar/Navbar";
 import axios from "axios";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
 import "./OrderCheckout.css";
@@ -10,11 +8,13 @@ import API_BASE_URL from "../../api";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setCartCount } from "../../Redux/slices/cartSlice";
 import RazorPayment from "../../utils/RazorPayment";
 import EmailFunction from "../../utils/EmailFunction";
 import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
 import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
+
 const OrderDetailsSkeleton = () => {
   return (
     <div className="checkout-container">
@@ -35,6 +35,7 @@ const OrderDetailsSkeleton = () => {
 const Orderdetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
   const {
@@ -177,7 +178,7 @@ const Orderdetails = () => {
           deliveryfee,
           deliveryAddress,
           paymentMethod,
-          paymentId,
+          paymentId: paymentMethod === "Online Payment" ? paymentId : null,
         };
 
         const orderResponse = await axios.post(
@@ -229,6 +230,7 @@ const Orderdetails = () => {
   const clearCart = useCallback(async () => {
     try {
       await axios.delete(`${API_BASE_URL}/api/cart/clear/${user._id}`);
+      dispatch(setCartCount(0)); 
     } catch (error) {
       console.error("Error clearing cart:", error);
     }
@@ -252,7 +254,6 @@ const Orderdetails = () => {
       });
 
       if (paymentId) {
-        console.log(paymentId);
         await handlePlaceOrder(paymentId);
       } else {
         toast.error("Payment failed. Please try again.");
@@ -265,10 +266,9 @@ const Orderdetails = () => {
   };
 
   const handledeliverycheck = async (value) => {
-    console.log("called");
+    
     if (String(value.length) == 6) {
       setCheckingDelivery(true);
-      console.log("checking..");
       try {
         const msg = await HandleCheckDelivery(
           value,
@@ -293,7 +293,6 @@ const Orderdetails = () => {
   if (loading) {
     return (
       <div className="product-page-container">
-        <Navbar />
         <div className="product-main-content">
           <OrderDetailsSkeleton />
         </div>
@@ -304,18 +303,13 @@ const Orderdetails = () => {
   if (error) {
     return (
       <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
         <ErrorDisplay error={error} onRetry={() => window.location.reload()} />
-        <BottomNav />
       </div>
     );
   }
 
   return (
     <div className="checkout-container">
-      <Navbar />
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -535,7 +529,6 @@ const Orderdetails = () => {
           </div>
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 };

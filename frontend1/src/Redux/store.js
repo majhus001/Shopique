@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./slices/userSlice";
+import cartReducer from "./slices/cartSlice";
 import axios from "axios";
 import API_BASE_URL from "../api";
 
@@ -43,6 +44,7 @@ export const setupStore = async () => {
   const store = configureStore({
     reducer: {
       user: userReducer,
+       cart: cartReducer,
     },
     preloadedState,
   });

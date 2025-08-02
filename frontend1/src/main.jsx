@@ -16,6 +16,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
           <App />
         </GoogleOAuthProvider>
       </Provider>
-    </React.StrictMode>
+     </React.StrictMode>
   );
 })();

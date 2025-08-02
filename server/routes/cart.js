@@ -16,7 +16,7 @@ router.post("/add", async (req, res) => {
     }
 
     let cart = await Cart.findOne({ userId });
-
+    
     if (!cart) {
       cart = new Cart({
         userId,
@@ -36,10 +36,11 @@ router.post("/add", async (req, res) => {
 
     await cart.save();
 
+
     res.status(201).json({
       success: true,
       message: "Product added to cart successfully.",
-      cart,
+      cartCount: cart.items.length ,
     });
   } catch (error) {
     console.error("Error adding to cart:", error);

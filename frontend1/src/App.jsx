@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Helmet } from "react-helmet-async";
+import MainLayout from "./MainLayout";
 
 import SignUp from "./LogSin/SignUp";
 import Login from "./LogSin/Login";
@@ -34,33 +35,34 @@ const App = () => {
         <Routes>
           <Route path="/auth/signup" element={<SignUp />} />
           <Route path="/auth/login" element={<Login />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/" element={<HomePage />} />
-          <Route path="/allproducts" element={<AllProducts />} />
-          <Route
-            path="/products/:category/:subCategory/:name/:id"
-            element={<ProductList />}
-          />
-          <Route path="/user/myorders" element={<Orderhistory />} />
-          <Route path="/user/cart" element={<Cart />} />
-          <Route path="/user/profile" element={<ProfilePage />} />
-          <Route
-            path="/products/search/:category/:subCategory/:name/:id?"
-            element={<Searchproducts />}
-          />
-          <Route path="/user/:userId/product/buynow" element={<Buynow />} />
-          <Route
-            path="/user/:userId/order/checkout"
-            element={<Orderdetails />}
-          />
           <Route path="/authentication" element={<AuthRequired />} />
           <Route path="/not-found" element={<NotFound />} />
-          
-          
-          
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+          {/* 📦 Shared layout routes */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/allproducts" element={<AllProducts />} />
+            <Route
+              path="/products/search/:category/:subCategory/:name/:id?"
+              element={<Searchproducts />}
+            />
+            <Route
+              path="/products/:category/:subCategory/:name/:id"
+              element={<ProductList />}
+            />
+            <Route path="/user/cart" element={<Cart />} />
+            <Route path="/user/profile" element={<ProfilePage />} />
+            <Route path="/user/myorders" element={<Orderhistory />} />
+            <Route path="/user/:userId/product/buynow" element={<Buynow />} />
+            <Route
+              path="/user/:userId/order/checkout"
+              element={<Orderdetails />}
+            />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          </Route>
         </Routes>
       </Router>
     </HelmetProvider>

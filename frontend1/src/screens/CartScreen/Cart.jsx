@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import normalizeError from "../../utils/Error/NormalizeError";
 import ErrorDisplay from "../../utils/Error/ErrorDisplay";
@@ -9,13 +9,10 @@ import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Navbar from "../../components/navbar/Navbar";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import AuthRequired from "../../components/Authentication/AuthRequired";
 import "./Cart.css";
 import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
 import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
-
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -27,7 +24,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pincode, setPincode] = useState(user?.pincode || "");
- 
+
   const [isPincodeTouched, setIsPincodeTouched] = useState(false);
   const [pincodeload, setPincodeLoad] = useState(false);
   const [deliveryfee, setDeliveryFee] = useState(0);
@@ -212,27 +209,20 @@ const Cart = () => {
     );
   };
 
-  
   if (error) {
     return (
       <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
         <ErrorDisplay
           error={error}
           onRetry={() => user?._id && fetchCartData(user._id)}
         />
-        <BottomNav />
       </div>
     );
   }
 
   return (
     <div className="cart-page">
-      <div className="cart-navbar">
-        <Navbar />
-      </div>
+     
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -445,7 +435,6 @@ const Cart = () => {
         </div>
       )}
 
-      <BottomNav />
     </div>
   );
 };

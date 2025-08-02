@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../../components/navbar/Navbar";
 import { useSelector } from "react-redux";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
-import { FiAlertCircle } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
 import "../CartScreen/Cart.css";
 import AuthRequired from "../../components/Authentication/AuthRequired";
 import HandleCheckDelivery from "../../utils/DeliveryPincodeCheck/DeliveryCheck";
@@ -75,7 +72,7 @@ const Buynow = () => {
 
   const handleBuyNow = () => {
     if (user._id && cartItems.length > 0) {
-      console.log(user)
+      console.log(user);
       navigate(`/user/${user._id}/order/checkout`, {
         state: {
           cartItems,
@@ -117,9 +114,6 @@ const Buynow = () => {
 
   return (
     <div className="cart-page">
-      <div className="cart-navbar">
-        <Navbar />
-      </div>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -253,8 +247,8 @@ const Buynow = () => {
                 </div>
 
                 {!isPincodeDone && (
-                  <span>Enter Pincode to check Delivery fee
-                  </span>)}
+                  <span>Enter Pincode to check Delivery fee</span>
+                )}
 
                 {pincodeload ? (
                   <div className="cart-delivery-loading">
@@ -331,8 +325,6 @@ const Buynow = () => {
           )}
         </div>
       )}
-
-      <BottomNav />
     </div>
   );
 };

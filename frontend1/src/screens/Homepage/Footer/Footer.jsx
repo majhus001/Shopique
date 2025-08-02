@@ -172,7 +172,7 @@ const Footer = () => {
 
           <div className="footer-legal">
             <Link to="/terms">Terms of Service</Link>
-            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/privacy-policy">Privacy Policy</Link>
             <Link to="/cookies">Cookie Policy</Link>
           </div>
         </motion.div>

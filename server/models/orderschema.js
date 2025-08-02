@@ -30,6 +30,9 @@ const orderedItemSchema = new mongoose.Schema({
   category: {
     type: String,
   },
+  subCategory: {
+    type: String,
+  },
   addedAt: {
     type: Date,
     default: Date.now,

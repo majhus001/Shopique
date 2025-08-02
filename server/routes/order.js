@@ -14,9 +14,8 @@ router.post("/add", async (req, res) => {
     deliveryfee,
     deliveryAddress,
     paymentMethod,
-    paymentId
+    paymentId,
   } = req.body;
-
 
   if (
     !userId ||
@@ -28,8 +27,7 @@ router.post("/add", async (req, res) => {
     !pincode ||
     !deliveryfee ||
     !deliveryAddress ||
-    !paymentMethod ||
-    !paymentId 
+    !paymentMethod
   ) {
     return res.status(400).json({ message: "All fields are required." });
   }
@@ -39,7 +37,7 @@ router.post("/add", async (req, res) => {
     let collection = product;
     for (let item of cartItems) {
       const product = await collection.findById(item._id);
-
+      
       if (!product) {
         return res
           .status(404)
@@ -52,11 +50,10 @@ router.post("/add", async (req, res) => {
           .json({ message: `Insufficient stock for ${product.name}.` });
       }
 
-      // Update stock and salesCount
       product.stock -= item.quantity;
       product.salesCount += item.quantity;
       await product.save();
-
+      
       formattedItems.push({
         productId: item._id,
         name: item.name,
@@ -66,8 +63,10 @@ router.post("/add", async (req, res) => {
         description: item.description,
         image: item.image,
         category: item.category,
+        subCategory: item.subCategory,
       });
     }
+    console.log(formattedItems);
 
     const newOrder = new Order({
       userId,
@@ -78,11 +77,11 @@ router.post("/add", async (req, res) => {
       deliveryfee,
       deliveryAddress,
       paymentMethod,
-      paymentId
+      paymentId,
     });
 
     await newOrder.save();
-    console.log("order placed")
+    console.log("order placed");
     return res.status(201).json({
       success: true,
       message: "Order placed successfully!",

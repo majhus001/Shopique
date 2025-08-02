@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./AllProducts.css";
-import BottomNav from "../../components/Bottom Navbar/BottomNav";
-import Navbar from "../../components/navbar/Navbar";
 import axios from "axios";
 import API_BASE_URL from "../../api";
 import { useSelector } from "react-redux";
@@ -12,7 +10,7 @@ import normalizeError from "../../utils/Error/NormalizeError";
 import { FiX } from "react-icons/fi";
 import capitalizeWords from "../../utils/CapitalizeWord";
 import HandleProdlistNavigation from "../../utils/Navigation/ProdlistNavigation";
-import slugify from "../../utils/SlugifyUrl";
+import HandleCategoryClick from "../../utils/Navigation/CategoryListNavigation";
 
 AbortSignal.timeout = function (ms) {
   const controller = new AbortController();
@@ -156,41 +154,10 @@ const AllProducts = () => {
 
   const sortedProducts = sortProducts(products);
 
-  const handlecategoryClick = (subCategory) => {
-    let prodCategory = null;
-    let prodSubCategory = null;
-    let prodname = null;
-    let productId = null;
-    products.forEach((item) => {
-      if (item.subCategory === subCategory) {
-        console.log(item);
-        prodSubCategory = slugify(item.subCategory);
-        prodCategory = slugify(item.category);
-        prodname = slugify(item.name);
-        productId = item._id;
-      }
-    });
-    navigate(
-      `/products/search/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          user,
-          productCategory: prodCategory,
-          productSubCategory: prodSubCategory,
-        },
-      }
-    );
-  };
-
- 
   if (error) {
     return (
       <div className="usprof-container">
-        <div className="usprof-nav">
-          <Navbar />
-        </div>
         <ErrorDisplay error={error} onRetry={fetchData} />
-        <BottomNav />
       </div>
     );
   }
@@ -198,18 +165,15 @@ const AllProducts = () => {
   if (isLoading) {
     return (
       <div className="app">
-        <Navbar />
         <div className="main-container">
           <AllProductsSkeleton />
         </div>
-        <BottomNav />
       </div>
     );
   }
 
   return (
     <div className="app">
-      <Navbar />
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -287,6 +251,7 @@ const AllProducts = () => {
                             setSelectedCategory(cat.name);
                             setSearchQuery("");
                             setShowSuggestions(false);
+                            setShowMobileFilters(!showMobileFilters)
                           }}
                           className="all-prods-cat-suggestion-item"
                         >
@@ -341,7 +306,7 @@ const AllProducts = () => {
                   {sortedProducts.map((product) => (
                     <div
                       key={product._id}
-                      onClick={() => handlecategoryClick(product.subCategory)}
+                      onClick={() => HandleCategoryClick(product, navigate)}
                       className="all-prods-card"
                     >
                       <div className="all-prods-card-img-container">
@@ -420,7 +385,6 @@ const AllProducts = () => {
           </div>
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 };

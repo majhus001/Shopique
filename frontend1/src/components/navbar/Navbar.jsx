@@ -1,97 +1,70 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Navbar.css";
 import { useDispatch, useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
-import ValidUserData from "../../utils/ValidUserData";
-import slugify from "../../utils/SlugifyUrl";
+import { setCartCount } from "../../Redux/slices/cartSlice";
+import HandleCategoryClick from "../../utils/Navigation/CategoryListNavigation";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
 
-  const [username, setUsername] = useState(user?.username || "");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { _id, username, isLoggedIn } = useSelector((state) => state.user);
+  const cartCount = useSelector((state) => state.cart.cartCount);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [cartlength, setCartLength] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
-  const debounceTimeout = useRef(null);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [focusedResultIndex, setFocusedResultIndex] = useState(-1);
 
-  // Separate refs for mobile and desktop search bars
+  const debounceTimeout = useRef(null);
   const mobileSearchRef = useRef(null);
   const desktopSearchRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const searchResultsRef = useRef([]);
+
+  // Update search results ref whenever searchResults change
+  useEffect(() => {
+    searchResultsRef.current = searchResults;
+  }, [searchResults]);
+
+  // Memoize user display name
+  const displayName = useMemo(() => {
+    return username?.split(" ")[0] || "User";
+  }, [username]);
 
   const fetchCartData = useCallback(async () => {
+    if (!_id) return;
     try {
       const response = await axios.get(`${API_BASE_URL}/api/cart/fetch/count`, {
-        params: { userId: user?._id },
+        params: { userId: _id },
       });
       if (response.data.success) {
-        setCartLength(response.data.cartLength);
+        dispatch(setCartCount(response.data.cartLength));
       }
     } catch (error) {
       console.error("Error fetching cart data:", error);
     }
-  }, [user?._id]);
-
-  const checkUser = useCallback(async () => {
-    try {
-      const userData = await ValidUserData(dispatch);
-      if (userData) {
-        setUsername(userData.username);
-        setIsLoggedIn(true);
-        return true;
-      }
-      setIsLoggedIn(false);
-      return false;
-    } catch (error) {
-      console.error("Error validating users:", error);
-      setIsLoggedIn(false);
-      return false;
-    }
-  }, [dispatch]);
-
-  const hasCheckedUser = useRef(false);
+  }, [_id, dispatch]);
 
   useEffect(() => {
-    const initialize = async () => {
-      if (hasCheckedUser.current) return;
-      hasCheckedUser.current = true;
-
-      setIsLoading(true);
-
-      try {
-        let shouldFetchCart = false;
-
-        if (!user || !user?._id) {
-          const isUserValid = await checkUser();
-          shouldFetchCart = isUserValid;
-        } else {
-          setIsLoggedIn(true);
-          shouldFetchCart = true;
-        }
-
-        if (shouldFetchCart) {
-          await fetchCartData();
-        }
-      } catch (error) {
-        console.error("Initialization error:", error);
-        setIsLoggedIn(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initialize();
-  }, [checkUser, fetchCartData, user]);
+    fetchCartData();
+  }, [fetchCartData]);
 
   const searchProducts = useCallback(async (query) => {
-    if (!query || query.trim().length < 1) {
+    if (!query || query.trim().length < 2) {
       setSearchResults([]);
+      setShowSearchResults(false);
+      setFocusedResultIndex(-1);
       return;
     }
 
@@ -102,59 +75,141 @@ export default function Navbar() {
       });
 
       if (response.data.success) {
-        setSearchResults(response.data.data.slice(0, 5)); // Limit to 5 results
+        const results = response.data.data.slice(0, 5);
+        setSearchResults(results);
+        setShowSearchResults(results.length > 0);
+        setFocusedResultIndex(-1); // Reset focus when new results come
       }
     } catch (error) {
       console.error("Error searching products:", error);
       setSearchResults([]);
+      setShowSearchResults(false);
+      setFocusedResultIndex(-1);
     } finally {
       setIsSearching(false);
     }
   }, []);
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
+  const handleSearchChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setSearchQuery(value);
+      setFocusedResultIndex(-1); // Reset focus when typing
 
-    // Clear previous timeout if it exists
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
 
-    // Set new timeout
-    debounceTimeout.current = setTimeout(() => {
-      searchProducts(value);
-    }, 300); // 300ms debounce delay
-  };
+      debounceTimeout.current = setTimeout(() => {
+        searchProducts(value);
+      }, 300);
+    },
+    [searchProducts]
+  );
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-      // If user presses Enter with a search query, navigate to search page
-      e.preventDefault();
-      navigate(`/products/search?query=${encodeURIComponent(searchQuery)}`);
+  const handleProductClick = useCallback(
+    (product) => {
       setSearchQuery("");
       setSearchResults([]);
+      setShowSearchResults(false);
+      HandleCategoryClick(product, navigate);
+    },
+    [navigate]
+  );
+
+  const handleSearchSubmit = useCallback(() => {
+    if (searchQuery.trim()) {
+      navigate(
+        `/products/search?query=${encodeURIComponent(searchQuery.trim())}`
+      );
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowSearchResults(false);
+      searchInputRef.current?.blur();
     }
-  };
+  }, [searchQuery, navigate]);
 
-  const handleProductClick = (product) => {
-    const prodSubCategory = slugify(product.subCategory);
-    const prodCategory = slugify(product.category);
-    const prodname = slugify(product.name);
-    const productId = product._id;
-    navigate(
-      `/products/search/${prodCategory}/${prodSubCategory}/${prodname}/${productId}`,
-      {
-        state: {
-          clickedProduct: product,
-        },
+  const handleKeyDown = useCallback(
+    (e) => {
+      const { key } = e;
+
+      // Handle Enter key press
+      if (key === "Enter") {
+        e.preventDefault();
+
+        // If search results are shown and there are results
+        if (showSearchResults && searchResults.length > 0) {
+          // If no specific result is focused, use the first result
+          const productToSelect =
+            focusedResultIndex >= 0
+              ? searchResultsRef.current[focusedResultIndex]
+              : searchResultsRef.current[0];
+
+          if (productToSelect) {
+            handleProductClick(productToSelect);
+          }
+        }
+        // If no search results or they're not shown, submit the search query
+        else if (searchQuery.trim()) {
+          handleSearchSubmit();
+        }
+        return;
       }
-    );
-    setSearchQuery("");
-    setSearchResults([]);
-  };
 
-  // Close search results when clicking outside both search bars
+      // Handle arrow keys only when search results are shown
+      if (!showSearchResults) return;
+
+      const resultsCount = searchResultsRef.current.length;
+
+      // Arrow down - move focus to next result
+      if (key === "ArrowDown") {
+        e.preventDefault();
+        const nextIndex =
+          focusedResultIndex < resultsCount - 1 ? focusedResultIndex + 1 : 0;
+        setFocusedResultIndex(nextIndex);
+      }
+      // Arrow up - move focus to previous result
+      else if (key === "ArrowUp") {
+        e.preventDefault();
+        const prevIndex =
+          focusedResultIndex > 0 ? focusedResultIndex - 1 : resultsCount - 1;
+        setFocusedResultIndex(prevIndex);
+      }
+      // Escape - close results
+      else if (key === "Escape") {
+        e.preventDefault();
+        setShowSearchResults(false);
+        searchInputRef.current?.blur();
+      }
+    },
+    [
+      showSearchResults,
+      focusedResultIndex,
+      handleProductClick,
+      handleSearchSubmit,
+      searchQuery,
+      searchResults.length,
+    ]
+  );
+
+  const handleViewAllResults = useCallback(() => {
+    if (searchQuery.trim()) {
+      navigate(
+        `/products/search?query=${encodeURIComponent(searchQuery.trim())}`
+      );
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  }, [searchQuery, navigate]);
+
+  const handleImageError = useCallback((e) => {
+    e.target.src =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+    e.target.alt = "Product image not available";
+  }, []);
+
+  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -163,35 +218,135 @@ export default function Navbar() {
         (desktopSearchRef.current &&
           desktopSearchRef.current.contains(event.target))
       ) {
-        // Click inside either search bar, do nothing
         return;
       }
-      setSearchResults([]);
+      setShowSearchResults(false);
+      setFocusedResultIndex(-1);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
     };
   }, []);
 
-  if (isLoading || isLoggedIn === null) {
-    return (
-      <nav className="nav-container">
-        <div className="nav-mobile-header">
-          <div className="nav-logo">
-            <h2>ShopiQue</h2>
-          </div>
+  // Here's the updated renderSearchResults function in your Navbar.jsx:
+  const renderSearchResults = () => {
+    if (!showSearchResults) return null;
+
+    if (isSearching) {
+      return (
+        <div className="nav-search-results">
+          <div className="nav-search-loading">Searching...</div>
         </div>
-      </nav>
+      );
+    }
+
+    if (searchResults.length === 0) return null;
+
+    return (
+      <div className="nav-search-results">
+        {searchResults.map((product, index) => (
+          <div
+            key={product._id}
+            className={`nav-search-result-item ${
+              focusedResultIndex === index ? "nav-search-result-focused" : ""
+            }`}
+            onClick={() => handleProductClick(product)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleProductClick(product);
+            }}
+            ref={(el) => {
+              if (el && focusedResultIndex === index) {
+                el.scrollIntoView({ block: "nearest" });
+              }
+            }}
+          >
+            <img
+              src={product.images?.[0] || ""}
+              alt={product.name}
+              loading="lazy"
+              onError={handleImageError}
+            />
+            <div style={{ minWidth: 0 }}>
+              {" "}
+              {/* Add this wrapper div */}
+              <p>{product.name}</p>
+              <span>
+                {product.offerPrice
+                  ? `₹${product.offerPrice.toLocaleString()}`
+                  : `₹${product.price.toLocaleString()}`}
+              </span>
+            </div>
+          </div>
+        ))}
+        <div
+          className={`nav-search-view-all ${
+            focusedResultIndex === searchResults.length
+              ? "nav-search-result-focused"
+              : ""
+          }`}
+          onClick={handleViewAllResults}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleViewAllResults();
+          }}
+        >
+          View all results for "{searchQuery}"
+        </div>
+      </div>
     );
-  }
+  };
+
+  const renderSearchBar = (isMobile = false) => (
+    <div
+      className="nav-search-bar"
+      ref={isMobile ? mobileSearchRef : desktopSearchRef}
+    >
+      <input
+        ref={!isMobile ? searchInputRef : null}
+        type="text"
+        placeholder="Search for products, brands and more..."
+        className="nav-search-input"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        onKeyDown={handleKeyDown}
+        onFocus={() => {
+          if (searchResults.length > 0) {
+            setShowSearchResults(true);
+          }
+        }}
+        autoComplete="off"
+        spellCheck="false"
+      />
+      {renderSearchResults()}
+    </div>
+  );
 
   return (
-    <nav className="nav-container">
-      {/* Mobile header row */}
+    <nav
+      className="nav-container"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      {/* Mobile Header */}
       <div className="nav-mobile-header">
-        <div className="nav-logo" onClick={() => navigate("/home")}>
+        <div
+          className="nav-logo"
+          onClick={() => navigate("/home")}
+          role="button"
+          tabIndex={0}
+        >
           <h2>ShopiQue</h2>
         </div>
 
@@ -199,149 +354,75 @@ export default function Navbar() {
           {isLoggedIn ? (
             <button
               className="nav-btn nav-profile-btn"
-              onClick={() => navigate(`/user/profile`)}
-              aria-label="Profile"
+              onClick={() => navigate("/user/profile")}
+              aria-label={`Profile - ${displayName}`}
             >
-              <i className="fas fa-user"></i>
-              <span>{username?.split(" ")[0] || "User"}</span>
+              <i className="fas fa-user" aria-hidden="true"></i>
+              <span>{displayName}</span>
             </button>
           ) : (
             <button
-              className="nav-btn nav-profile-btn"
+              className="nav-btn nav-login-btn"
               onClick={() => navigate("/auth/login")}
               aria-label="Login"
             >
-              <i className="fas fa-user"></i>
+              <i className="fas fa-user" aria-hidden="true"></i>
               <span>Login</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Search bar - always visible in mobile */}
-      <div className="nav-mobile-search-container">
-        <div className="nav-search-bar" ref={mobileSearchRef}>
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="nav-search-input"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={handleKeyDown}
-          />
-          {searchResults.length > 0 && !isSearching && (
-            <div className="nav-search-results">
-              {searchResults.map((product) => (
-                <div
-                  key={product._id}
-                  className="nav-search-result-item"
-                  onClick={() => handleProductClick(product)}
-                >
-                  <img
-                    src={product.images?.[0] || ""}
-                    alt={product.name}
-                    onError={(e) => {
-                      e.target.src = "";
-                      e.target.alt = "Image not available";
-                    }}
-                  />
-                  <div>
-                    <p>{product.name}</p>
-                    <span>
-                      {product.offerPrice
-                        ? `₹${product.offerPrice}`
-                        : `₹${product.price}`}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              <div
-                className="nav-search-view-all"
-                onClick={() => handleProductClick(searchResults[0])}
-              >
-                View all results for "{searchQuery}"
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Mobile Search */}
+      <div className="nav-mobile-search-container">{renderSearchBar(true)}</div>
 
-      {/* Desktop layout */}
+      {/* Desktop Layout */}
       <div className="nav-desktop-content">
-        <div className="nav-logo" onClick={() => navigate("/home")}>
+        <div
+          className="nav-logo"
+          onClick={() => navigate("/home")}
+          role="button"
+          tabIndex={0}
+        >
           <h2>ShopiQue</h2>
         </div>
-        <div className="nav-search-bar" ref={desktopSearchRef}>
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="nav-search-input"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={handleKeyDown}
-          />
-          {searchResults.length > 0 && !isSearching && (
-            <div className="nav-search-results">
-              {searchResults.map((product) => (
-                <div
-                  key={product._id}
-                  className="nav-search-result-item"
-                  onClick={() => handleProductClick(product)}
-                >
-                  <img
-                    src={product.images?.[0] || ""}
-                    alt={product.name}
-                    onError={(e) => {
-                      e.target.src = "";
-                      e.target.alt = "Image not available";
-                    }}
-                  />
-                  <div>
-                    <p>{product.name}</p>
-                    <span>
-                      {product.offerPrice
-                        ? `₹${product.offerPrice}`
-                        : `₹${product.price}`}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              <div
-                className="nav-search-view-all"
-                onClick={() => handleProductClick(searchResults[0])}
-              >
-                View all results for "{searchQuery}"
-              </div>
-            </div>
-          )}
-        </div>
+
+        {renderSearchBar(false)}
 
         <div className="nav-actions">
           <button
             className="nav-btn nav-cart-btn"
-            onClick={() => navigate(`/user/cart`)}
+            onClick={() => navigate("/user/cart")}
+            aria-label={`Cart ${cartCount > 0 ? `(${cartCount} items)` : "(empty)"}`}
           >
-            <i className="fas fa-shopping-cart"></i>
+            <i className="fas fa-shopping-cart" aria-hidden="true"></i>
             <span className="nav-btn-text">Cart</span>
-            {cartlength > 0 && (
-              <span className="nav-cart-count">{cartlength}</span>
+            {cartCount > 0 && (
+              <span
+                className="nav-cart-count"
+                aria-label={`${cartCount} items in cart`}
+              >
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
             )}
           </button>
 
           {isLoggedIn ? (
             <button
               className="nav-btn nav-profile-btn"
-              onClick={() => navigate(`/user/profile`)}
+              onClick={() => navigate("/user/profile")}
+              aria-label={`Profile - ${displayName}`}
             >
-              <i className="fas fa-user"></i>
-              <span>{username?.split(" ")[0] || " "}</span>
+              <i className="fas fa-user" aria-hidden="true"></i>
+              <span>{displayName}</span>
             </button>
           ) : (
             <button
               className="nav-btn nav-login-btn"
               onClick={() => navigate("/auth/login")}
+              aria-label="Login"
             >
-              <i className="fas fa-user"></i>
+              <i className="fas fa-user" aria-hidden="true"></i>
               <span className="nav-btn-text">Login</span>
             </button>
           )}
