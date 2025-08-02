@@ -7,7 +7,15 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import API_BASE_URL from "../../api";
-import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
+import {
+  FaTrash,
+  FaPlus,
+  FaMinus,
+  FaShoppingBag,
+  FaTruck,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 import AuthRequired from "../../components/Authentication/AuthRequired";
 import "./Cart.css";
@@ -82,7 +90,7 @@ const Cart = () => {
 
           return {
             ...product,
-            image: product?.images?.[0] || "/placeholder.jpg", // ✅ new image field as string
+            image: product?.images?.[0] || "/placeholder.jpg",
             cartItemId: item._id,
             quantity: item.quantity,
           };
@@ -165,9 +173,11 @@ const Cart = () => {
         setCartItems(
           cartItems.filter((item) => item.cartItemId !== cartItemId)
         );
+        toast.success("Item removed from cart");
       }
     } catch (error) {
       console.error("Error removing item:", error);
+      toast.error("Failed to remove item. Please try again.");
     }
   };
 
@@ -222,7 +232,6 @@ const Cart = () => {
 
   return (
     <div className="cart-page">
-     
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -239,14 +248,21 @@ const Cart = () => {
         <CartSkeletonLoading />
       ) : (
         <div className="cart-container">
-          <motion.h1
-            className="cart-title"
+          <motion.div
+            className="cart-header"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            Your Shopping Cart
-          </motion.h1>
+            <h1 className="cart-title">
+              <FaShoppingBag className="cart-title-icon" /> Your Shopping Cart
+            </h1>
+            {cartItems.length > 0 && (
+              <div className="cart-item-count">
+                {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+              </div>
+            )}
+          </motion.div>
 
           {cartItems.length > 0 ? (
             <div className="cart-content">
@@ -258,6 +274,9 @@ const Cart = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
+                    whileHover={{
+                      boxShadow: "0 4px 12px rgba(0, 122, 255, 0.1)",
+                    }}
                   >
                     <div className="cart-item-image-container">
                       <img
@@ -288,18 +307,20 @@ const Cart = () => {
                             handleQuantityChange(item.cartItemId, -1)
                           }
                           disabled={item.quantity <= 1}
-                          className="cart-quantity-btn"
+                          className="cart-quantity-btn minus"
+                          aria-label="Decrease quantity"
                         >
-                          <FaMinus />
+                          <FaMinus size={12} />
                         </button>
                         <span className="cart-quantity">{item.quantity}</span>
                         <button
                           onClick={() =>
                             handleQuantityChange(item.cartItemId, 1)
                           }
-                          className="cart-quantity-btn"
+                          className="cart-quantity-btn plus"
+                          aria-label="Increase quantity"
                         >
-                          <FaPlus />
+                          <FaPlus size={12} />
                         </button>
                       </div>
                     </div>
@@ -308,99 +329,127 @@ const Cart = () => {
                         handleRemoveItem(item.cartItemId, item._id)
                       }
                       className="cart-remove-btn"
+                      aria-label="Remove item"
                     >
-                      <FaTrash />
+                      <FaTrash size={16} />
                     </button>
                   </motion.div>
                 ))}
               </div>
 
               <div className="cart-order-summary">
-                <h3>Order Summary</h3>
+                <h3 className="summary-title">Order Summary</h3>
                 <div className="cart-summary-row">
                   <span>Subtotal ({cartItems.length} items)</span>
-                  <span>₹{calculateSubtotal().toLocaleString()}</span>
+                  <span className="summary-value">
+                    ₹{calculateSubtotal().toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="delivery-section">
+                  <div className="delivery-header">
+                    <FaTruck className="delivery-icon" />
+                    <h4>Delivery Information</h4>
+                  </div>
+                  <div className="pincode-input-container">
+                    <div className="pincode-input-wrapper">
+                      <FaMapMarkerAlt className="pincode-icon" />
+                      <input
+                        className="pincode-input"
+                        placeholder="Enter delivery pincode"
+                        value={pincode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 6) {
+                            setPincode(value);
+                            if (value.length === 6) {
+                              handleCheckDelivery(value);
+                            }
+                          }
+                          if (!isPincodeTouched) {
+                            setIsPincodeTouched(true);
+                          }
+                        }}
+                        onFocus={() => {
+                          if (!isPincodeTouched) {
+                            setIsPincodeTouched(true);
+                          }
+                        }}
+                        style={{ color: isPincodeTouched ? "inherit" : "#aaa" }}
+                        maxLength={6}
+                      />
+                    </div>
+                    <button
+                      className="cart-pincode-check-btn"
+                      onClick={() => handleCheckDelivery(pincode)}
+                      disabled={pincodeload || !isPincodeTouched}
+                    >
+                      {pincodeload ? (
+                        <>
+                          <span className="cart-loader"></span>
+                          <span>Checking...</span>
+                        </>
+                      ) : (
+                        "Check"
+                      )}
+                    </button>
+                  </div>
+
+                  {!isPincodeDone && (
+                    <div className="pincode-prompt">
+                      Enter Pincode to check delivery options
+                    </div>
+                  )}
+
+                  {pincodeload ? (
+                    <div className="cart-delivery-loading">
+                      <span className="cart-loader"></span>
+                      <span>Checking delivery availability...</span>
+                    </div>
+                  ) : expectedDelivery ? (
+                    <div className="cart-delivery-info">
+                      <div className="delivery-message-row">
+                        <FaMapMarkerAlt className="delivery-info-icon" />
+                        <div>
+                          <strong>Delivery Address:</strong>
+                          <div>{expectedDelivery}</div>
+                        </div>
+                      </div>
+
+                      {expectedDeliverydate && (
+                        <div className="delivery-message-row">
+                          <FaCalendarAlt className="delivery-info-icon" />
+                          <div>
+                            <strong>Estimated Delivery:</strong>
+                            <div>{expectedDeliverydate}</div>
+                          </div>
+                        </div>
+                      )}
+                      {deliveryfee > 0 && (
+                        <div className="delivery-message-row">
+                          <FaTruck className="delivery-info-icon" />
+                          <div>
+                            <strong>Delivery Fee:</strong>
+                            <div>₹{deliveryfee}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="cart-summary-row">
-                  <input
-                    className="pincode-input"
-                    placeholder="Enter delivery pincode"
-                    value={pincode}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      if (value.length <= 6) {
-                        setPincode(value);
-                        if (value.length === 6) {
-                          handleCheckDelivery(value);
-                        }
-                      }
-                      if (!isPincodeTouched) {
-                        setIsPincodeTouched(true);
-                      }
-                    }}
-                    onFocus={() => {
-                      if (!isPincodeTouched) {
-                        setIsPincodeTouched(true);
-                      }
-                    }}
-                    maxLength={6}
-                    style={{ color: isPincodeTouched ? "inherit" : "#aaa" }} // Light gray when untouched
-                  />
-                  <button
-                    className="cart-pincode-check-btn"
-                    onClick={() => handleCheckDelivery(pincode)}
-                    disabled={pincodeload || !isPincodeTouched} // Disabled if not touched
-                  >
-                    {pincodeload ? (
-                      <>
-                        <span className="cart-loader"></span>
-                        <span>Checking...</span>
-                      </>
-                    ) : (
-                      "Check"
-                    )}
-                  </button>
+                  <span>Delivery Fee</span>
+                  <span className="summary-value">
+                    ₹{deliveryfee.toLocaleString()}
+                  </span>
                 </div>
 
-                {pincodeload ? (
-                  <div className="cart-delivery-loading">
-                    <span className="cart-loader"></span>
-                    <span>Checking delivery availability...</span>
-                  </div>
-                ) : expectedDelivery ? (
-                  <div className="cart-delivery-info">
-                    <div className="cart-delivery-message">
-                      <strong className="cart-delivery-address-label">
-                        Delivery Address:
-                      </strong>
-                    </div>
-                    <div className="cart-delivery-message">
-                      {expectedDelivery}
-                    </div>
-
-                    {expectedDeliverydate && (
-                      <div className="cart-delivery-date">
-                        <strong className="cart-delivery-address-label">
-                          Estimated Delivery :
-                        </strong>
-                        {expectedDeliverydate}
-                      </div>
-                    )}
-                    {deliveryfee > 0 && (
-                      <div className="cart-delivery-date">
-                        <strong className="cart-delivery-address-label">
-                          Delivery Fee :
-                        </strong>
-                        ₹{deliveryfee}
-                      </div>
-                    )}
-                  </div>
-                ) : null}
-
                 <div className="cart-summary-total">
-                  <span>Total</span>
-                  <span>₹{calculateTotal().toLocaleString()}</span>
+                  <span>Total Amount</span>
+                  <span className="total-value">
+                    ₹{calculateTotal().toLocaleString()}
+                  </span>
                 </div>
                 <button
                   onClick={handleCheckOut}
@@ -434,7 +483,6 @@ const Cart = () => {
           )}
         </div>
       )}
-
     </div>
   );
 };

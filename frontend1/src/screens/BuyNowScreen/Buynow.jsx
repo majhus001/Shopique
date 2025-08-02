@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
+import {
+  FaTrash,
+  FaPlus,
+  FaMinus,
+  FaShoppingBag,
+  FaTruck,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -54,7 +62,7 @@ const Buynow = () => {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
-      toast.error("please login to continue");
+      toast.error("Please login to continue");
     }
   }, [user]);
 
@@ -72,7 +80,6 @@ const Buynow = () => {
 
   const handleBuyNow = () => {
     if (user._id && cartItems.length > 0) {
-      console.log(user);
       navigate(`/user/${user._id}/order/checkout`, {
         state: {
           cartItems,
@@ -89,14 +96,14 @@ const Buynow = () => {
 
   const updateQuantity = (itemId, change) => {
     const updatedCartItems = cartItems.map((item) =>
-      item.itemId === itemId
+      item._id === itemId
         ? { ...item, quantity: Math.max(item.quantity + change, 1) }
         : item
     );
     setCartItems(updatedCartItems);
     toast.success(
       `Quantity updated to ${
-        updatedCartItems.find((item) => item.itemId === itemId).quantity
+        updatedCartItems.find((item) => item._id === itemId).quantity
       }`
     );
   };
@@ -126,7 +133,7 @@ const Buynow = () => {
       />
 
       {!isLoggedIn ? (
-        <AuthRequired message="Please login to view your cart" />
+        <AuthRequired message="Please login to proceed with your purchase" />
       ) : loading ? (
         <div className="cart-skeleton">
           <div className="cart-skeleton-header"></div>
@@ -134,25 +141,35 @@ const Buynow = () => {
         </div>
       ) : (
         <div className="cart-container">
-          <motion.h1
-            className="cart-title"
+          <motion.div
+            className="cart-header"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            Check Out
-          </motion.h1>
+            <h1 className="cart-title">
+              <FaShoppingBag className="cart-title-icon" /> Quick Checkout
+            </h1>
+            {cartItems.length > 0 && (
+              <div className="cart-item-count">
+                {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+              </div>
+            )}
+          </motion.div>
 
           {cartItems?.length > 0 ? (
             <div className="cart-content">
               <div className="cart-items-container">
                 {cartItems.map((item) => (
                   <motion.div
-                    key={item.itemId}
+                    key={item._id}
                     className="cart-item"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
+                    whileHover={{
+                      boxShadow: "0 4px 12px rgba(0, 122, 255, 0.1)",
+                    }}
                   >
                     <div className="cart-item-image-container">
                       <img
@@ -173,122 +190,148 @@ const Buynow = () => {
                       </p>
                       <div className="cart-quantity-controls">
                         <button
-                          onClick={() => updateQuantity(item.itemId, -1)}
+                          onClick={() => updateQuantity(item._id, -1)}
                           disabled={item.quantity <= 1}
-                          className="cart-quantity-btn"
+                          className="cart-quantity-btn minus"
+                          aria-label="Decrease quantity"
                         >
-                          <FaMinus />
+                          <FaMinus size={12} />
                         </button>
                         <span className="cart-quantity">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.itemId, 1)}
-                          className="cart-quantity-btn"
+                          onClick={() => updateQuantity(item._id, 1)}
+                          className="cart-quantity-btn plus"
+                          aria-label="Increase quantity"
                         >
-                          <FaPlus />
+                          <FaPlus size={12} />
                         </button>
                       </div>
                     </div>
                     <button
                       onClick={() => setCartItems([])}
                       className="cart-remove-btn"
+                      aria-label="Remove item"
                     >
-                      <FaTrash />
+                      <FaTrash size={16} />
                     </button>
                   </motion.div>
                 ))}
               </div>
 
               <div className="cart-order-summary">
-                <h3>Order Summary</h3>
+                <h3 className="summary-title">Order Summary</h3>
                 <div className="cart-summary-row">
                   <span>Subtotal ({cartItems.length} item)</span>
-                  <span>₹{calculateSubtotal().toLocaleString()}</span>
+                  <span className="summary-value">
+                    ₹{calculateSubtotal().toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="delivery-section">
+                  <div className="delivery-header">
+                    <FaTruck className="delivery-icon" />
+                    <h4>Delivery Information</h4>
+                  </div>
+                  <div className="pincode-input-container">
+                    <div className="pincode-input-wrapper">
+                      <FaMapMarkerAlt className="pincode-icon" />
+                      <input
+                        className="pincode-input"
+                        placeholder="Enter delivery pincode"
+                        value={pincode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 6) {
+                            setPincode(value);
+                            if (value.length === 6) {
+                              handleCheckDelivery(value);
+                            }
+                          }
+                          if (!isPincodeTouched) {
+                            setIsPincodeTouched(true);
+                          }
+                        }}
+                        onFocus={() => {
+                          if (!isPincodeTouched) {
+                            setIsPincodeTouched(true);
+                          }
+                        }}
+                        style={{ color: isPincodeTouched ? "inherit" : "#aaa" }}
+                        maxLength={6}
+                      />
+                    </div>
+                    <button
+                      className="cart-pincode-check-btn"
+                      onClick={() => handleCheckDelivery(pincode)}
+                      disabled={pincodeload || !isPincodeTouched}
+                    >
+                      {pincodeload ? (
+                        <>
+                          <span className="cart-loader"></span>
+                          <span>Checking...</span>
+                        </>
+                      ) : (
+                        "Check"
+                      )}
+                    </button>
+                  </div>
+
+                  {!isPincodeDone && (
+                    <div className="pincode-prompt">
+                      Enter Pincode to check delivery options
+                    </div>
+                  )}
+
+                  {pincodeload ? (
+                    <div className="cart-delivery-loading">
+                      <span className="cart-loader"></span>
+                      <span>Checking delivery availability...</span>
+                    </div>
+                  ) : expectedDelivery ? (
+                    <div className="cart-delivery-info">
+                      <div className="delivery-message-row">
+                        <FaMapMarkerAlt className="delivery-info-icon" />
+                        <div>
+                          <strong>Delivery Address:</strong>
+                          <div>{expectedDelivery}</div>
+                        </div>
+                      </div>
+
+                      {expectedDeliverydate && (
+                        <div className="delivery-message-row">
+                          <FaCalendarAlt className="delivery-info-icon" />
+                          <div>
+                            <strong>Estimated Delivery:</strong>
+                            <div>{expectedDeliverydate}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {deliveryfee > 0 && (
+                        <div className="delivery-message-row">
+                          <FaTruck className="delivery-info-icon" />
+                          <div>
+                            <strong>Delivery Fee:</strong>
+                            <div>₹{deliveryfee}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="cart-summary-row">
-                  <input
-                    className="pincode-input"
-                    placeholder="Enter delivery pincode"
-                    value={pincode}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      if (value.length <= 6) {
-                        setPincode(value);
-                        if (value.length === 6) {
-                          handleCheckDelivery(value);
-                        }
-                      }
-                      if (!isPincodeTouched) {
-                        setIsPincodeTouched(true);
-                      }
-                    }}
-                    onFocus={() => {
-                      if (!isPincodeTouched) {
-                        setIsPincodeTouched(true);
-                      }
-                    }}
-                    maxLength={6}
-                    style={{ color: isPincodeTouched ? "inherit" : "#aaa" }}
-                  />
-                  <button
-                    className="cart-pincode-check-btn"
-                    onClick={() => handleCheckDelivery(pincode)}
-                    disabled={pincodeload || !isPincodeTouched}
-                  >
-                    {pincodeload ? (
-                      <>
-                        <span className="cart-loader"></span>
-                        <span>Checking...</span>
-                      </>
-                    ) : (
-                      "Check"
-                    )}
-                  </button>
+                  <span>Delivery Fee</span>
+                  <span className="summary-value">
+                    ₹{deliveryfee.toLocaleString()}
+                  </span>
                 </div>
 
-                {!isPincodeDone && (
-                  <span>Enter Pincode to check Delivery fee</span>
-                )}
-
-                {pincodeload ? (
-                  <div className="cart-delivery-loading">
-                    <span className="cart-loader"></span>
-                    <span>Checking delivery availability...</span>
-                  </div>
-                ) : expectedDelivery ? (
-                  <div className="cart-delivery-info">
-                    <div className="cart-delivery-message">
-                      <strong className="cart-delivery-address-label">
-                        Delivery Address:
-                      </strong>
-                    </div>
-                    <div className="cart-delivery-message">
-                      {expectedDelivery}
-                    </div>
-
-                    {expectedDeliverydate && (
-                      <div className="cart-delivery-date">
-                        <strong className="cart-delivery-address-label">
-                          Estimated Delivery:
-                        </strong>
-                        {expectedDeliverydate}
-                      </div>
-                    )}
-
-                    {deliveryfee > 0 && (
-                      <div className="cart-delivery-date">
-                        <strong className="cart-delivery-address-label">
-                          Delivery Fee :
-                        </strong>
-                        ₹{deliveryfee}
-                      </div>
-                    )}
-                  </div>
-                ) : null}
-
                 <div className="cart-summary-total">
-                  <span>Total</span>
-                  <span>₹{calculateTotal().toLocaleString()}</span>
+                  <span>Total Amount</span>
+                  <span className="total-value">
+                    ₹{calculateTotal().toLocaleString()}
+                  </span>
                 </div>
                 <button
                   onClick={handleBuyNow}
